@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>结算分账 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* 直接应用于结算分账页面头部的内联样式 */
+    .settlement-header {
+      background: linear-gradient(to right, #3b82f6, #2563eb);
+      color: white;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .settlement-card {
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .member-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .settlement-amount {
+      font-weight: 600;
+      color: #16a34a; /* Green for receive money */
+    }
+    
+    .settlement-amount.negative {
+      color: #dc2626; /* Red for pay money */
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">10:20</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- Header -->
+      <div class="settlement-header">
+        <div class="flex items-center mb-4">
+          <a href="family_finance.html" class="mr-3 text-white">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 class="text-xl font-bold">结算分账</h1>
+        </div>
+        
+        <div class="text-sm font-medium mb-2">管理家庭成员间的消费平衡</div>
+        
+        <!-- Settlement Summary -->
+        <div class="settlement-card">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="text-sm" style="color: rgba(255, 255, 255, 0.8);">本月家庭总支出</div>
+              <div class="text-xl font-bold">¥8,530.45</div>
+            </div>
+            <div>
+              <div class="text-sm" style="color: rgba(255, 255, 255, 0.8);">待结算金额</div>
+              <div class="text-xl font-bold">¥930.05</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="p-4">
+        <!-- Settlement Navigation -->
+        <div class="bg-white rounded-lg shadow-sm mb-4 p-1 flex">
+          <button class="flex-1 py-3 rounded-lg text-center font-medium text-blue-600 bg-blue-50">
+            结算状态
+          </button>
+          <button class="flex-1 py-3 rounded-lg text-center font-medium text-gray-500">
+            历史记录
+          </button>
+        </div>
+        
+        <!-- Settlement Status -->
+        <div class="card p-4 mb-4">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">需要结算的账单</h2>
+          
+          <div class="space-y-4">
+            <!-- Balance Status -->
+            <div class="p-3 bg-blue-50 rounded-lg mb-4">
+              <div class="flex items-start">
+                <i class="fas fa-info-circle text-blue-500 mt-1 mr-2"></i>
+                <p class="text-sm text-gray-600">根据目前消费情况，李明支出占比高于王丽，王丽需要向李明支付¥930.05元以平衡家庭支出。</p>
+              </div>
+            </div>
+            
+            <!-- Family Member Settlement -->
+            <div class="flex justify-between items-center border-b border-gray-100 pb-4">
+              <div class="flex items-center">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80" 
+                     alt="李明" class="member-avatar mr-3" />
+                <div>
+                  <div class="font-medium">李明 (我)</div>
+                  <div class="text-xs text-gray-500">总支出: ¥4,730.25</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="settlement-amount">+¥930.05</div>
+                <div class="text-xs text-gray-500">应收金额</div>
+              </div>
+            </div>
+            
+            <div class="flex justify-between items-center border-b border-gray-100 pb-4">
+              <div class="flex items-center">
+                <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80" 
+                     alt="王丽" class="member-avatar mr-3" />
+                <div>
+                  <div class="font-medium">王丽 (配偶)</div>
+                  <div class="text-xs text-gray-500">总支出: ¥3,800.20</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="settlement-amount negative">-¥930.05</div>
+                <div class="text-xs text-gray-500">应付金额</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Settlement Details -->
+        <div class="card p-4 mb-4">
+          <h2 class="text-lg font-semibold text-gray-800 mb-2">计算明细</h2>
+          <p class="text-sm text-gray-500 mb-4">根据每个成员的支出与理想占比计算</p>
+          
+          <div class="space-y-3">
+            <div class="flex justify-between text-sm">
+              <span>家庭总支出</span>
+              <span class="font-medium">¥8,530.45</span>
+            </div>
+            
+            <div class="flex justify-between text-sm">
+              <span>李明实际支出</span>
+              <span class="font-medium">¥4,730.25 (55.4%)</span>
+            </div>
+            
+            <div class="flex justify-between text-sm">
+              <span>王丽实际支出</span>
+              <span class="font-medium">¥3,800.20 (44.6%)</span>
+            </div>
+            
+            <div class="border-t border-gray-100 my-2"></div>
+            
+            <div class="flex justify-between text-sm">
+              <span>理想支出比例</span>
+              <span class="font-medium">50% : 50%</span>
+            </div>
+            
+            <div class="flex justify-between text-sm">
+              <span>李明理想支出</span>
+              <span class="font-medium">¥4,265.22</span>
+            </div>
+            
+            <div class="flex justify-between text-sm">
+              <span>王丽理想支出</span>
+              <span class="font-medium">¥4,265.22</span>
+            </div>
+            
+            <div class="border-t border-gray-100 my-2"></div>
+            
+            <div class="flex justify-between text-sm font-medium">
+              <span>王丽应支付给李明</span>
+              <span class="text-blue-600">¥930.05</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Settlement Methods -->
+        <div class="card p-4 mb-6">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">结算方式</h2>
+          
+          <div class="space-y-3">
+            <button class="w-full flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fab fa-alipay text-blue-600 text-xl"></i>
+                </div>
+                <span class="font-medium">支付宝转账</span>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </button>
+            
+            <button class="w-full flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fab fa-weixin text-green-600 text-xl"></i>
+                </div>
+                <span class="font-medium">微信支付</span>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </button>
+            
+            <button class="w-full flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-university text-orange-600"></i>
+                </div>
+                <span class="font-medium">银行转账</span>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Settlement Adjustment -->
+        <div class="flex space-x-4 mb-6">
+          <button class="flex-1 bg-gray-100 text-gray-700 rounded-lg py-3 px-4 font-medium flex items-center justify-center">
+            <i class="fas fa-sliders-h mr-2"></i> 调整比例
+          </button>
+          <button class="flex-1 bg-blue-600 text-white rounded-lg py-3 px-4 font-medium flex items-center justify-center">
+            <i class="fas fa-check-circle mr-2"></i> 标记为已结算
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="profile.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+</body>
+</html>

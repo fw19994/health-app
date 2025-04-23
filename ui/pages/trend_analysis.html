@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>趋势分析 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .trend-header {
+      background: linear-gradient(to right, #8b5cf6, #6366f1);
+      color: white;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .trend-card {
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .chart-container {
+      height: 200px;
+      position: relative;
+    }
+    
+    .line-chart {
+      height: 160px;
+      display: flex;
+      align-items: flex-end;
+      position: relative;
+    }
+    
+    .line-chart::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      background: #e5e7eb;
+      bottom: 0;
+    }
+    
+    .line-point {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #6366f1;
+      transform: translate(-50%, 50%);
+    }
+    
+    .line-segment {
+      position: absolute;
+      height: 2px;
+      background: #6366f1;
+      transform-origin: left center;
+    }
+    
+    .month-label {
+      position: absolute;
+      font-size: 10px;
+      color: #6b7280;
+      bottom: -20px;
+      transform: translateX(-50%);
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">10:26</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- Header -->
+      <div class="trend-header">
+        <div class="flex items-center mb-4">
+          <a href="financial_report.html" class="mr-3 text-white">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 class="text-xl font-bold">趋势分析</h1>
+        </div>
+        
+        <div class="text-sm font-medium mb-2">查看长期财务变化趋势</div>
+        
+        <!-- Analysis Period -->
+        <div class="trend-card">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="text-sm" style="color: rgba(255, 255, 255, 0.8);">分析周期</div>
+              <div class="text-xl font-bold">2024-2025年</div>
+            </div>
+            <div class="flex items-center bg-white/20 rounded-full px-3 py-1">
+              <span class="text-sm mr-2">自定义时间段</span>
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="p-4">
+        <!-- Report Navigation -->
+        <div class="bg-white rounded-lg shadow-sm mb-4 p-1 flex">
+          <a href="financial_report.html" class="flex-1 py-3 rounded-lg text-center font-medium text-gray-500">
+            月度报告
+          </a>
+          <a href="trend_analysis.html" class="flex-1 py-3 rounded-lg text-center font-medium text-purple-600 bg-purple-50">
+            趋势分析
+          </a>
+          <a href="financial_forecast.html" class="flex-1 py-3 rounded-lg text-center font-medium text-gray-500">
+            预测规划
+          </a>
+        </div>
+        
+        <!-- Income Trend -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">收入趋势 (12个月)</h2>
+            <div class="text-sm text-purple-600">详细数据</div>
+          </div>
+          
+          <div class="chart-container mb-4">
+            <div class="line-chart">
+              <!-- Month Labels -->
+              <div class="month-label" style="left: 8.3%">4月</div>
+              <div class="month-label" style="left: 16.6%">5月</div>
+              <div class="month-label" style="left: 25%">6月</div>
+              <div class="month-label" style="left: 33.3%">7月</div>
+              <div class="month-label" style="left: 41.6%">8月</div>
+              <div class="month-label" style="left: 50%">9月</div>
+              <div class="month-label" style="left: 58.3%">10月</div>
+              <div class="month-label" style="left: 66.6%">11月</div>
+              <div class="month-label" style="left: 75%">12月</div>
+              <div class="month-label" style="left: 83.3%">1月</div>
+              <div class="month-label" style="left: 91.6%">2月</div>
+              <div class="month-label" style="left: 100%">3月</div>
+              
+              <!-- Data Points -->
+              <div class="line-point" style="left: 8.3%; bottom: 60%"></div>
+              <div class="line-segment" style="left: 8.3%; width: 8.3%; bottom: 60%; transform: rotate(5deg)"></div>
+              
+              <div class="line-point" style="left: 16.6%; bottom: 65%"></div>
+              <div class="line-segment" style="left: 16.6%; width: 8.4%; bottom: 65%; transform: rotate(-2deg)"></div>
+              
+              <div class="line-point" style="left: 25%; bottom: 63%"></div>
+              <div class="line-segment" style="left: 25%; width: 8.3%; bottom: 63%; transform: rotate(7deg)"></div>
+              
+              <div class="line-point" style="left: 33.3%; bottom: 70%"></div>
+              <div class="line-segment" style="left: 33.3%; width: 8.3%; bottom: 70%; transform: rotate(5deg)"></div>
+              
+              <div class="line-point" style="left: 41.6%; bottom: 75%"></div>
+              <div class="line-segment" style="left: 41.6%; width: 8.4%; bottom: 75%; transform: rotate(-3deg)"></div>
+              
+              <div class="line-point" style="left: 50%; bottom: 72%"></div>
+              <div class="line-segment" style="left: 50%; width: 8.3%; bottom: 72%; transform: rotate(0deg)"></div>
+              
+              <div class="line-point" style="left: 58.3%; bottom: 72%"></div>
+              <div class="line-segment" style="left: 58.3%; width: 8.3%; bottom: 72%; transform: rotate(8deg)"></div>
+              
+              <div class="line-point" style="left: 66.6%; bottom: 80%"></div>
+              <div class="line-segment" style="left: 66.6%; width: 8.4%; bottom: 80%; transform: rotate(5deg)"></div>
+              
+              <div class="line-point" style="left: 75%; bottom: 85%"></div>
+              <div class="line-segment" style="left: 75%; width: 8.3%; bottom: 85%; transform: rotate(-2deg)"></div>
+              
+              <div class="line-point" style="left: 83.3%; bottom: 83%"></div>
+              <div class="line-segment" style="left: 83.3%; width: 8.3%; bottom: 83%; transform: rotate(7deg)"></div>
+              
+              <div class="line-point" style="left: 91.6%; bottom: 90%"></div>
+              <div class="line-segment" style="left: 91.6%; width: 8.4%; bottom: 90%; transform: rotate(10deg)"></div>
+              
+              <div class="line-point" style="left: 100%; bottom: 100%"></div>
+            </div>
+          </div>
+          
+          <div class="flex justify-between text-sm text-gray-600 mb-2">
+            <div>2024年4月: ¥7,850</div>
+            <div>2025年3月: ¥9,580</div>
+          </div>
+          
+          <div class="flex justify-between items-center text-sm">
+            <div class="flex items-center text-green-600">
+              <i class="fas fa-arrow-up mr-1"></i>
+              <span>年增长: +22.0%</span>
+            </div>
+            <div class="text-gray-500">月平均: ¥8,640</div>
+          </div>
+        </div>
+        
+        <!-- Expense Trend -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">支出趋势 (12个月)</h2>
+            <div class="text-sm text-purple-600">详细数据</div>
+          </div>
+          
+          <div class="chart-container mb-4">
+            <div class="line-chart">
+              <!-- Month Labels (Same as income chart) -->
+              <div class="month-label" style="left: 8.3%">4月</div>
+              <div class="month-label" style="left: 16.6%">5月</div>
+              <div class="month-label" style="left: 25%">6月</div>
+              <div class="month-label" style="left: 33.3%">7月</div>
+              <div class="month-label" style="left: 41.6%">8月</div>
+              <div class="month-label" style="left: 50%">9月</div>
+              <div class="month-label" style="left: 58.3%">10月</div>
+              <div class="month-label" style="left: 66.6%">11月</div>
+              <div class="month-label" style="left: 75%">12月</div>
+              <div class="month-label" style="left: 83.3%">1月</div>
+              <div class="month-label" style="left: 91.6%">2月</div>
+              <div class="month-label" style="left: 100%">3月</div>
+              
+              <!-- Data Points (Different from income chart) -->
+              <div class="line-point" style="left: 8.3%; bottom: 40%; background: #ef4444;"></div>
+              <div class="line-segment" style="left: 8.3%; width: 8.3%; bottom: 40%; transform: rotate(10deg); background: #ef4444;"></div>
+              
+              <div class="line-point" style="left: 16.6%; bottom: 50%; background: #ef4444;"></div>
+              <div class="line-segment" style="left: 16.6%; width: 8.4%; bottom: 50%; transform: rotate(-15deg); background: #ef4444;"></div>
+              
+              <div class="line-point" style="left: 25%; bottom: 35%; background: #ef4444;"></div>
+              <div class="line-segment" style="left: 25%; width: 8.3%; bottom: 35%; transform: rotate(15deg); background: #ef4444;"></div>
+              
+              <div class="line-point" style="left: 33.3%; bottom: 50%; background: #ef4444;"></div>
+              <div class="line-segment" style="left: 33.3%; width: 8.3%; bottom: 50%; transform: rotate(-5deg); background: #ef4444;"></div>
+              
+              <div class="line-point" style="left: 41.6%; bottom: 45%; background: #ef4444;"></div>
+              <div class="line-segment" style="left: 41.6%; width: 8.4%; bottom: 45%; transform: rotate(15deg); background: #ef4444;"></div>
+              
+              <div class="line-point" style="left: 50%; bottom: 60%; background: #ef4444;"></div>
+              <div class="line-segment" style="left: 50%; width: 8.3%; bottom: 60%; transform: rotate(5deg); background: #ef4444;"></div>
+              
+              <div class="line-point" style="left: 58.3%; bottom: 65%; background: #ef4444;"></div>
+              <div class="line-segment" style="left: 58.3%; width: 8.3%; bottom: 65%; transform: rotate(-10deg); background: #ef4444;"></div>
+              
+              <div class="line-point" style="left: 66.6%; bottom: 55%; background: #ef4444;"></div>
+              <div class="line-segment" style="left: 66.6%; width: 8.4%; bottom: 55%; transform: rotate(10deg); background: #ef4444;"></div>
+              
+              <div class="line-point" style="left: 75%; bottom: 65%; background: #ef4444;"></div>
+              <div class="line-segment" style="left: 75%; width: 8.3%; bottom: 65%; transform: rotate(-10deg); background: #ef4444;"></div>
+              
+              <div class="line-point" style="left: 83.3%; bottom: 55%; background: #ef4444;"></div>
+              <div class="line-segment" style="left: 83.3%; width: 8.3%; bottom: 55%; transform: rotate(-5deg); background: #ef4444;"></div>
+              
+              <div class="line-point" style="left: 91.6%; bottom: 50%; background: #ef4444;"></div>
+              <div class="line-segment" style="left: 91.6%; width: 8.4%; bottom: 50%; transform: rotate(-5deg); background: #ef4444;"></div>
+              
+              <div class="line-point" style="left: 100%; bottom: 45%; background: #ef4444;"></div>
+            </div>
+          </div>
+          
+          <div class="flex justify-between text-sm text-gray-600 mb-2">
+            <div>2024年4月: ¥3,250</div>
+            <div>2025年3月: ¥4,334</div>
+          </div>
+          
+          <div class="flex justify-between items-center text-sm">
+            <div class="flex items-center text-red-600">
+              <i class="fas fa-arrow-up mr-1"></i>
+              <span>年增长: +33.4%</span>
+            </div>
+            <div class="text-gray-500">月平均: ¥3,856</div>
+          </div>
+        </div>
+        
+        <!-- Category Trends -->
+        <div class="card p-4 mb-4">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">支出类别变化趋势</h2>
+          
+          <div class="space-y-4">
+            <!-- Category 1 -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center">
+                  <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                  <span class="text-sm">住房</span>
+                </div>
+                <div class="text-sm font-medium">稳定</div>
+              </div>
+              <div class="h-2 bg-gray-100 rounded-full relative">
+                <div class="absolute left-0 top-0 h-2 bg-red-500 rounded-full" style="width: 40%"></div>
+                <div class="absolute left-0 top-0 h-2 bg-red-300 rounded-full" style="width: 38%"></div>
+              </div>
+              <div class="flex justify-between text-xs text-gray-500 mt-1">
+                <span>上年同期: 38%</span>
+                <span>当前: 40%</span>
+              </div>
+            </div>
+            
+            <!-- Category 2 -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center">
+                  <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                  <span class="text-sm">购物</span>
+                </div>
+                <div class="text-sm font-medium text-red-500">+5%</div>
+              </div>
+              <div class="h-2 bg-gray-100 rounded-full relative">
+                <div class="absolute left-0 top-0 h-2 bg-blue-500 rounded-full" style="width: 25%"></div>
+                <div class="absolute left-0 top-0 h-2 bg-blue-300 rounded-full" style="width: 20%"></div>
+              </div>
+              <div class="flex justify-between text-xs text-gray-500 mt-1">
+                <span>上年同期: 20%</span>
+                <span>当前: 25%</span>
+              </div>
+            </div>
+            
+            <!-- Category 3 -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center">
+                  <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                  <span class="text-sm">餐饮</span>
+                </div>
+                <div class="text-sm font-medium text-green-500">-3%</div>
+              </div>
+              <div class="h-2 bg-gray-100 rounded-full relative">
+                <div class="absolute left-0 top-0 h-2 bg-green-500 rounded-full" style="width: 12%"></div>
+                <div class="absolute left-0 top-0 h-2 bg-green-300 rounded-full" style="width: 15%"></div>
+              </div>
+              <div class="flex justify-between text-xs text-gray-500 mt-1">
+                <span>上年同期: 15%</span>
+                <span>当前: 12%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Savings Rate Trend -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">储蓄率变化</h2>
+            <div class="text-sm text-purple-600">详细数据</div>
+          </div>
+          
+          <div class="p-4 bg-indigo-50 rounded-lg mb-4">
+            <div class="flex justify-between items-center">
+              <div>
+                <div class="text-sm text-gray-600">平均储蓄率 (过去12个月)</div>
+                <div class="text-3xl font-bold text-indigo-600">54.8%</div>
+              </div>
+              <div>
+                <div class="text-sm text-gray-600">年度变化</div>
+                <div class="flex items-center text-green-600 text-xl font-bold">
+                  <i class="fas fa-arrow-up mr-1"></i>
+                  <span>+6.2%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="text-sm text-gray-600 mb-3">
+            储蓄率 = (收入 - 支出) / 收入 × 100%
+          </div>
+          
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm">
+              <span>2024年Q2 (4-6月)</span>
+              <span class="font-medium">47.5%</span>
+            </div>
+            <div class="h-2 bg-gray-100 rounded-full">
+              <div class="h-2 bg-indigo-500 rounded-full" style="width: 47.5%"></div>
+            </div>
+            
+            <div class="flex justify-between items-center text-sm">
+              <span>2024年Q3 (7-9月)</span>
+              <span class="font-medium">52.3%</span>
+            </div>
+            <div class="h-2 bg-gray-100 rounded-full">
+              <div class="h-2 bg-indigo-500 rounded-full" style="width: 52.3%"></div>
+            </div>
+            
+            <div class="flex justify-between items-center text-sm">
+              <span>2024年Q4 (10-12月)</span>
+              <span class="font-medium">56.8%</span>
+            </div>
+            <div class="h-2 bg-gray-100 rounded-full">
+              <div class="h-2 bg-indigo-500 rounded-full" style="width: 56.8%"></div>
+            </div>
+            
+            <div class="flex justify-between items-center text-sm">
+              <span>2025年Q1 (1-3月)</span>
+              <span class="font-medium">58.6%</span>
+            </div>
+            <div class="h-2 bg-gray-100 rounded-full">
+              <div class="h-2 bg-indigo-500 rounded-full" style="width: 58.6%"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Insight Summary -->
+        <div class="card p-4 mb-6">
+          <h2 class="text-lg font-semibold text-gray-800 mb-3">趋势分析洞察</h2>
+          
+          <div class="space-y-4">
+            <div class="p-3 bg-green-50 rounded-lg">
+              <div class="flex">
+                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="fas fa-chart-line text-green-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium mb-1">收入稳步增长</h3>
+                  <p class="text-sm text-gray-600">过去一年您的收入增长了22.0%，这是个积极的趋势，高于通货膨胀率。</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="p-3 bg-yellow-50 rounded-lg">
+              <div class="flex">
+                <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium mb-1">支出增速过快</h3>
+                  <p class="text-sm text-gray-600">您的年度支出增长达33.4%，超过了收入增长。特别是购物类支出比例上升明显。</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="p-3 bg-blue-50 rounded-lg">
+              <div class="flex">
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="fas fa-piggy-bank text-blue-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium mb-1">储蓄率持续改善</h3>
+                  <p class="text-sm text-gray-600">尽管支出增长较快，您的储蓄率仍然实现了从47.5%到58.6%的提升，这对长期财务健康非常有利。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="profile.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+</body>
+</html>

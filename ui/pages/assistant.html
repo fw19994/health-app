@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智能助手 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .assistant-header {
+      background: linear-gradient(to right, #4f46e5, #6366f1);
+      color: white;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .message-bubble {
+      max-width: 80%;
+      padding: 0.75rem 1rem;
+      border-radius: 1rem;
+      margin-bottom: 0.75rem;
+      animation: fade-in 0.3s ease-out;
+    }
+    
+    .message-bubble.assistant {
+      background-color: #f3f4f6;
+      border-top-left-radius: 0.25rem;
+      align-self: flex-start;
+    }
+    
+    .message-bubble.user {
+      background-color: #4f46e5;
+      color: white;
+      border-top-right-radius: 0.25rem;
+      align-self: flex-end;
+    }
+    
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background-color: #f3f4f6;
+      border-radius: 1rem;
+      border-top-left-radius: 0.25rem;
+      width: fit-content;
+      margin-bottom: 0.75rem;
+    }
+    
+    .typing-indicator span {
+      height: 0.5rem;
+      width: 0.5rem;
+      background-color: #9ca3af;
+      border-radius: 50%;
+      display: inline-block;
+      margin: 0 0.1rem;
+      opacity: 0.6;
+    }
+    
+    .typing-indicator span:nth-child(1) {
+      animation: blink 1s infinite 0.2s;
+    }
+    
+    .typing-indicator span:nth-child(2) {
+      animation: blink 1s infinite 0.4s;
+    }
+    
+    .typing-indicator span:nth-child(3) {
+      animation: blink 1s infinite 0.6s;
+    }
+    
+    @keyframes blink {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+    
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .suggestion-chip {
+      border-radius: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+      white-space: nowrap;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+    
+    .suggestion-chip:active {
+      background-color: #e5e7eb;
+      transform: scale(0.97);
+    }
+    
+    .assistant-avatar {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(to bottom right, #4f46e5, #8b5cf6);
+      color: white;
+      font-size: 1.25rem;
+      margin-right: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+      <span>中国移动</span>
+    </div>
+    <div class="status-bar-center">11:37</div>
+    <div class="status-bar-right">
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i>
+      </span>
+      <span>82%</span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- Header -->
+      <div class="assistant-header">
+        <div class="flex items-center mb-4">
+          <a href="finance_dashboard.html" class="mr-3 text-white">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 class="text-xl font-bold">智能助手</h1>
+        </div>
+        
+        <div class="flex items-center">
+          <div class="assistant-avatar">
+            <i class="fas fa-robot"></i>
+          </div>
+          <div>
+            <div class="font-medium">财务小助手</div>
+            <div class="text-sm opacity-80">随时为您提供帮助</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Chat Content -->
+      <div class="p-4">
+        <div class="flex flex-col mb-4">
+          <!-- Welcome Message -->
+          <div class="flex items-start mb-3">
+            <div class="assistant-avatar text-sm">
+              <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-bubble assistant">
+              <p>您好，我是您的智能财务助手！我可以帮您：</p>
+              <ul class="mt-2 ml-4 list-disc text-sm">
+                <li>分析您的支出模式</li>
+                <li>提供节省开支的建议</li>
+                <li>回答财务相关问题</li>
+                <li>提醒您重要的账单日期</li>
+              </ul>
+              <p class="mt-2">有什么可以帮您的吗？</p>
+            </div>
+          </div>
+          
+          <!-- Suggestions -->
+          <div class="flex flex-wrap ml-12 mb-4">
+            <button class="suggestion-chip">分析我的月度支出</button>
+            <button class="suggestion-chip">如何制定家庭预算？</button>
+            <button class="suggestion-chip">有什么理财建议？</button>
+            <button class="suggestion-chip">提醒我下次账单日期</button>
+          </div>
+          
+          <!-- Example Conversation -->
+          <div class="message-bubble user">
+            我最近在哪些类别上花费过多？
+          </div>
+          
+          <div class="flex items-start mb-3">
+            <div class="assistant-avatar text-sm">
+              <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-bubble assistant">
+              <p>根据您4月份的消费数据，<strong>餐饮</strong>和<strong>娱乐</strong>类别的支出比上月增加了23%。</p>
+              <div class="mt-3 bg-white p-3 rounded-lg">
+                <div class="text-sm font-medium mb-2">支出增长最快的类别：</div>
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between text-sm mb-1">
+                      <span>餐饮</span>
+                      <span class="text-red-600">+23%</span>
+                    </div>
+                    <div class="progress-bar">
+                      <div class="progress-fill bg-red-500" style="width: 78%"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-sm mb-1">
+                      <span>娱乐</span>
+                      <span class="text-red-600">+18%</span>
+                    </div>
+                    <div class="progress-bar">
+                      <div class="progress-fill bg-purple-500" style="width: 65%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p class="mt-3">您可以考虑设置这两个类别的预算提醒，或者查看详细分析了解具体消费情况。</p>
+            </div>
+          </div>
+          
+          <!-- Typing Indicator -->
+          <div class="flex items-start" style="display: none;">
+            <div class="assistant-avatar text-sm">
+              <i class="fas fa-robot"></i>
+            </div>
+            <div class="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Suggestions Bar -->
+        <div class="border-t border-gray-200 pt-3 mt-auto">
+          <div class="text-sm text-gray-500 mb-2">您可能想问：</div>
+          <div class="flex overflow-x-auto pb-2 -mx-1 px-1" style="scrollbar-width: none;">
+            <button class="suggestion-chip flex-shrink-0">我的储蓄情况如何？</button>
+            <button class="suggestion-chip flex-shrink-0">帮我分析家庭支出</button>
+            <button class="suggestion-chip flex-shrink-0">我的预算执行得怎么样？</button>
+            <button class="suggestion-chip flex-shrink-0">有什么省钱技巧？</button>
+          </div>
+        </div>
+        
+        <!-- Input Box -->
+        <div class="sticky bottom-0 bg-white pt-3">
+          <div class="flex items-center bg-gray-100 rounded-full pr-2">
+            <input type="text" placeholder="输入您的问题..." class="flex-1 bg-transparent py-3 px-4 focus:outline-none">
+            <button class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+          
+          <!-- Add bottom padding to prevent content from being hidden by tab bar -->
+          <div style="height: 80px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="user_profile.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const suggestionChips = document.querySelectorAll('.suggestion-chip');
+      const input = document.querySelector('input[type="text"]');
+      const sendButton = document.querySelector('.fa-paper-plane').parentNode;
+      const chatContainer = document.querySelector('.flex.flex-col.mb-4');
+      const typingIndicator = document.querySelector('.typing-indicator').parentNode;
+      
+      // Handle suggestion chips
+      suggestionChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+          input.value = this.textContent.trim();
+          sendMessage();
+        });
+      });
+      
+      // Handle send button
+      sendButton.addEventListener('click', sendMessage);
+      
+      // Handle enter key
+      input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          sendMessage();
+        }
+      });
+      
+      function sendMessage() {
+        const message = input.value.trim();
+        if (message) {
+          // Add user message
+          const userMessage = document.createElement('div');
+          userMessage.className = 'message-bubble user';
+          userMessage.textContent = message;
+          chatContainer.appendChild(userMessage);
+          
+          // Clear input
+          input.value = '';
+          
+          // Show typing indicator
+          typingIndicator.style.display = 'flex';
+          
+          // Scroll to bottom
+          scrollToBottom();
+          
+          // Simulate response after delay
+          setTimeout(() => {
+            // Hide typing indicator
+            typingIndicator.style.display = 'none';
+            
+            // Add assistant response
+            const responseContainer = document.createElement('div');
+            responseContainer.className = 'flex items-start mb-3';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'assistant-avatar text-sm';
+            avatar.innerHTML = '<i class="fas fa-robot"></i>';
+            
+            const responseMessage = document.createElement('div');
+            responseMessage.className = 'message-bubble assistant';
+            
+            // Generate response based on message content
+            if (message.includes('支出') || message.includes('花费') || message.includes('消费')) {
+              responseMessage.innerHTML = `
+                <p>您本月总支出为 ¥5,243，其中餐饮类占比最高，达到36%。</p>
+                <p class="mt-2">相比上月，您的总支出减少了8%，做得很好！</p>
+                <div class="mt-3 bg-white p-3 rounded-lg">
+                  <div class="font-medium mb-1">您的主要支出类别：</div>
+                  <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div>餐饮：¥1,887</div>
+                    <div>住房：¥1,550</div>
+                    <div>交通：¥823</div>
+                    <div>购物：¥683</div>
+                  </div>
+                </div>
+                <p class="mt-3">需要查看详细的支出分析吗？</p>
+              `;
+            } else if (message.includes('预算') || message.includes('计划')) {
+              responseMessage.innerHTML = `
+                <p>制定家庭预算的关键是了解收入和必要支出，然后合理分配剩余资金。</p>
+                <p class="mt-2">50/30/20法则是个不错的开始：</p>
+                <ul class="mt-1 ml-4 list-disc text-sm">
+                  <li>50%用于必要支出（房租、水电、食品等）</li>
+                  <li>30%用于个人支出（娱乐、购物等）</li>
+                  <li>20%用于储蓄和投资</li>
+                </ul>
+                <p class="mt-2">需要我帮您制定一个个性化预算方案吗？</p>
+              `;
+            } else if (message.includes('账单') || message.includes('提醒')) {
+              responseMessage.innerHTML = `
+                <p>我已为您设置了以下账单提醒：</p>
+                <div class="mt-3 space-y-2">
+                  <div class="bg-white p-3 rounded-lg flex items-center">
+                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 mr-3">
+                      <i class="fas fa-home"></i>
+                    </div>
+                    <div class="flex-1">
+                      <div class="font-medium">房租</div>
+                      <div class="text-sm text-gray-500">每月20日，¥2,800</div>
+                    </div>
+                    <div class="text-xs bg-red-100 text-red-600 rounded-full px-2 py-1">
+                      还有18天
+                    </div>
+                  </div>
+                  
+                  <div class="bg-white p-3 rounded-lg flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-3">
+                      <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="flex-1">
+                      <div class="font-medium">信用卡还款</div>
+                      <div class="text-sm text-gray-500">每月6日，¥4,235</div>
+                    </div>
+                    <div class="text-xs bg-yellow-100 text-yellow-600 rounded-full px-2 py-1">
+                      还有4天
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3">需要添加或修改提醒吗？</p>
+              `;
+            } else if (message.includes('理财') || message.includes('储蓄') || message.includes('投资')) {
+              responseMessage.innerHTML = `
+                <p>以下是适合您当前财务状况的几个理财建议：</p>
+                <ol class="mt-2 ml-4 list-decimal space-y-2">
+                  <li>建立3-6个月的紧急备用金</li>
+                  <li>设立专项储蓄账户（如旅行、教育金等）</li>
+                  <li>考虑低风险的理财产品（如货币基金）</li>
+                  <li>适当配置一些中长期投资，如指数基金</li>
+                </ol>
+                <p class="mt-3">根据您的风险承受能力，我可以为您提供更具体的投资组合建议。</p>
+              `;
+            } else {
+              responseMessage.innerHTML = `
+                <p>感谢您的提问！我需要更多信息来帮助您解决这个问题。</p>
+                <p class="mt-2">您可以告诉我更具体的需求，或者尝试以下选项：</p>
+                <div class="mt-3 flex flex-wrap">
+                  <button class="suggestion-chip">分析我的月度支出</button>
+                  <button class="suggestion-chip">如何制定家庭预算？</button>
+                  <button class="suggestion-chip">有什么理财建议？</button>
+                </div>
+              `;
+              
+              // Add click event to newly created suggestion chips
+              setTimeout(() => {
+                const newChips = responseMessage.querySelectorAll('.suggestion-chip');
+                newChips.forEach(chip => {
+                  chip.addEventListener('click', function() {
+                    input.value = this.textContent.trim();
+                    sendMessage();
+                  });
+                });
+              }, 100);
+            }
+            
+            responseContainer.appendChild(avatar);
+            responseContainer.appendChild(responseMessage);
+            chatContainer.appendChild(responseContainer);
+            
+            // Scroll to bottom
+            scrollToBottom();
+          }, 1500);
+        }
+      }
+      
+      function scrollToBottom() {
+        const scrollContainer = document.querySelector('.scroll-container');
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    });
+  </script>
+</body>
+</html>

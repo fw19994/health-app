@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>家庭成员管理 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="../js/assistant.js" defer></script>
+  <style>
+    .members-header {
+      background: linear-gradient(to right, #047857, #10b981);
+      color: white;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .member-card {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .member-card:active {
+      transform: scale(0.98);
+    }
+    
+    .member-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background-color: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: #9ca3af;
+      border: 2px solid #e5e7eb;
+      overflow: hidden;
+    }
+    
+    .role-badge {
+      font-size: 0.75rem;
+      padding: 0.125rem 0.5rem;
+      border-radius: 1rem;
+      font-weight: 500;
+    }
+    
+    .role-badge.head {
+      background-color: rgba(79, 70, 229, 0.1);
+      color: #4f46e5;
+    }
+    
+    .role-badge.spouse {
+      background-color: rgba(236, 72, 153, 0.1);
+      color: #ec4899;
+    }
+    
+    .role-badge.child {
+      background-color: rgba(14, 165, 233, 0.1);
+      color: #0ea5e9;
+    }
+    
+    .role-badge.other {
+      background-color: rgba(168, 85, 247, 0.1);
+      color: #a855f7;
+    }
+    
+    .select-role {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+      background-position: right 0.5rem center;
+      background-repeat: no-repeat;
+      background-size: 1.5em 1.5em;
+      padding-right: 2.5rem;
+    }
+    
+    .avatar-upload {
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .avatar-upload .overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background-color: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .avatar-upload:hover .overlay {
+      opacity: 1;
+    }
+    
+    .checkbox-wrapper {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+    
+    .custom-checkbox {
+      appearance: none;
+      width: 1.25rem;
+      height: 1.25rem;
+      border: 2px solid #d1d5db;
+      border-radius: 0.25rem;
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .custom-checkbox:checked {
+      background-color: #10b981;
+      border-color: #10b981;
+    }
+    
+    .custom-checkbox:checked::after {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 3px;
+      width: 4px;
+      height: 8px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">10:57</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- Header -->
+      <div class="members-header">
+        <div class="flex items-center mb-4">
+          <a href="family_finance.html" class="mr-3 text-white">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 class="text-xl font-bold">家庭成员管理</h1>
+        </div>
+        
+        <div class="text-sm opacity-90 mb-4">管理您的家庭成员和财务权限</div>
+        
+        <div class="bg-white/10 rounded-lg p-3">
+          <div class="flex items-center">
+            <div class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center mr-3">
+              <i class="fas fa-users"></i>
+            </div>
+            <div>
+              <div class="font-medium">当前家庭人数: 4</div>
+              <div class="text-xs opacity-80 mt-0.5">主要成员: 李明 (我), 王芳, 李小美, 李小强</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="p-4">
+        <!-- Action Buttons -->
+        <div class="mb-5">
+          <button class="bg-green-600 text-white rounded-lg w-full py-3 flex items-center justify-center font-medium shadow-sm">
+            <i class="fas fa-plus mr-2"></i> 添加新成员
+          </button>
+        </div>
+        
+        <!-- Members List -->
+        <h2 class="text-lg font-semibold text-gray-800 mb-3">家庭成员列表</h2>
+        
+        <!-- Member 1 (Me) -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-4 member-card">
+          <div class="flex items-start">
+            <div class="member-avatar mr-4 relative">
+              <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80" 
+                   alt="李明" 
+                   class="w-full h-full object-cover" />
+              <div class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start mb-1">
+                <div>
+                  <h3 class="font-semibold text-lg">李明 (我)</h3>
+                  <div class="text-xs text-gray-500">账户创建者</div>
+                </div>
+                <div class="role-badge head">家庭主账户</div>
+              </div>
+              
+              <div class="space-y-2 mt-2">
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500">电话:</span>
+                  <span>138****1234</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500">加入时间:</span>
+                  <span>2024年10月25日</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500">权限:</span>
+                  <span>完全访问权限</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex justify-end mt-3">
+            <button class="text-green-600 text-sm font-medium">
+              <i class="fas fa-pen mr-1"></i> 编辑资料
+            </button>
+          </div>
+        </div>
+        
+        <!-- Member 2 -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-4 member-card">
+          <div class="flex items-start">
+            <div class="member-avatar mr-4">
+              <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80" 
+                   alt="王芳" 
+                   class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start mb-1">
+                <div>
+                  <h3 class="font-semibold text-lg">王芳</h3>
+                  <div class="text-xs text-gray-500">家庭第二收入来源</div>
+                </div>
+                <div class="role-badge spouse">配偶</div>
+              </div>
+              
+              <div class="space-y-2 mt-2">
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500">电话:</span>
+                  <span>139****5678</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500">加入时间:</span>
+                  <span>2024年10月26日</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500">权限:</span>
+                  <span>管理自己的支出和共享账单</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex justify-end space-x-4 mt-3">
+            <button class="text-red-600 text-sm font-medium">
+              <i class="fas fa-trash-alt mr-1"></i> 移除
+            </button>
+            <button class="text-green-600 text-sm font-medium">
+              <i class="fas fa-pen mr-1"></i> 编辑
+            </button>
+          </div>
+        </div>
+        
+        <!-- Member 3 -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-4 member-card">
+          <div class="flex items-start">
+            <div class="member-avatar mr-4">
+              <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80" 
+                   alt="李小美" 
+                   class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start mb-1">
+                <div>
+                  <h3 class="font-semibold text-lg">李小美</h3>
+                  <div class="text-xs text-gray-500">大学生</div>
+                </div>
+                <div class="role-badge child">子女</div>
+              </div>
+              
+              <div class="space-y-2 mt-2">
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500">电话:</span>
+                  <span>132****3456</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500">加入时间:</span>
+                  <span>2024年11月05日</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500">权限:</span>
+                  <span>记录个人支出</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex justify-end space-x-4 mt-3">
+            <button class="text-red-600 text-sm font-medium">
+              <i class="fas fa-trash-alt mr-1"></i> 移除
+            </button>
+            <button class="text-green-600 text-sm font-medium">
+              <i class="fas fa-pen mr-1"></i> 编辑
+            </button>
+          </div>
+        </div>
+        
+        <!-- Member 4 -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-6 member-card">
+          <div class="flex items-start">
+            <div class="member-avatar mr-4">
+              <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80" 
+                   alt="李小强" 
+                   class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start mb-1">
+                <div>
+                  <h3 class="font-semibold text-lg">李小强</h3>
+                  <div class="text-xs text-gray-500">高中生</div>
+                </div>
+                <div class="role-badge child">子女</div>
+              </div>
+              
+              <div class="space-y-2 mt-2">
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500">电话:</span>
+                  <span>131****7890</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500">加入时间:</span>
+                  <span>2024年11月08日</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500">权限:</span>
+                  <span>记录个人支出</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex justify-end space-x-4 mt-3">
+            <button class="text-red-600 text-sm font-medium">
+              <i class="fas fa-trash-alt mr-1"></i> 移除
+            </button>
+            <button class="text-green-600 text-sm font-medium">
+              <i class="fas fa-pen mr-1"></i> 编辑
+            </button>
+          </div>
+        </div>
+        
+        <!-- Add Member Modal (Hidden by Default) -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+          <div class="bg-white rounded-xl w-11/12 max-w-md max-h-[80vh] overflow-y-auto">
+            <div class="p-5">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">添加家庭成员</h3>
+                <button class="text-gray-400">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              
+              <!-- Tab Selector -->
+              <div class="flex border border-gray-200 rounded-lg mb-5">
+                <button class="flex-1 py-2.5 text-center text-sm font-medium rounded-l-lg bg-green-600 text-white" id="tab-find">
+                  查找已有用户
+                </button>
+                <button class="flex-1 py-2.5 text-center text-sm font-medium rounded-r-lg text-gray-700" id="tab-create">
+                  创建虚拟成员
+                </button>
+              </div>
+              
+              <!-- Find Existing User Form -->
+              <div id="form-find-user">
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">手机号码</label>
+                    <div class="relative">
+                      <input type="tel" class="w-full px-3 py-2 border border-gray-300 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                             placeholder="输入手机号查找用户">
+                      <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-green-600">
+                        <i class="fas fa-search"></i>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Search Results (Initially Hidden) -->
+                  <div class="border rounded-lg p-3 bg-gray-50" style="display: none;" id="search-results">
+                    <div class="text-center text-sm text-gray-500 py-2">查找中...</div>
+                  </div>
+                  
+                  <!-- User Found Result (Example, Initially Hidden) -->
+                  <div class="border rounded-lg p-3" id="user-found" style="display: none;">
+                    <div class="flex items-center">
+                      <div class="member-avatar w-12 h-12 mr-3">
+                        <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80" 
+                             alt="张伟" class="w-full h-full object-cover">
+                      </div>
+                      <div class="flex-1">
+                        <div class="font-medium">张伟</div>
+                        <div class="text-sm text-gray-500">138****5678</div>
+                      </div>
+                    </div>
+                    
+                    <div class="mt-3 space-y-3">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">角色</label>
+                        <select class="select-role w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                          <option value="">选择角色</option>
+                          <option value="spouse">配偶</option>
+                          <option value="child">子女</option>
+                          <option value="parent">父母</option>
+                          <option value="other">其他</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">权限设置</label>
+                        
+                        <div class="space-y-2">
+                          <div class="flex items-start">
+                            <div class="checkbox-wrapper mt-0.5 mr-2">
+                              <input type="checkbox" class="custom-checkbox" id="search-perm1" checked>
+                            </div>
+                            <label for="search-perm1" class="text-sm">
+                              <div>记录个人支出</div>
+                              <div class="text-xs text-gray-500">可以添加自己的收支记录</div>
+                            </label>
+                          </div>
+                          
+                          <div class="flex items-start">
+                            <div class="checkbox-wrapper mt-0.5 mr-2">
+                              <input type="checkbox" class="custom-checkbox" id="search-perm2" checked>
+                            </div>
+                            <label for="search-perm2" class="text-sm">
+                              <div>查看家庭收支</div>
+                              <div class="text-xs text-gray-500">可以查看家庭总体收支情况</div>
+                            </label>
+                          </div>
+                          
+                          <div class="flex items-start">
+                            <div class="checkbox-wrapper mt-0.5 mr-2">
+                              <input type="checkbox" class="custom-checkbox" id="search-perm3">
+                            </div>
+                            <label for="search-perm3" class="text-sm">
+                              <div>修改家庭账目</div>
+                              <div class="text-xs text-gray-500">可以修改其他成员的收支记录</div>
+                            </label>
+                          </div>
+                          
+                          <div class="flex items-start">
+                            <div class="checkbox-wrapper mt-0.5 mr-2">
+                              <input type="checkbox" class="custom-checkbox" id="search-perm4">
+                            </div>
+                            <label for="search-perm4" class="text-sm">
+                              <div>管理家庭预算</div>
+                              <div class="text-xs text-gray-500">可以设置和调整家庭预算</div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- No User Found Result (Initially Hidden) -->
+                  <div class="border rounded-lg p-4 text-center" id="no-user-found" style="display: none;">
+                    <div class="text-gray-500 mb-3">未找到该用户</div>
+                    <button class="text-green-600 font-medium" id="switch-to-virtual">
+                      创建虚拟成员 <i class="fas fa-arrow-right ml-1"></i>
+                    </button>
+                  </div>
+                  
+                  <div class="mt-6 grid grid-cols-2 gap-3">
+                    <button type="button" class="py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700">取消</button>
+                    <button type="button" class="py-2.5 bg-green-600 rounded-lg font-medium text-white" id="add-found-user" disabled>添加成员</button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Create Virtual User Form (Initially Hidden) -->
+              <form id="form-create-virtual" style="display: none;">
+                <div class="mb-6 text-center">
+                  <div class="avatar-upload inline-block">
+                    <div class="member-avatar mx-auto">
+                      <i class="fas fa-user"></i>
+                    </div>
+                    <div class="overlay">
+                      <i class="fas fa-camera"></i>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">姓名</label>
+                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="输入成员姓名">
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">手机号码 <span class="text-xs text-gray-500">(可选)</span></label>
+                    <input type="tel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="输入联系电话">
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">角色</label>
+                    <select class="select-role w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                      <option value="">选择角色</option>
+                      <option value="spouse">配偶</option>
+                      <option value="child">子女</option>
+                      <option value="parent">父母</option>
+                      <option value="other">其他</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">描述 <span class="text-xs text-gray-500">(可选)</span></label>
+                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="简短描述，如'大学生'">
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">虚拟成员标记</label>
+                    <div class="flex items-center bg-yellow-50 p-3 rounded-lg">
+                      <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600 mr-3">
+                        <i class="fas fa-user-tag"></i>
+                      </div>
+                      <div class="flex-1">
+                        <div class="text-sm font-medium">虚拟成员</div>
+                        <div class="text-xs text-gray-500">此成员为虚拟用户，将无法自行登录使用</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">权限设置</label>
+                    
+                    <div class="space-y-2">
+                      <div class="flex items-start">
+                        <div class="checkbox-wrapper mt-0.5 mr-2">
+                          <input type="checkbox" class="custom-checkbox" id="perm1" checked>
+                        </div>
+                        <label for="perm1" class="text-sm">
+                          <div>记录个人支出</div>
+                          <div class="text-xs text-gray-500">可以添加自己的收支记录</div>
+                        </label>
+                      </div>
+                      
+                      <div class="flex items-start">
+                        <div class="checkbox-wrapper mt-0.5 mr-2">
+                          <input type="checkbox" class="custom-checkbox" id="perm2" checked>
+                        </div>
+                        <label for="perm2" class="text-sm">
+                          <div>查看家庭收支</div>
+                          <div class="text-xs text-gray-500">可以查看家庭总体收支情况</div>
+                        </label>
+                      </div>
+                      
+                      <div class="flex items-start">
+                        <div class="checkbox-wrapper mt-0.5 mr-2">
+                          <input type="checkbox" class="custom-checkbox" id="perm3">
+                        </div>
+                        <label for="perm3" class="text-sm">
+                          <div>修改家庭账目</div>
+                          <div class="text-xs text-gray-500">可以修改其他成员的收支记录</div>
+                        </label>
+                      </div>
+                      
+                      <div class="flex items-start">
+                        <div class="checkbox-wrapper mt-0.5 mr-2">
+                          <input type="checkbox" class="custom-checkbox" id="perm4">
+                        </div>
+                        <label for="perm4" class="text-sm">
+                          <div>管理家庭预算</div>
+                          <div class="text-xs text-gray-500">可以设置和调整家庭预算</div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="mt-6 grid grid-cols-2 gap-3">
+                  <button type="button" class="py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700">取消</button>
+                  <button type="submit" class="py-2.5 bg-green-600 rounded-lg font-medium text-white">添加成员</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Add bottom padding to prevent content from being hidden by tab bar -->
+        <div style="height: 100px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="profile.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+</body>
+</html>
+
+<script>
+  // 添加模态框切换功能
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabFind = document.getElementById('tab-find');
+    const tabCreate = document.getElementById('tab-create');
+    const formFindUser = document.getElementById('form-find-user');
+    const formCreateVirtual = document.getElementById('form-create-virtual');
+    const switchToVirtual = document.getElementById('switch-to-virtual');
+    
+    // 添加新成员按钮
+    const addMemberBtn = document.querySelector('.mb-5 button');
+    const modalContainer = document.querySelector('.fixed.inset-0');
+    const closeModalBtn = document.querySelector('.fixed.inset-0 .fas.fa-times').parentNode;
+    
+    // 模态框切换
+    tabFind.addEventListener('click', function() {
+      tabFind.classList.add('bg-green-600', 'text-white');
+      tabFind.classList.remove('text-gray-700');
+      tabCreate.classList.remove('bg-green-600', 'text-white');
+      tabCreate.classList.add('text-gray-700');
+      formFindUser.style.display = 'block';
+      formCreateVirtual.style.display = 'none';
+    });
+    
+    tabCreate.addEventListener('click', function() {
+      tabCreate.classList.add('bg-green-600', 'text-white');
+      tabCreate.classList.remove('text-gray-700');
+      tabFind.classList.remove('bg-green-600', 'text-white');
+      tabFind.classList.add('text-gray-700');
+      formCreateVirtual.style.display = 'block';
+      formFindUser.style.display = 'none';
+    });
+    
+    // 从未找到用户切换到创建虚拟用户
+    switchToVirtual.addEventListener('click', function() {
+      tabCreate.click();
+    });
+    
+    // 显示/隐藏模态框
+    addMemberBtn.addEventListener('click', function() {
+      modalContainer.style.display = 'flex';
+    });
+    
+    closeModalBtn.addEventListener('click', function() {
+      modalContainer.style.display = 'none';
+    });
+    
+    // 模拟搜索用户功能
+    const searchInput = document.querySelector('#form-find-user input[type="tel"]');
+    const searchButton = document.querySelector('#form-find-user .fas.fa-search').parentNode;
+    const searchResults = document.getElementById('search-results');
+    const userFound = document.getElementById('user-found');
+    const noUserFound = document.getElementById('no-user-found');
+    const addFoundUserBtn = document.getElementById('add-found-user');
+    
+    searchButton.addEventListener('click', function() {
+      const phone = searchInput.value.trim();
+      if (phone.length > 0) {
+        // 显示搜索中状态
+        searchResults.style.display = 'block';
+        userFound.style.display = 'none';
+        noUserFound.style.display = 'none';
+        
+        // 模拟搜索延迟
+        setTimeout(function() {
+          searchResults.style.display = 'none';
+          
+          // 模拟查找结果（这里我们假设手机号以"138"开头的能找到用户）
+          if (phone.startsWith('138')) {
+            userFound.style.display = 'block';
+            addFoundUserBtn.disabled = false;
+          } else {
+            noUserFound.style.display = 'block';
+            addFoundUserBtn.disabled = true;
+          }
+        }, 1000);
+      }
+    });
+    
+    // 回车触发搜索
+    searchInput.addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') {
+        searchButton.click();
+      }
+    });
+  });
+</script>

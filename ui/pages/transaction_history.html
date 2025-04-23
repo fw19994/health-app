@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>交易记录 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .transaction-header {
+      background: linear-gradient(to right, #059669, #10b981);
+      color: white;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .filter-container {
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .filter-item {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.25);
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      margin-right: 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .filter-item i {
+      margin-left: 0.5rem;
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
+    
+    .transaction-item {
+      border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .transaction-item:last-child {
+      border-bottom: none;
+    }
+    
+    .transaction-type {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+    
+    .transaction-type.income {
+      background-color: #10b981;
+    }
+    
+    .transaction-type.expense {
+      background-color: #ef4444;
+    }
+    
+    .category-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: white;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .member-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.125rem 0.5rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-right: 0.5rem;
+    }
+    
+    .member-badge.dad {
+      background-color: rgba(79, 70, 229, 0.1);
+      color: #4f46e5;
+    }
+    
+    .member-badge.mom {
+      background-color: rgba(124, 58, 237, 0.1);
+      color: #7c3aed;
+    }
+    
+    .member-badge.daughter {
+      background-color: rgba(219, 39, 119, 0.1);
+      color: #db2777;
+    }
+    
+    .member-badge.son {
+      background-color: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+    }
+    
+    .tab-group {
+      display: flex;
+      background-color: #f3f4f6;
+      border-radius: 0.5rem;
+      padding: 0.25rem;
+      margin-bottom: 1rem;
+    }
+    
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.5rem 0;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #4b5563;
+    }
+    
+    .tab.active {
+      background-color: white;
+      color: #059669;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .date-header {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #6b7280;
+      padding: 0.5rem 1rem;
+      background-color: #f9fafb;
+      border-radius: 0.25rem;
+      margin: 1rem 0 0.5rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">10:47</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- Header -->
+      <div class="transaction-header">
+        <div class="flex items-center mb-4">
+          <a href="javascript:history.back()" class="mr-3 text-white">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 class="text-xl font-bold">交易记录</h1>
+        </div>
+        
+        <div class="flex items-center justify-between mb-4">
+          <div class="text-sm opacity-90">查看所有收支明细</div>
+          <div class="flex items-center bg-white/20 rounded-full px-3 py-1">
+            <i class="fas fa-search mr-2 text-sm"></i>
+            <span class="text-sm">搜索</span>
+          </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="filter-container">
+          <div class="flex justify-between items-center mb-3">
+            <div class="text-sm font-medium">筛选条件</div>
+            <div class="text-xs">清除全部</div>
+          </div>
+          
+          <div class="flex flex-wrap space-y-2 sm:space-y-0">
+            <div class="filter-item mr-2">
+              <span>成员: 全部</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="filter-item mr-2">
+              <span>类型: 全部</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="filter-item mr-2">
+              <span>分类: 全部</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="filter-item">
+              <span>时间: 近30天</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="p-4">
+        <!-- Tab Group -->
+        <div class="tab-group">
+          <div class="tab active">全部交易</div>
+          <div class="tab">收入</div>
+          <div class="tab">支出</div>
+        </div>
+        
+        <!-- Statistics Summary -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+          <div class="grid grid-cols-3 gap-4">
+            <div class="text-center">
+              <div class="text-sm text-gray-500 mb-1">总交易</div>
+              <div class="text-xl font-bold">86笔</div>
+            </div>
+            <div class="text-center">
+              <div class="text-sm text-gray-500 mb-1">总收入</div>
+              <div class="text-xl font-bold text-green-600">¥25,850</div>
+            </div>
+            <div class="text-center">
+              <div class="text-sm text-gray-500 mb-1">总支出</div>
+              <div class="text-xl font-bold text-red-600">¥15,240</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Trends Chart -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-medium">支出趋势</h3>
+            <div class="text-sm text-gray-500">近30天</div>
+          </div>
+          
+          <div class="chart-container h-40 relative mb-4">
+            <!-- Line Chart Visualization -->
+            <svg class="w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
+              <!-- Grid Lines -->
+              <line x1="0" y1="0" x2="300" y2="0" stroke="#f3f4f6" stroke-width="1" />
+              <line x1="0" y1="25" x2="300" y2="25" stroke="#f3f4f6" stroke-width="1" />
+              <line x1="0" y1="50" x2="300" y2="50" stroke="#f3f4f6" stroke-width="1" />
+              <line x1="0" y1="75" x2="300" y2="75" stroke="#f3f4f6" stroke-width="1" />
+              <line x1="0" y1="100" x2="300" y2="100" stroke="#f3f4f6" stroke-width="1" />
+              
+              <!-- Income Line -->
+              <path d="M0,80 L30,70 L60,75 L90,60 L120,65 L150,55 L180,50 L210,45 L240,35 L270,30 L300,20" 
+                    fill="none" stroke="#10b981" stroke-width="2" />
+              
+              <!-- Expense Line -->
+              <path d="M0,30 L30,40 L60,35 L90,50 L120,45 L150,60 L180,55 L210,65 L240,60 L270,70 L300,65" 
+                    fill="none" stroke="#ef4444" stroke-width="2" />
+            </svg>
+            
+            <!-- Labels -->
+            <div class="absolute top-0 right-0 flex items-center text-xs">
+              <div class="flex items-center mr-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
+                <span>收入</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-2 h-2 bg-red-500 rounded-full mr-1"></div>
+                <span>支出</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-4 gap-2 text-xs text-gray-500">
+            <div class="text-center">4/1-4/7</div>
+            <div class="text-center">4/8-4/14</div>
+            <div class="text-center">4/15-4/21</div>
+            <div class="text-center">4/22-4/28</div>
+          </div>
+        </div>
+        
+        <!-- Member Contribution -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-medium">成员支出占比</h3>
+            <div class="text-sm text-gray-500">本月</div>
+          </div>
+          
+          <div class="relative pt-1">
+            <div class="flex h-4 overflow-hidden text-xs rounded-full">
+              <div class="w-2/5 bg-indigo-600 flex items-center justify-center text-white" style="width: 35%">
+                <span class="text-xs">爸爸</span>
+              </div>
+              <div class="w-1/3 bg-purple-600 flex items-center justify-center text-white" style="width: 35%">
+                <span class="text-xs">妈妈</span>
+              </div>
+              <div class="w-1/6 bg-pink-500 flex items-center justify-center text-white" style="width: 20%">
+                <span class="text-xs">女儿</span>
+              </div>
+              <div class="w-1/12 bg-blue-500 flex items-center justify-center text-white" style="width: 10%">
+                <span class="text-xs">儿子</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-indigo-600 rounded-full mr-1"></div>
+              <span class="text-xs text-gray-600">爸爸: 35% (¥5,334)</span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-purple-600 rounded-full mr-1"></div>
+              <span class="text-xs text-gray-600">妈妈: 35% (¥5,334)</span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-pink-500 rounded-full mr-1"></div>
+              <span class="text-xs text-gray-600">女儿: 20% (¥3,048)</span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-blue-500 rounded-full mr-1"></div>
+              <span class="text-xs text-gray-600">儿子: 10% (¥1,524)</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Transaction List -->
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+          <!-- Date Group 1 -->
+          <div class="date-header">
+            <span>2025年4月2日 (今天)</span>
+            <span>收支: +¥5,350</span>
+          </div>
+          
+          <!-- Transaction Items -->
+          <div class="transaction-item p-3 flex items-center">
+            <div class="category-icon bg-green-500 mr-3">
+              <i class="fas fa-briefcase"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium">工资收入</div>
+                  <div class="flex items-center text-xs text-gray-500 mt-1">
+                    <span class="member-badge dad">李明</span>
+                    <span>10:12</span>
+                  </div>
+                </div>
+                <div class="text-green-600 font-medium">+¥11,500</div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">备注: 4月份工资</div>
+            </div>
+          </div>
+          
+          <div class="transaction-item p-3 flex items-center">
+            <div class="category-icon bg-red-500 mr-3">
+              <i class="fas fa-home"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium">房贷还款</div>
+                  <div class="flex items-center text-xs text-gray-500 mt-1">
+                    <span class="member-badge dad">李明</span>
+                    <span>09:45</span>
+                  </div>
+                </div>
+                <div class="text-red-600 font-medium">-¥4,850</div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">备注: 4月房贷自动扣款</div>
+            </div>
+          </div>
+          
+          <div class="transaction-item p-3 flex items-center">
+            <div class="category-icon bg-yellow-500 mr-3">
+              <i class="fas fa-utensils"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium">午餐</div>
+                  <div class="flex items-center text-xs text-gray-500 mt-1">
+                    <span class="member-badge mom">王芳</span>
+                    <span>08:30</span>
+                  </div>
+                </div>
+                <div class="text-red-600 font-medium">-¥85</div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">备注: 华莱士外带</div>
+            </div>
+          </div>
+          
+          <div class="transaction-item p-3 flex items-center">
+            <div class="category-icon bg-blue-500 mr-3">
+              <i class="fas fa-bus"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium">公交</div>
+                  <div class="flex items-center text-xs text-gray-500 mt-1">
+                    <span class="member-badge daughter">李小美</span>
+                    <span>07:15</span>
+                  </div>
+                </div>
+                <div class="text-red-600 font-medium">-¥2</div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">备注: 上学路线</div>
+            </div>
+          </div>
+          
+          <!-- Date Group 2 -->
+          <div class="date-header">
+            <span>2025年4月1日 (昨天)</span>
+            <span>收支: -¥1,213</span>
+          </div>
+          
+          <!-- Transaction Items -->
+          <div class="transaction-item p-3 flex items-center">
+            <div class="category-icon bg-purple-500 mr-3">
+              <i class="fas fa-shopping-bag"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium">超市购物</div>
+                  <div class="flex items-center text-xs text-gray-500 mt-1">
+                    <span class="member-badge mom">王芳</span>
+                    <span>19:30</span>
+                  </div>
+                </div>
+                <div class="text-red-600 font-medium">-¥367</div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">备注: 超市周采购</div>
+            </div>
+          </div>
+          
+          <div class="transaction-item p-3 flex items-center">
+            <div class="category-icon bg-yellow-500 mr-3">
+              <i class="fas fa-utensils"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium">晚餐</div>
+                  <div class="flex items-center text-xs text-gray-500 mt-1">
+                    <span class="member-badge son">李小强</span>
+                    <span>18:20</span>
+                  </div>
+                </div>
+                <div class="text-red-600 font-medium">-¥26</div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">备注: 学校食堂</div>
+            </div>
+          </div>
+          
+          <div class="transaction-item p-3 flex items-center">
+            <div class="category-icon bg-pink-500 mr-3">
+              <i class="fas fa-tshirt"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium">服装购买</div>
+                  <div class="flex items-center text-xs text-gray-500 mt-1">
+                    <span class="member-badge daughter">李小美</span>
+                    <span>16:45</span>
+                  </div>
+                </div>
+                <div class="text-red-600 font-medium">-¥490</div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">备注: 优衣库春季上衣</div>
+            </div>
+          </div>
+          
+          <div class="transaction-item p-3 flex items-center">
+            <div class="category-icon bg-blue-500 mr-3">
+              <i class="fas fa-car"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium">加油</div>
+                  <div class="flex items-center text-xs text-gray-500 mt-1">
+                    <span class="member-badge dad">李明</span>
+                    <span>12:30</span>
+                  </div>
+                </div>
+                <div class="text-red-600 font-medium">-¥330</div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">备注: 中石化92号</div>
+            </div>
+          </div>
+          
+          <!-- Date Group 3 -->
+          <div class="date-header">
+            <span>2025年3月31日</span>
+            <span>收支: +¥578</span>
+          </div>
+          
+          <!-- Transaction Items -->
+          <div class="transaction-item p-3 flex items-center">
+            <div class="category-icon bg-indigo-500 mr-3">
+              <i class="fas fa-coins"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium">利息收入</div>
+                  <div class="flex items-center text-xs text-gray-500 mt-1">
+                    <span class="member-badge dad">李明</span>
+                    <span>10:00</span>
+                  </div>
+                </div>
+                <div class="text-green-600 font-medium">+¥980</div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">备注: 定期存款利息</div>
+            </div>
+          </div>
+          
+          <div class="transaction-item p-3 flex items-center">
+            <div class="category-icon bg-orange-500 mr-3">
+              <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium">教育费用</div>
+                  <div class="flex items-center text-xs text-gray-500 mt-1">
+                    <span class="member-badge son">李小强</span>
+                    <span>09:15</span>
+                  </div>
+                </div>
+                <div class="text-red-600 font-medium">-¥402</div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">备注: 物理课外补习</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Show More -->
+        <div class="text-center mb-6">
+          <button class="bg-white border border-gray-200 rounded-lg py-3 px-4 text-sm text-gray-600 w-full flex items-center justify-center">
+            <i class="fas fa-spinner mr-2"></i> 加载更多
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="profile.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+</body>
+</html>

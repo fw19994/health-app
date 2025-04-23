@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>运动计划 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- Header -->
+      <div class="bg-indigo-600 text-white p-6">
+        <div class="flex items-center mb-4">
+          <a href="health_dashboard.html" class="mr-3">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 class="text-xl font-bold">运动计划</h1>
+        </div>
+        
+        <div class="text-sm opacity-90 mb-2">根据您的健身目标定制</div>
+        
+        <div class="flex space-x-2 mt-4">
+          <div class="bg-white/20 rounded-full px-3 py-1 text-xs">中度活动</div>
+          <div class="bg-white/20 rounded-full px-3 py-1 text-xs">增肌</div>
+          <div class="bg-white/20 rounded-full px-3 py-1 text-xs">4-5次/周</div>
+        </div>
+      </div>
+
+      <!-- Exercise Overview -->
+      <div class="p-4 bg-white">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-semibold">周目标</h2>
+          <div class="text-sm text-indigo-600">4/7 已完成</div>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-2 mb-4">
+          <div class="bg-gray-50 p-3 rounded-lg text-center">
+            <div class="text-lg font-bold">5</div>
+            <div class="text-xs text-gray-500">训练天数</div>
+          </div>
+          <div class="bg-gray-50 p-3 rounded-lg text-center">
+            <div class="text-lg font-bold">225</div>
+            <div class="text-xs text-gray-500">分钟</div>
+          </div>
+          <div class="bg-gray-50 p-3 rounded-lg text-center">
+            <div class="text-lg font-bold">2800</div>
+            <div class="text-xs text-gray-500">消耗卡路里</div>
+          </div>
+        </div>
+        
+        <div class="flex space-x-3 overflow-x-auto pb-2 mb-4">
+          <button class="whitespace-nowrap px-4 py-2 bg-indigo-600 text-white rounded-full text-sm font-medium">本周</button>
+          <button class="whitespace-nowrap px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm">下周</button>
+          <button class="whitespace-nowrap px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm">定制计划</button>
+          <button class="whitespace-nowrap px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm">运动库</button>
+        </div>
+      </div>
+
+      <!-- Day Selection -->
+      <div class="p-4 pt-0 bg-white">
+        <div class="flex space-x-2 overflow-x-auto pb-2">
+          <button class="flex-shrink-0 w-12 h-16 rounded-lg bg-indigo-600 text-white flex flex-col items-center justify-center">
+            <div class="font-medium">一</div>
+            <div class="text-xs mt-1">4/1</div>
+          </button>
+          <button class="flex-shrink-0 w-12 h-16 rounded-lg bg-gray-100 text-gray-700 flex flex-col items-center justify-center">
+            <div class="font-medium">二</div>
+            <div class="text-xs mt-1">4/2</div>
+          </button>
+          <button class="flex-shrink-0 w-12 h-16 rounded-lg bg-gray-100 text-gray-700 flex flex-col items-center justify-center">
+            <div class="font-medium">三</div>
+            <div class="text-xs mt-1">4/3</div>
+          </button>
+          <button class="flex-shrink-0 w-12 h-16 rounded-lg bg-gray-100 text-gray-700 flex flex-col items-center justify-center">
+            <div class="font-medium">四</div>
+            <div class="text-xs mt-1">4/4</div>
+          </button>
+          <button class="flex-shrink-0 w-12 h-16 rounded-lg bg-gray-100 text-gray-700 flex flex-col items-center justify-center">
+            <div class="font-medium">五</div>
+            <div class="text-xs mt-1">4/5</div>
+          </button>
+          <button class="flex-shrink-0 w-12 h-16 rounded-lg bg-gray-100 text-gray-700 flex flex-col items-center justify-center">
+            <div class="font-medium">六</div>
+            <div class="text-xs mt-1">4/6</div>
+          </button>
+          <button class="flex-shrink-0 w-12 h-16 rounded-lg bg-gray-100 text-gray-700 flex flex-col items-center justify-center">
+            <div class="font-medium">日</div>
+            <div class="text-xs mt-1">4/7</div>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Today's Plan Section -->
+      <div class="p-4">
+        <h2 class="text-lg font-semibold mb-4">今日计划：力量训练（胸部和背部）</h2>
+        
+        <!-- Warmup Section -->
+        <div class="card p-4 mb-4">
+          <div class="flex items-center mb-3">
+            <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mr-3">
+              <i class="fas fa-fire text-amber-600"></i>
+            </div>
+            <div>
+              <h3 class="font-semibold">热身</h3>
+              <div class="text-xs text-gray-500">5-10分钟</div>
+            </div>
+          </div>
+          
+          <div class="space-y-3 ml-12">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="font-medium">动态拉伸</h4>
+                <div class="text-xs text-gray-500">手臂环绕, 躯干扭转, 髋关节转动</div>
+              </div>
+              <div class="text-indigo-600">3分钟</div>
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="font-medium">轻度有氧</h4>
+                <div class="text-xs text-gray-500">慢跑或原地高抬腿</div>
+              </div>
+              <div class="text-indigo-600">5分钟</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Main Workout Section -->
+        <div class="card p-4 mb-4">
+          <div class="flex items-center mb-4">
+            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+              <i class="fas fa-dumbbell text-indigo-600"></i>
+            </div>
+            <div>
+              <h3 class="font-semibold">主要训练</h3>
+              <div class="text-xs text-gray-500">45分钟 · 完成4个动作</div>
+            </div>
+          </div>
+          
+          <!-- Exercise 1 -->
+          <div class="border-t border-gray-100 pt-3 pb-3">
+            <div class="flex items-center">
+              <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=120&q=80" 
+                   class="w-16 h-16 rounded-lg object-cover mr-3" alt="Bench Press">
+              <div class="flex-1">
+                <div class="flex justify-between">
+                  <h4 class="font-medium">卧推</h4>
+                  <span class="text-indigo-600 text-sm">4组 x 10次</span>
+                </div>
+                <div class="text-xs text-gray-500 mt-1">目标肌群: 胸大肌, 三头肌</div>
+                <div class="mt-2">
+                  <div class="h-1.5 bg-gray-100 rounded-full w-full relative">
+                    <div class="h-1.5 bg-indigo-600 rounded-full absolute left-0 top-0" style="width: 75%"></div>
+                    <div class="flex justify-between text-xs mt-1">
+                      <span>3/4 组</span>
+                      <span class="text-indigo-600">75%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="ml-20 mt-2">
+              <button class="text-xs text-indigo-600 flex items-center">
+                <i class="fas fa-play-circle mr-1"></i> 观看视频教程
+              </button>
+            </div>
+          </div>
+          
+          <!-- Exercise 2 -->
+          <div class="border-t border-gray-100 pt-3 pb-3">
+            <div class="flex items-center">
+              <img src="https://images.unsplash.com/photo-1599058917765-a780eda07a3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=120&q=80" 
+                   class="w-16 h-16 rounded-lg object-cover mr-3" alt="Pull Ups">
+              <div class="flex-1">
+                <div class="flex justify-between">
+                  <h4 class="font-medium">引体向上</h4>
+                  <span class="text-indigo-600 text-sm">3组 x 8次</span>
+                </div>
+                <div class="text-xs text-gray-500 mt-1">目标肌群: 背阔肌, 二头肌</div>
+                <div class="mt-2">
+                  <div class="h-1.5 bg-gray-100 rounded-full w-full relative">
+                    <div class="h-1.5 bg-indigo-600 rounded-full absolute left-0 top-0" style="width: 33%"></div>
+                    <div class="flex justify-between text-xs mt-1">
+                      <span>1/3 组</span>
+                      <span class="text-indigo-600">33%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="ml-20 mt-2">
+              <button class="text-xs text-indigo-600 flex items-center">
+                <i class="fas fa-play-circle mr-1"></i> 观看视频教程
+              </button>
+            </div>
+          </div>
+          
+          <!-- Exercise 3 -->
+          <div class="border-t border-gray-100 pt-3 pb-3">
+            <div class="flex items-center">
+              <img src="https://images.unsplash.com/photo-1598971639058-fab055be7439?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=120&q=80" 
+                   class="w-16 h-16 rounded-lg object-cover mr-3" alt="Chest Flies">
+              <div class="flex-1">
+                <div class="flex justify-between">
+                  <h4 class="font-medium">飞鸟夹胸</h4>
+                  <span class="text-indigo-600 text-sm">3组 x 12次</span>
+                </div>
+                <div class="text-xs text-gray-500 mt-1">目标肌群: 胸大肌, 三角肌</div>
+                <div class="mt-2">
+                  <div class="h-1.5 bg-gray-100 rounded-full w-full relative">
+                    <div class="h-1.5 bg-gray-100 rounded-full absolute left-0 top-0" style="width: 0%"></div>
+                    <div class="flex justify-between text-xs mt-1">
+                      <span>0/3 组</span>
+                      <span class="text-indigo-600">0%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="ml-20 mt-2">
+              <button class="text-xs text-indigo-600 flex items-center">
+                <i class="fas fa-play-circle mr-1"></i> 观看视频教程
+              </button>
+            </div>
+          </div>
+          
+          <!-- Exercise 4 -->
+          <div class="border-t border-gray-100 pt-3 pb-3">
+            <div class="flex items-center">
+              <img src="https://images.unsplash.com/photo-1616803689943-5601631c7fec?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=120&q=80" 
+                   class="w-16 h-16 rounded-lg object-cover mr-3" alt="Rows">
+              <div class="flex-1">
+                <div class="flex justify-between">
+                  <h4 class="font-medium">哑铃划船</h4>
+                  <span class="text-indigo-600 text-sm">3组 x 12次</span>
+                </div>
+                <div class="text-xs text-gray-500 mt-1">目标肌群: 背阔肌, 菱形肌</div>
+                <div class="mt-2">
+                  <div class="h-1.5 bg-gray-100 rounded-full w-full relative">
+                    <div class="h-1.5 bg-gray-100 rounded-full absolute left-0 top-0" style="width: 0%"></div>
+                    <div class="flex justify-between text-xs mt-1">
+                      <span>0/3 组</span>
+                      <span class="text-indigo-600">0%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="ml-20 mt-2">
+              <button class="text-xs text-indigo-600 flex items-center">
+                <i class="fas fa-play-circle mr-1"></i> 观看视频教程
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Cooldown Section -->
+        <div class="card p-4 mb-6">
+          <div class="flex items-center mb-3">
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+              <i class="fas fa-wind text-blue-600"></i>
+            </div>
+            <div>
+              <h3 class="font-semibold">放松整理</h3>
+              <div class="text-xs text-gray-500">10分钟</div>
+            </div>
+          </div>
+          
+          <div class="space-y-3 ml-12">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="font-medium">静态拉伸</h4>
+                <div class="text-xs text-gray-500">胸部, 背部, 手臂的拉伸动作</div>
+              </div>
+              <div class="text-indigo-600">5分钟</div>
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="font-medium">深呼吸放松</h4>
+                <div class="text-xs text-gray-500">冥想与肌肉放松</div>
+              </div>
+              <div class="text-indigo-600">5分钟</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Workout Summary -->
+        <div class="bg-indigo-50 rounded-lg p-4 mb-6">
+          <h2 class="font-semibold mb-3">训练总结</h2>
+          
+          <div class="flex justify-between mb-2">
+            <span class="text-gray-700">进度</span>
+            <span class="font-medium">4/13 组完成 (30%)</span>
+          </div>
+          <div class="progress-bar mb-4">
+            <div class="progress-bar-fill" style="width: 30%"></div>
+          </div>
+          
+          <div class="grid grid-cols-3 gap-4">
+            <div class="text-center">
+              <div class="text-sm text-gray-500">预计消耗</div>
+              <div class="font-bold text-lg">350</div>
+              <div class="text-xs">卡路里</div>
+            </div>
+            
+            <div class="text-center">
+              <div class="text-sm text-gray-500">总训练时间</div>
+              <div class="font-bold text-lg">60</div>
+              <div class="text-xs">分钟</div>
+            </div>
+            
+            <div class="text-center">
+              <div class="text-sm text-gray-500">目标肌群</div>
+              <div class="font-bold text-lg">4</div>
+              <div class="text-xs">组</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex space-x-4 mb-6">
+          <button class="flex-1 btn-primary flex items-center justify-center">
+            <i class="fas fa-check-circle mr-2"></i> 完成训练
+          </button>
+          <button class="flex-1 btn-secondary flex items-center justify-center">
+            <i class="fas fa-sliders-h mr-2"></i> 调整难度
+          </button>
+        </div>
+        
+        <!-- Future Workouts Preview -->
+        <div class="mb-6">
+          <h2 class="text-lg font-semibold mb-3">本周其他训练</h2>
+          
+          <div class="space-y-3">
+            <div class="bg-white rounded-lg p-3 shadow-sm flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-running text-purple-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium">有氧训练</h3>
+                  <div class="text-xs text-gray-500">周三 · 30分钟</div>
+                </div>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+            
+            <div class="bg-white rounded-lg p-3 shadow-sm flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-dumbbell text-green-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium">下肢力量训练</h3>
+                  <div class="text-xs text-gray-500">周五 · 45分钟</div>
+                </div>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+            
+            <div class="bg-white rounded-lg p-3 shadow-sm flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-spa text-blue-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium">瑜伽/恢复训练</h3>
+                  <div class="text-xs text-gray-500">周日 · 40分钟</div>
+                </div>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="profile.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+</body>
+</html>

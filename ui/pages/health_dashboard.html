@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>健康仪表盘 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- Header -->
+      <div class="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+        <h1 class="text-xl font-bold mb-2">健康仪表盘</h1>
+        <p class="opacity-90">周二, 4月 1日</p>
+        
+        <!-- Overview Stats -->
+        <div class="mt-4 flex justify-between">
+          <div class="text-center">
+            <div class="text-2xl font-bold">72</div>
+            <div class="text-xs opacity-80">体重 (kg)</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold">22.7</div>
+            <div class="text-xs opacity-80">BMI</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold">75<span class="text-sm">bpm</span></div>
+            <div class="text-xs opacity-80">静息心率</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="p-4">
+        <!-- Health Score Card -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-2">
+            <h2 class="text-lg font-semibold text-gray-800">健康评分</h2>
+            <span class="text-xs text-gray-500">本周</span>
+          </div>
+          
+          <div class="flex items-center justify-center my-2">
+            <div class="relative w-32 h-32">
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="text-3xl font-bold text-indigo-600">87</div>
+              </div>
+              <svg class="w-full h-full" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="16" fill="none" stroke="#edf2f7" stroke-width="2"></circle>
+                <circle cx="18" cy="18" r="16" fill="none" stroke="#4f46e5" stroke-width="2" stroke-dasharray="100" stroke-dashoffset="13" transform="rotate(-90 18 18)"></circle>
+              </svg>
+            </div>
+          </div>
+          
+          <div class="text-center text-sm text-gray-600 mb-4">基于您的活动、睡眠和饮食质量</div>
+          
+          <div class="flex justify-between text-center">
+            <div>
+              <div class="h-1 bg-indigo-100 w-16 mb-1">
+                <div class="h-1 bg-indigo-600" style="width: 90%"></div>
+              </div>
+              <div class="text-xs text-gray-600">活动</div>
+              <div class="font-medium">90%</div>
+            </div>
+            <div>
+              <div class="h-1 bg-indigo-100 w-16 mb-1">
+                <div class="h-1 bg-indigo-600" style="width: 85%"></div>
+              </div>
+              <div class="text-xs text-gray-600">睡眠</div>
+              <div class="font-medium">85%</div>
+            </div>
+            <div>
+              <div class="h-1 bg-indigo-100 w-16 mb-1">
+                <div class="h-1 bg-indigo-600" style="width: 80%"></div>
+              </div>
+              <div class="text-xs text-gray-600">饮食</div>
+              <div class="font-medium">80%</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Activity Summary -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">活动概览</h2>
+            <div class="flex space-x-2">
+              <button class="chip active">日</button>
+              <button class="chip">周</button>
+              <button class="chip">月</button>
+            </div>
+          </div>
+          
+          <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center">
+              <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-walking text-blue-500"></i>
+              </div>
+              <div>
+                <div class="font-semibold">8,752</div>
+                <div class="text-xs text-gray-500">步数</div>
+              </div>
+            </div>
+            
+            <div class="flex items-center">
+              <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-route text-green-500"></i>
+              </div>
+              <div>
+                <div class="font-semibold">6.4 km</div>
+                <div class="text-xs text-gray-500">距离</div>
+              </div>
+            </div>
+            
+            <div class="flex items-center">
+              <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-fire-alt text-orange-500"></i>
+              </div>
+              <div>
+                <div class="font-semibold">437</div>
+                <div class="text-xs text-gray-500">卡路里</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Activity Chart -->
+          <div class="h-40 flex items-end space-x-2">
+            <div class="flex flex-col items-center flex-1">
+              <div class="bg-blue-200 rounded-t-sm w-full" style="height: 60%"></div>
+              <div class="mt-1 text-xs text-gray-500">一</div>
+            </div>
+            <div class="flex flex-col items-center flex-1">
+              <div class="bg-blue-200 rounded-t-sm w-full" style="height: 45%"></div>
+              <div class="mt-1 text-xs text-gray-500">二</div>
+            </div>
+            <div class="flex flex-col items-center flex-1">
+              <div class="bg-blue-200 rounded-t-sm w-full" style="height: 75%"></div>
+              <div class="mt-1 text-xs text-gray-500">三</div>
+            </div>
+            <div class="flex flex-col items-center flex-1">
+              <div class="bg-blue-200 rounded-t-sm w-full" style="height: 50%"></div>
+              <div class="mt-1 text-xs text-gray-500">四</div>
+            </div>
+            <div class="flex flex-col items-center flex-1">
+              <div class="bg-blue-200 rounded-t-sm w-full" style="height: 70%"></div>
+              <div class="mt-1 text-xs text-gray-500">五</div>
+            </div>
+            <div class="flex flex-col items-center flex-1">
+              <div class="bg-blue-200 rounded-t-sm w-full" style="height: 85%"></div>
+              <div class="mt-1 text-xs text-gray-500">六</div>
+            </div>
+            <div class="flex flex-col items-center flex-1">
+              <div class="bg-blue-600 rounded-t-sm w-full" style="height: 80%"></div>
+              <div class="mt-1 text-xs font-semibold">日</div>
+            </div>
+          </div>
+          
+          <div class="flex justify-center mt-3">
+            <div class="text-xs text-gray-500">平均每日 <span class="font-semibold">7,341</span> 步数</div>
+          </div>
+        </div>
+        
+        <!-- Sleep & Nutrition Cards -->
+        <div class="flex space-x-4 mb-4">
+          <!-- Sleep Card -->
+          <div class="card p-4 flex-1">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="font-semibold">睡眠</h2>
+              <i class="fas fa-moon text-indigo-500"></i>
+            </div>
+            
+            <div class="text-2xl font-bold">7.5<span class="text-sm font-normal text-gray-500">小时</span></div>
+            
+            <div class="mt-3 flex justify-between items-center">
+              <div class="text-xs">
+                <div class="text-gray-500">入睡</div>
+                <div class="font-medium">11:30 PM</div>
+              </div>
+              <div class="text-xs text-center">
+                <i class="fas fa-arrow-right text-gray-300"></i>
+              </div>
+              <div class="text-xs text-right">
+                <div class="text-gray-500">醒来</div>
+                <div class="font-medium">7:00 AM</div>
+              </div>
+            </div>
+            
+            <div class="mt-2">
+              <div class="flex justify-between text-xs mb-1">
+                <span>睡眠质量</span>
+                <span>很好</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill" style="width: 85%"></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Nutrition Card -->
+          <div class="card p-4 flex-1">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="font-semibold">营养</h2>
+              <i class="fas fa-utensils text-green-500"></i>
+            </div>
+            
+            <div class="text-2xl font-bold">1,286<span class="text-sm font-normal text-gray-500">卡路里</span></div>
+            
+            <div class="mt-2">
+              <div class="flex justify-between text-xs mb-1">
+                <span>蛋白质</span>
+                <span>86g</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-red-500" style="width: 80%"></div>
+              </div>
+            </div>
+            
+            <div class="mt-2">
+              <div class="flex justify-between text-xs mb-1">
+                <span>碳水</span>
+                <span>150g</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-amber-500" style="width: 60%"></div>
+              </div>
+            </div>
+            
+            <div class="mt-2">
+              <div class="flex justify-between text-xs mb-1">
+                <span>脂肪</span>
+                <span>45g</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-blue-500" style="width: 50%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Health Actions -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <a href="meal_plan.html" class="bg-indigo-50 rounded-lg p-4 flex flex-col items-center justify-center text-center">
+            <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-2">
+              <i class="fas fa-pizza-slice text-indigo-600"></i>
+            </div>
+            <div class="font-medium text-indigo-900">膳食计划</div>
+            <div class="text-xs text-gray-500 mt-1">查看您的个性化膳食计划</div>
+          </a>
+          
+          <a href="exercise_plan.html" class="bg-indigo-50 rounded-lg p-4 flex flex-col items-center justify-center text-center">
+            <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-2">
+              <i class="fas fa-dumbbell text-indigo-600"></i>
+            </div>
+            <div class="font-medium text-indigo-900">运动计划</div>
+            <div class="text-xs text-gray-500 mt-1">查看您的个性化运动计划</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="profile.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+</body>
+</html>

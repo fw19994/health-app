@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图标选择器 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/icon_selector.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <!-- 触发按钮 -->
+    <button class="btn-primary m-4" onclick="iconSelector.show()">
+      选择图标
+    </button>
+
+    <!-- 图标选择器模态框 -->
+    <div class="icon-selector-modal" id="iconSelector">
+      <!-- 标题栏 -->
+      <div class="modal-header">
+        <h2 class="modal-title">选择图标</h2>
+        <button onclick="iconSelector.hide()" class="close-button">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- 分类标签 -->
+      <div class="category-tabs" id="categoryTabs"></div>
+
+      <!-- 最近使用的图标 -->
+      <div class="section-title">最近使用</div>
+      <div class="recent-icons" id="recentIcons"></div>
+
+      <!-- 图标网格 -->
+      <div class="icon-grid" id="iconGrid"></div>
+
+      <!-- 添加自定义图标按钮 -->
+      <button class="add-custom-button" onclick="customIconManager.showAddForm()">
+        <i class="fas fa-plus-circle"></i>
+        <span>添加自定义图标</span>
+      </button>
+
+      <!-- 确认按钮 -->
+      <button class="confirm-button" onclick="iconSelector.confirmSelection()">
+        确认选择
+      </button>
+    </div>
+
+    <!-- 自定义图标表单 -->
+    <div class="custom-icon-form" id="customIconForm">
+      <div class="modal-header">
+        <h2 class="modal-title">添加自定义图标</h2>
+        <button onclick="customIconManager.hideForm()" class="close-button">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="form-group">
+        <label for="iconName">图标名称</label>
+        <input type="text" id="iconName" class="form-input" placeholder="输入图标名称">
+      </div>
+      
+      <div class="form-group">
+        <label>选择图标</label>
+        <div class="icon-selection-grid" id="iconSelectionGrid"></div>
+      </div>
+      
+      <div class="form-group">
+        <label>选择颜色</label>
+        <div class="color-selection-grid" id="colorSelectionGrid"></div>
+      </div>
+      
+      <button class="confirm-button" onclick="customIconManager.saveCustomIcon()">
+        保存自定义图标
+      </button>
+    </div>
+  </div>
+
+  <script src="../js/icon_selector.js"></script>
+  <script src="../js/custom_icon_manager.js"></script>
+</body>
+</html> 

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>财务仪表盘 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="../js/assistant.js" defer></script>
+  <style>
+    /* 直接应用于财务仪表盘头部的内联样式 */
+    .finance-header {
+      background: linear-gradient(to right, #f97316, #f59e0b);
+      color: white;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .finance-balance-card {
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-top: 1.25rem;
+    }
+    
+    .divider {
+      height: 1px;
+      background-color: rgba(255, 255, 255, 0.2);
+      margin: 0.75rem 0;
+    }
+
+    /* Switch 开关样式 */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #e5e7eb;
+      transition: .4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: .4s;
+    }
+
+    .slider.round {
+      border-radius: 24px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #f97316;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #f97316;
+    }
+
+    /* Modal 样式 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .modal.show {
+      display: block;
+    }
+
+    .modal-content {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      border-radius: 0.5rem;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    /* Number Input 样式 */
+    .number-input {
+      position: relative;
+      display: flex;
+      align-items: center;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+    }
+
+    .number-input .currency {
+      color: #6b7280;
+      margin-right: 0.5rem;
+    }
+
+    .number-input input {
+      border: none;
+      outline: none;
+      flex: 1;
+    }
+
+    .number-input .controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .number-input button {
+      color: #6b7280;
+      padding: 0.25rem;
+    }
+
+    .number-input button:hover {
+      color: #f97316;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- Header -->
+      <div class="finance-header">
+        <h1 class="text-xl font-bold mb-2">财务仪表盘</h1>
+        <p class="opacity-90">周三, 4月 2日</p>
+        
+        <!-- Balance Overview -->
+        <div class="finance-balance-card">
+          <div class="text-sm font-medium">本月余额</div>
+          <div class="text-3xl font-bold mt-1">¥5,245.75</div>
+          <div class="flex items-center mt-1">
+            <div class="flex items-center" style="color: #bbf7d0;">
+              <i class="fas fa-arrow-up mr-1 text-xs"></i>
+              <span class="text-sm font-medium">12.5% 较上月</span>
+            </div>
+          </div>
+          
+          <div class="divider"></div>
+          
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="text-xs" style="color: rgba(255, 255, 255, 0.8);">总收入</div>
+              <div class="text-lg font-semibold">¥9,580.00</div>
+            </div>
+            <div>
+              <div class="text-xs" style="color: rgba(255, 255, 255, 0.8);">总支出</div>
+              <div class="text-lg font-semibold">¥4,334.25</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="p-4">
+        <!-- Quick Actions -->
+        <div class="flex justify-between mb-4">
+          <a href="expense_tracking.html" class="w-24 h-24 bg-white rounded-lg shadow flex flex-col items-center justify-center">
+            <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mb-2">
+              <i class="fas fa-plus text-amber-600"></i>
+            </div>
+            <span class="text-sm font-medium">记一笔</span>
+          </a>
+          
+          <a href="budget_settings.html" class="w-24 h-24 bg-white rounded-lg shadow flex flex-col items-center justify-center">
+            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mb-2">
+              <i class="fas fa-sliders-h text-purple-600"></i>
+            </div>
+            <span class="text-sm font-medium text-center">预算和储蓄设置</span>
+          </a>
+          
+          <a href="assistant.html" class="w-24 h-24 bg-white rounded-lg shadow flex flex-col items-center justify-center">
+            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mb-2 relative">
+              <i class="fas fa-robot text-indigo-600"></i>
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+            </div>
+            <span class="text-sm font-medium">智能助手</span>
+          </a>
+          
+          <a href="family_finance.html" class="w-24 h-24 bg-white rounded-lg shadow flex flex-col items-center justify-center">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mb-2">
+              <i class="fas fa-users text-green-600"></i>
+            </div>
+            <span class="text-sm font-medium">家庭账本</span>
+          </a>
+        </div>
+        
+        <!-- Budget Overview Card -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">预算概览</h2>
+            <div class="text-sm text-orange-500">4月</div>
+          </div>
+          
+          <div class="flex justify-between items-center mb-3">
+            <div>
+              <div class="text-sm text-gray-500">已用</div>
+              <div class="text-xl font-bold">¥3,245.00</div>
+            </div>
+            <div class="h-8 border-l border-gray-200"></div>
+            <div>
+              <div class="text-sm text-gray-500">剩余</div>
+              <div class="text-xl font-bold text-green-600">¥1,755.00</div>
+            </div>
+            <div class="h-8 border-l border-gray-200"></div>
+            <div>
+              <div class="text-sm text-gray-500">总预算</div>
+              <div class="text-xl font-bold text-gray-700">¥5,000.00</div>
+            </div>
+          </div>
+          
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span>预算使用进度</span>
+              <span>65%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill" style="width: 65%"></div>
+            </div>
+          </div>
+          
+          <div class="mt-4 text-xs text-gray-500 flex justify-between items-center">
+            <div>距离月底还有 <span class="font-semibold">30天</span></div>
+            <a href="budget_settings.html" class="text-orange-600">调整预算和储蓄</a>
+          </div>
+        </div>
+        
+        <!-- Recent Transactions -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">近期交易</h2>
+            <a href="transaction_history.html" class="text-sm text-orange-500">查看全部</a>
+          </div>
+          
+          <div class="space-y-3">
+            <!-- Transaction 1 -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-shopping-basket text-blue-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium">超市购物</h3>
+                  <p class="text-xs text-gray-500">今天 · 沃尔玛</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-medium text-red-600">-¥157.35</div>
+                <div class="text-xs text-gray-500">食品</div>
+              </div>
+            </div>
+            
+            <!-- Transaction 2 -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-utensils text-purple-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium">午餐</h3>
+                  <p class="text-xs text-gray-500">今天 · 味千拉面</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-medium text-red-600">-¥48.00</div>
+                <div class="text-xs text-gray-500">餐饮</div>
+              </div>
+            </div>
+            
+            <!-- Transaction 3 -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-money-bill-wave text-green-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium">工资</h3>
+                  <p class="text-xs text-gray-500">昨天 · 公司名称</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-medium text-green-600">+¥9,580.00</div>
+                <div class="text-xs text-gray-500">收入</div>
+              </div>
+            </div>
+            
+            <!-- Transaction 4 -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-home text-red-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium">房租</h3>
+                  <p class="text-xs text-gray-500">3月30日 · 自动扣款</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-medium text-red-600">-¥2,800.00</div>
+                <div class="text-xs text-gray-500">住房</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Monthly Spending -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">月度支出分析</h2>
+            <div class="flex space-x-2">
+              <button class="chip">3月</button>
+              <button class="chip active">4月</button>
+            </div>
+          </div>
+          
+          <!-- Spending Chart -->
+          <div class="h-48 mb-4 flex items-end space-x-2">
+            <div class="flex flex-col items-center flex-1">
+              <div class="bg-orange-200 rounded-t-sm w-full" style="height: 30%"></div>
+              <div class="mt-1 text-xs text-gray-500">餐饮</div>
+            </div>
+            <div class="flex flex-col items-center flex-1">
+              <div class="bg-orange-200 rounded-t-sm w-full" style="height: 60%"></div>
+              <div class="mt-1 text-xs text-gray-500">购物</div>
+            </div>
+            <div class="flex flex-col items-center flex-1">
+              <div class="bg-orange-500 rounded-t-sm w-full" style="height: 95%"></div>
+              <div class="mt-1 text-xs font-semibold">住房</div>
+            </div>
+            <div class="flex flex-col items-center flex-1">
+              <div class="bg-orange-200 rounded-t-sm w-full" style="height: 40%"></div>
+              <div class="mt-1 text-xs text-gray-500">交通</div>
+            </div>
+            <div class="flex flex-col items-center flex-1">
+              <div class="bg-orange-200 rounded-t-sm w-full" style="height: 25%"></div>
+              <div class="mt-1 text-xs text-gray-500">娱乐</div>
+            </div>
+            <div class="flex flex-col items-center flex-1">
+              <div class="bg-orange-200 rounded-t-sm w-full" style="height: 15%"></div>
+              <div class="mt-1 text-xs text-gray-500">医疗</div>
+            </div>
+            <div class="flex flex-col items-center flex-1">
+              <div class="bg-orange-200 rounded-t-sm w-full" style="height: 20%"></div>
+              <div class="mt-1 text-xs text-gray-500">其他</div>
+            </div>
+          </div>
+          
+          <!-- Top Categories -->
+          <h3 class="font-medium text-sm text-gray-700 mb-3">主要支出类别</h3>
+          
+          <div class="space-y-3">
+            <!-- Category 1 -->
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="flex items-center">
+                  <i class="fas fa-home text-red-500 mr-2"></i>
+                  住房
+                </span>
+                <span>¥2,800 (56%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-red-500" style="width: 56%"></div>
+              </div>
+            </div>
+            
+            <!-- Category 2 -->
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="flex items-center">
+                  <i class="fas fa-shopping-cart text-blue-500 mr-2"></i>
+                  购物
+                </span>
+                <span>¥920 (18%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-blue-500" style="width: 18%"></div>
+              </div>
+            </div>
+            
+            <!-- Category 3 -->
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="flex items-center">
+                  <i class="fas fa-utensils text-purple-500 mr-2"></i>
+                  餐饮
+                </span>
+                <span>¥650 (13%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-purple-500" style="width: 13%"></div>
+              </div>
+            </div>
+            
+            <!-- Category 4 -->
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="flex items-center">
+                  <i class="fas fa-car text-green-500 mr-2"></i>
+                  交通
+                </span>
+                <span>¥480 (9%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-green-500" style="width: 9%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Financial Health -->
+        <div class="card p-4 mb-4">
+          <h2 class="text-lg font-semibold text-gray-800 mb-3">财务健康</h2>
+          
+          <div class="bg-green-50 rounded-lg p-3 mb-3">
+            <div class="flex items-start">
+              <div class="mt-1 mr-3 text-green-500">
+                <i class="fas fa-check-circle text-xl"></i>
+              </div>
+              <div>
+                <h3 class="font-medium">您的存款充足</h3>
+                <p class="text-sm text-gray-600">您当前的储蓄金额可以覆盖约4个月的生活开支，这是个不错的应急准备。</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-amber-50 rounded-lg p-3">
+            <div class="flex items-start">
+              <div class="mt-1 mr-3 text-amber-500">
+                <i class="fas fa-exclamation-circle text-xl"></i>
+              </div>
+              <div>
+                <h3 class="font-medium">住房开销偏高</h3>
+                <p class="text-sm text-gray-600">您的住房支出占月收入的35%，略高于建议的30%。考虑寻找更经济的选择。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Saving Goals -->
+        <div class="card p-4 mb-6">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">储蓄目标</h2>
+            <button class="text-sm text-orange-500">
+              <i class="fas fa-plus"></i> 添加
+            </button>
+          </div>
+          
+          <div class="space-y-4">
+            <!-- Goal 1 -->
+            <div class="bg-gray-50 rounded-lg p-3">
+              <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-plane text-blue-600"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">旅行基金</h3>
+                    <p class="text-xs text-gray-500">目标: ¥15,000</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="font-semibold">¥6,500</div>
+                  <div class="text-xs text-gray-500">已存43%</div>
+                </div>
+              </div>
+              
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-blue-500" style="width: 43%"></div>
+              </div>
+            </div>
+            
+            <!-- Goal 2 -->
+            <div class="bg-gray-50 rounded-lg p-3">
+              <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-laptop text-amber-600"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">新电脑</h3>
+                    <p class="text-xs text-gray-500">目标: ¥8,000</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="font-semibold">¥2,200</div>
+                  <div class="text-xs text-gray-500">已存28%</div>
+                </div>
+              </div>
+              
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-amber-500" style="width: 28%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Add bottom padding to prevent content from being hidden by tab bar -->
+        <div style="height: 100px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="profile.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+
+  <!-- Edit Savings Goal Modal -->
+  <div id="editSavingsGoalModal" class="modal">
+    <div class="modal-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold">编辑储蓄目标</h3>
+        <button class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="space-y-6">
+        <!-- Goal Icon & Name -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            目标图标
+          </label>
+          <div class="grid grid-cols-5 gap-3">
+            <button class="p-3 border border-gray-200 rounded-lg flex flex-col items-center hover:border-orange-500 hover:text-orange-500">
+              <i class="fas fa-plane text-xl"></i>
+            </button>
+            <button class="p-3 border border-gray-200 rounded-lg flex flex-col items-center hover:border-orange-500 hover:text-orange-500">
+              <i class="fas fa-car text-xl"></i>
+            </button>
+            <button class="p-3 border border-gray-200 rounded-lg flex flex-col items-center hover:border-orange-500 hover:text-orange-500">
+              <i class="fas fa-home text-xl"></i>
+            </button>
+            <button class="p-3 border border-gray-200 rounded-lg flex flex-col items-center hover:border-orange-500 hover:text-orange-500">
+              <i class="fas fa-graduation-cap text-xl"></i>
+            </button>
+            <button class="p-3 border border-gray-200 rounded-lg flex flex-col items-center hover:border-orange-500 hover:text-orange-500">
+              <i class="fas fa-plus text-xl"></i>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            目标名称
+          </label>
+          <input type="text" value="旅行基金" 
+            class="block w-full px-3 h-11 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+        </div>
+
+        <!-- Goal Amount -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            目标金额
+          </label>
+          <div class="number-input">
+            <span class="currency">¥</span>
+            <input type="number" value="15000.00" step="1000" min="0" class="text-lg">
+            <div class="controls">
+              <button><i class="fas fa-minus"></i></button>
+              <button><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Target Date -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            目标日期
+          </label>
+          <input type="date" value="2025-07-01"
+            class="block w-full px-3 h-11 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+          <p class="mt-1 text-xs text-gray-500">距离目标日期还有456天</p>
+        </div>
+
+        <!-- Monthly Savings -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            每月储蓄
+          </label>
+          <div class="number-input">
+            <span class="currency">¥</span>
+            <input type="number" value="1000.00" step="100" min="0" class="text-lg">
+            <div class="controls">
+              <button><i class="fas fa-minus"></i></button>
+              <button><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+          <p class="mt-1 text-xs text-gray-500">按此金额预计需要15个月完成目标</p>
+        </div>
+
+        <!-- Notes -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            备注
+          </label>
+          <textarea
+            class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 resize-none"
+            rows="2"
+            placeholder="添加关于这个储蓄目标的备注..."
+          >计划明年7月去日本旅行，预计费用15000元。</textarea>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-2 gap-3">
+          <button class="py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700">
+            取消
+          </button>
+          <button class="py-2.5 bg-orange-500 text-white rounded-lg font-medium">
+            保存
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 获取储蓄目标编辑弹窗
+    const editSavingsGoalModal = document.getElementById('editSavingsGoalModal');
+
+    // 为储蓄目标卡片添加点击事件
+    document.querySelectorAll('.bg-gray-50.rounded-lg.p-3').forEach(goal => {
+      goal.addEventListener('click', () => {
+        // 获取目标信息
+        const name = goal.querySelector('h3').textContent;
+        const targetAmount = goal.querySelector('p.text-xs.text-gray-500').textContent
+          .split('¥')[1].replace(',', '');
+        const currentAmount = goal.querySelector('.font-semibold').textContent
+          .replace('¥', '').replace(',', '');
+        
+        // 更新弹窗内容
+        const modal = editSavingsGoalModal;
+        modal.querySelector('input[type="text"]').value = name;
+        modal.querySelector('input[value="15000.00"]').value = targetAmount;
+        modal.querySelector('input[value="1000.00"]').value = 
+          Math.ceil(targetAmount / 15).toFixed(2); // 默认15个月完成
+        
+        // 显示弹窗
+        editSavingsGoalModal.classList.add('show');
+      });
+    });
+
+    // 为添加按钮添加点击事件
+    document.querySelector('.card:last-of-type .text-orange-500').addEventListener('click', () => {
+      // 重置表单
+      const modal = editSavingsGoalModal;
+      modal.querySelector('input[type="text"]').value = '';
+      modal.querySelector('input[type="date"]').value = '';
+      modal.querySelector('input[value="15000.00"]').value = '0.00';
+      modal.querySelector('input[value="1000.00"]').value = '0.00';
+      modal.querySelector('textarea').value = '';
+      
+      // 显示弹窗
+      editSavingsGoalModal.classList.add('show');
+    });
+
+    // 关闭弹窗
+    editSavingsGoalModal.querySelector('.fa-times').parentElement.addEventListener('click', () => {
+      editSavingsGoalModal.classList.remove('show');
+    });
+
+    editSavingsGoalModal.querySelector('.grid.grid-cols-2 button:first-child').addEventListener('click', () => {
+      editSavingsGoalModal.classList.remove('show');
+    });
+
+    // 点击弹窗外部关闭
+    editSavingsGoalModal.addEventListener('click', (e) => {
+      if (e.target === editSavingsGoalModal) {
+        editSavingsGoalModal.classList.remove('show');
+      }
+    });
+
+    // 计算目标完成时间
+    document.querySelectorAll('#editSavingsGoalModal .number-input').forEach(container => {
+      const input = container.querySelector('input');
+      input.addEventListener('change', () => {
+        const goalAmount = parseFloat(document.querySelector('#editSavingsGoalModal input[value="15000.00"]').value);
+        const monthlySaving = parseFloat(document.querySelector('#editSavingsGoalModal input[value="1000.00"]').value);
+        if (monthlySaving > 0) {
+          const months = Math.ceil(goalAmount / monthlySaving);
+          container.nextElementSibling.textContent = `按此金额预计需要${months}个月完成目标`;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>月份选择器演示</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    
+    .phone-frame {
+      max-width: 390px;
+      height: 100vh;
+      margin: 0 auto;
+      background-color: white;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 15px;
+      background-color: #f8f8f8;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .content {
+      padding: 20px;
+      height: calc(100% - 120px);
+      overflow-y: auto;
+    }
+    
+    .content::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .tab-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      background-color: #fff;
+      border-top: 1px solid #eaeaea;
+    }
+    
+    .tab-bar a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 10px;
+      color: #999;
+      text-decoration: none;
+    }
+    
+    .tab-bar a.active {
+      color: #ff9500;
+    }
+    
+    .tab-bar i {
+      font-size: 20px;
+      margin-bottom: 3px;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    /* 月份选择器样式 */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .modal-content {
+      background-color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border-radius: 12px;
+      width: 85%;
+      max-width: 320px;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <!-- 状态栏 -->
+    <div class="status-bar">
+      <span>9:41</span>
+      <div>
+        <span class="mr-1"><i class="fas fa-signal"></i></span>
+        <span class="mr-1"><i class="fas fa-wifi"></i></span>
+        <span><i class="fas fa-battery-full"></i></span>
+      </div>
+    </div>
+    
+    <!-- 主内容区 -->
+    <div class="content">
+      <div class="header">
+        <h1 class="text-xl font-bold">月份选择器</h1>
+        <button class="text-orange-500" id="showPickerBtn">
+          <span>2024年4月</span>
+          <i class="fas fa-chevron-down ml-1"></i>
+        </button>
+      </div>
+      
+      <!-- 演示内容 -->
+      <div class="bg-white rounded-xl p-4 shadow-sm mb-4">
+        <h2 class="text-lg font-medium mb-3">月份选择器示例</h2>
+        <p class="text-gray-600 mb-4">点击右上角的月份按钮打开月份选择器</p>
+        
+        <div class="border-t pt-4">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-gray-600">当前选择</span>
+            <span class="font-medium text-orange-500" id="currentMonth">2024年4月</span>
+          </div>
+          <button class="w-full py-3 bg-orange-500 text-white rounded-lg font-medium mt-4" id="showPickerBtn2">
+            打开月份选择器
+          </button>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-xl p-4 shadow-sm mb-4">
+        <h2 class="text-lg font-medium mb-3">使用说明</h2>
+        <ul class="list-disc pl-5 text-gray-600 space-y-2">
+          <li>支持按年份浏览月份</li>
+          <li>提供快速选择当月、上月、下月</li>
+          <li>显示最近选择的月份记录</li>
+          <li>可通过点击外部区域或取消按钮关闭</li>
+          <li>选择确定后会更新当前选择的月份</li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- 底部标签栏 -->
+    <div class="tab-bar">
+      <a href="#" class="active">
+        <i class="fas fa-home"></i>
+        <span>首页</span>
+      </a>
+      <a href="#">
+        <i class="fas fa-heart"></i>
+        <span>健康</span>
+      </a>
+      <a href="#">
+        <i class="fas fa-wallet"></i>
+        <span>财务</span>
+      </a>
+      <a href="#">
+        <i class="fas fa-user"></i>
+        <span>我的</span>
+      </a>
+    </div>
+    
+    <!-- 月份选择器模态框 -->
+    <div id="monthPickerModal" class="modal" style="display: none;">
+      <div class="modal-content p-4 rounded-xl" style="max-width: 320px;">
+        <!-- 月份选择器头部 -->
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold">选择月份</h3>
+          <button class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <!-- 年份导航 -->
+        <div class="flex justify-between items-center mb-4">
+          <button class="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <div class="flex space-x-2 items-center">
+            <span class="text-base font-medium">2024年</span>
+            <button class="text-gray-600 hover:bg-gray-100 p-1 rounded">
+              <i class="fas fa-chevron-down text-xs"></i>
+            </button>
+          </div>
+          <button class="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+        
+        <!-- 月份网格 -->
+        <div class="grid grid-cols-3 gap-2 mb-4">
+          <button class="month-btn py-3 rounded-lg font-medium hover:bg-gray-100">1月</button>
+          <button class="month-btn py-3 rounded-lg font-medium hover:bg-gray-100">2月</button>
+          <button class="month-btn py-3 rounded-lg font-medium hover:bg-gray-100">3月</button>
+          <button class="month-btn py-3 rounded-lg font-medium bg-orange-50 text-orange-500 border border-orange-200">4月</button>
+          <button class="month-btn py-3 rounded-lg font-medium hover:bg-gray-100">5月</button>
+          <button class="month-btn py-3 rounded-lg font-medium hover:bg-gray-100">6月</button>
+          <button class="month-btn py-3 rounded-lg font-medium hover:bg-gray-100">7月</button>
+          <button class="month-btn py-3 rounded-lg font-medium hover:bg-gray-100">8月</button>
+          <button class="month-btn py-3 rounded-lg font-medium hover:bg-gray-100">9月</button>
+          <button class="month-btn py-3 rounded-lg font-medium hover:bg-gray-100">10月</button>
+          <button class="month-btn py-3 rounded-lg font-medium hover:bg-gray-100">11月</button>
+          <button class="month-btn py-3 rounded-lg font-medium hover:bg-gray-100">12月</button>
+        </div>
+        
+        <!-- 快速选择按钮 -->
+        <div class="flex space-x-2 mb-4">
+          <button class="px-3 py-1.5 text-sm bg-gray-50 rounded-full hover:bg-gray-100">
+            今月
+          </button>
+          <button class="px-3 py-1.5 text-sm bg-gray-50 rounded-full hover:bg-gray-100">
+            上月
+          </button>
+          <button class="px-3 py-1.5 text-sm bg-gray-50 rounded-full hover:bg-gray-100">
+            下月
+          </button>
+        </div>
+        
+        <!-- 最近选择记录 -->
+        <div class="mb-4">
+          <p class="text-xs text-gray-500 mb-2">最近选择</p>
+          <div class="flex flex-wrap gap-2">
+            <button class="px-3 py-1 text-xs bg-gray-50 rounded-md hover:bg-gray-100">
+              2024年3月
+            </button>
+            <button class="px-3 py-1 text-xs bg-gray-50 rounded-md hover:bg-gray-100">
+              2024年2月
+            </button>
+            <button class="px-3 py-1 text-xs bg-gray-50 rounded-md hover:bg-gray-100">
+              2023年12月
+            </button>
+          </div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="grid grid-cols-2 gap-3">
+          <button class="py-2 border border-gray-300 rounded-lg font-medium text-gray-700">
+            取消
+          </button>
+          <button class="py-2 bg-orange-500 text-white rounded-lg font-medium">
+            确定
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 月份选择器的基本交互功能
+    document.addEventListener('DOMContentLoaded', function() {
+      // 获取所有月份按钮
+      const monthBtns = document.querySelectorAll('.month-btn');
+      const monthPickerModal = document.getElementById('monthPickerModal');
+      const showPickerBtns = document.querySelectorAll('#showPickerBtn, #showPickerBtn2');
+      const currentMonthDisplay = document.getElementById('currentMonth');
+      
+      // 显示选择器按钮
+      showPickerBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          monthPickerModal.style.display = 'flex';
+        });
+      });
+      
+      // 月份按钮点击事件
+      monthBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          // 移除之前的选中状态
+          monthBtns.forEach(b => {
+            b.classList.remove('bg-orange-50', 'text-orange-500', 'border', 'border-orange-200');
+            b.classList.add('hover:bg-gray-100');
+          });
+          
+          // 设置当前按钮为选中状态
+          btn.classList.add('bg-orange-50', 'text-orange-500', 'border', 'border-orange-200');
+          btn.classList.remove('hover:bg-gray-100');
+        });
+      });
+      
+      // 关闭按钮功能
+      document.querySelector('#monthPickerModal .fa-times').addEventListener('click', () => {
+        monthPickerModal.style.display = 'none';
+      });
+      
+      // 取消按钮功能
+      document.querySelector('#monthPickerModal button:nth-last-child(2)').addEventListener('click', () => {
+        monthPickerModal.style.display = 'none';
+      });
+      
+      // 确定按钮功能
+      document.querySelector('#monthPickerModal button:last-child').addEventListener('click', () => {
+        const selectedMonth = document.querySelector('.month-btn.bg-orange-50').textContent;
+        const yearText = document.querySelector('#monthPickerModal .font-medium').textContent;
+        const fullDate = `${yearText}${selectedMonth}`;
+        
+        // 更新显示
+        currentMonthDisplay.textContent = fullDate;
+        showPickerBtns[0].querySelector('span').textContent = fullDate;
+        
+        // 关闭模态框
+        monthPickerModal.style.display = 'none';
+      });
+      
+      // 年份导航按钮功能
+      const yearText = document.querySelector('#monthPickerModal .font-medium');
+      const prevYearBtn = document.querySelector('#monthPickerModal .fa-chevron-left').parentElement;
+      const nextYearBtn = document.querySelector('#monthPickerModal .fa-chevron-right').parentElement;
+      
+      let currentYear = 2024;
+      
+      prevYearBtn.addEventListener('click', () => {
+        currentYear--;
+        yearText.textContent = `${currentYear}年`;
+      });
+      
+      nextYearBtn.addEventListener('click', () => {
+        currentYear++;
+        yearText.textContent = `${currentYear}年`;
+      });
+      
+      // 快速选择按钮功能
+      const quickButtons = document.querySelectorAll('#monthPickerModal .px-3.py-1\\.5');
+      
+      quickButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const now = new Date();
+          let year = now.getFullYear();
+          let month = now.getMonth();
+          
+          if (btn.textContent.trim() === '上月') {
+            month--;
+            if (month < 0) {
+              month = 11;
+              year--;
+            }
+          } else if (btn.textContent.trim() === '下月') {
+            month++;
+            if (month > 11) {
+              month = 0;
+              year++;
+            }
+          }
+          
+          // 更新UI
+          yearText.textContent = `${year}年`;
+          currentYear = year;
+          
+          // 选中对应月份
+          monthBtns.forEach(b => {
+            b.classList.remove('bg-orange-50', 'text-orange-500', 'border', 'border-orange-200');
+            b.classList.add('hover:bg-gray-100');
+            
+            if (b.textContent === `${month + 1}月`) {
+              b.classList.add('bg-orange-50', 'text-orange-500', 'border', 'border-orange-200');
+              b.classList.remove('hover:bg-gray-100');
+            }
+          });
+        });
+      });
+      
+      // 点击模态框背景关闭
+      monthPickerModal.addEventListener('click', (e) => {
+        if (e.target === monthPickerModal) {
+          monthPickerModal.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

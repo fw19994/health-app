@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>首页 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="../js/assistant.js" defer></script>
+  <style>
+    .header-card {
+      border-radius: 0px 0px 30px 30px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      padding: 20px;
+      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3);
+    }
+    
+    .weather-card {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 10px 15px;
+    }
+    
+    .user-greeting {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .user-message {
+      font-size: 0.95rem;
+      opacity: 0.85;
+    }
+    
+    .date-badge {
+      font-weight: 500;
+      font-size: 0.875rem;
+      background: rgba(255, 255, 255, 0.25);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 15px;
+      display: inline-block;
+    }
+    
+    .quick-actions {
+      display: flex;
+      gap: 12px;
+      padding-top: 15px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    
+    .quick-actions::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .action-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      padding: 8px 15px;
+      border-radius: 50px;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    
+    .action-pill:active {
+      transform: scale(0.95);
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .action-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+    }
+    
+    .profile-container {
+      position: relative;
+    }
+    
+    .profile-photo {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+    }
+    
+    .profile-badge {
+      position: absolute;
+      bottom: -5px;
+      right: -5px;
+      background: #22c55e;
+      color: white;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      border: 2px solid white;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- 新设计的首页头部 -->
+      <div class="header-card">
+        <!-- 顶部行：日期和用户头像 -->
+        <div class="flex justify-between items-start mb-4">
+          <div class="date-badge">
+            <i class="fas fa-calendar-alt mr-1"></i> 2025年4月2日 星期三
+          </div>
+          <div class="profile-container">
+            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80" 
+                alt="李明" 
+                class="profile-photo shadow-lg">
+            <div class="profile-badge">
+              <i class="fas fa-crown"></i>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 问候语 -->
+        <div class="mb-5">
+          <div class="user-greeting">早安，李明</div>
+          <div class="user-message">今天有2个重要提醒，点击查看详情</div>
+        </div>
+        
+        <!-- 天气信息卡片 -->
+        <div class="weather-card flex justify-between items-center mb-4">
+          <div class="flex items-center">
+            <div class="text-4xl mr-3">
+              <i class="fas fa-cloud-sun text-yellow-300"></i>
+            </div>
+            <div>
+              <div class="font-medium text-white">北京市</div>
+              <div class="text-xs opacity-80">晴间多云，空气优</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-2xl font-medium">21°C</div>
+            <div class="text-xs opacity-80">体感温度：19°C</div>
+          </div>
+        </div>
+        
+        <!-- 快捷操作 -->
+        <div class="quick-actions">
+          <a href="expense_tracking.html" class="action-pill">
+            <div class="action-icon">
+              <i class="fas fa-plus text-white text-xs"></i>
+            </div>
+            <span>记一笔</span>
+          </a>
+          <a href="member_detail.html#budget-section" class="action-pill">
+            <div class="action-icon">
+              <i class="fas fa-wallet text-white text-xs"></i>
+            </div>
+            <span>查看预算</span>
+          </a>
+          <a href="family_finance.html" class="action-pill">
+            <div class="action-icon">
+              <i class="fas fa-users text-white text-xs"></i>
+            </div>
+            <span>家庭账本</span>
+          </a>
+          <a href="assistant.html" class="action-pill">
+            <div class="action-icon">
+              <i class="fas fa-robot text-white text-xs"></i>
+            </div>
+            <span>咨询小财</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="p-4">
+        <!-- Health Summary Card -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-lg font-semibold text-gray-800">健康概览</h2>
+            <a href="health_dashboard.html" class="text-indigo-600 text-sm">查看详情</a>
+          </div>
+          
+          <div class="flex space-x-4">
+            <div class="flex-1 bg-blue-50 rounded-xl p-3 flex flex-col items-center">
+              <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-1">
+                <i class="fas fa-heartbeat text-blue-500"></i>
+              </div>
+              <span class="text-xs text-gray-600">今日步数</span>
+              <span class="font-semibold">8,752</span>
+            </div>
+            
+            <div class="flex-1 bg-green-50 rounded-xl p-3 flex flex-col items-center">
+              <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mb-1">
+                <i class="fas fa-utensils text-green-500"></i>
+              </div>
+              <span class="text-xs text-gray-600">卡路里</span>
+              <span class="font-semibold">1,286</span>
+            </div>
+            
+            <div class="flex-1 bg-purple-50 rounded-xl p-3 flex flex-col items-center">
+              <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mb-1">
+                <i class="fas fa-moon text-purple-500"></i>
+              </div>
+              <span class="text-xs text-gray-600">睡眠</span>
+              <span class="font-semibold">7.5小时</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Financial Summary Card -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-lg font-semibold text-gray-800">财务概览</h2>
+            <a href="finance_dashboard.html" class="text-indigo-600 text-sm">查看详情</a>
+          </div>
+          
+          <div class="bg-gray-50 rounded-lg p-3 mb-3">
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-xs text-gray-500">本月花销</span>
+                <div class="text-lg font-bold">¥3,245</div>
+              </div>
+              <div class="text-right">
+                <span class="text-xs text-gray-500">剩余预算</span>
+                <div class="text-lg font-bold text-green-600">¥1,755</div>
+              </div>
+            </div>
+            
+            <div class="mt-2">
+              <div class="flex justify-between text-xs mb-1">
+                <span>已使用预算</span>
+                <span>65%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill" style="width: 65%"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex space-x-3">
+            <a href="expense_tracking.html" class="flex-1 py-2 bg-indigo-100 rounded-lg text-center text-indigo-700 font-medium text-sm">
+              <i class="fas fa-plus-circle mr-1"></i> 记一笔
+            </a>
+            <a href="family_finance.html" class="flex-1 py-2 bg-amber-100 rounded-lg text-center text-amber-700 font-medium text-sm">
+              <i class="fas fa-users mr-1"></i> 家庭账本
+            </a>
+          </div>
+        </div>
+        
+        <!-- Today's Plan Card -->
+        <div class="card p-4">
+          <h2 class="text-lg font-semibold text-gray-800 mb-3">今日计划</h2>
+          
+          <div class="space-y-3">
+            <div class="flex items-center p-2 bg-blue-50 rounded-lg">
+              <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-running text-blue-500"></i>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-medium">晨间慢跑</h3>
+                <p class="text-xs text-gray-600">6:30 AM - 30分钟</p>
+              </div>
+              <div class="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center">
+                <i class="fas fa-check text-blue-500 text-sm"></i>
+              </div>
+            </div>
+            
+            <div class="flex items-center p-2 bg-green-50 rounded-lg">
+              <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-apple-alt text-green-500"></i>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-medium">健康午餐</h3>
+                <p class="text-xs text-gray-600">12:30 PM - 地中海沙拉</p>
+              </div>
+              <div class="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center">
+                <i class="fas fa-check text-green-500 text-sm"></i>
+              </div>
+            </div>
+            
+            <div class="flex items-center p-2 bg-purple-50 rounded-lg">
+              <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-dumbbell text-purple-500"></i>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-medium">力量训练</h3>
+                <p class="text-xs text-gray-600">6:00 PM - 45分钟</p>
+              </div>
+              <div class="h-6 w-6 rounded-full border-2 border-purple-200">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="profile.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+</body>
+</html>

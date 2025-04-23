@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>家庭财务 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="../js/assistant.js" defer></script>
+  <style>
+    /* ... */
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- Header -->
+      <div class="bg-green-600 text-white p-6">
+        <div class="flex items-center mb-4">
+          <a href="finance_dashboard.html" class="mr-3">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 class="text-xl font-bold">家庭财务</h1>
+        </div>
+        
+        <div class="text-sm opacity-90 mb-4">共同管理家庭收支</div>
+        
+        <!-- Family Members -->
+        <div class="flex -space-x-2 overflow-hidden mb-4">
+          <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80" 
+               alt="李明" 
+               class="inline-block h-10 w-10 rounded-full ring-2 ring-white" />
+          <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80" 
+               alt="王丽" 
+               class="inline-block h-10 w-10 rounded-full ring-2 ring-white" />
+          <a href="family_members.html" class="inline-block h-10 w-10 rounded-full ring-2 ring-white bg-green-500 flex items-center justify-center text-xs">
+            <i class="fas fa-plus"></i>
+          </a>
+        </div>
+        
+        <!-- Month Summary -->
+        <div class="bg-white/10 rounded-lg p-4">
+          <div class="flex justify-between items-center mb-3">
+            <span class="opacity-90">4月家庭总开销</span>
+            <div class="flex items-center text-sm bg-white/20 rounded-full px-3 py-1">
+              <i class="fas fa-calendar-alt mr-1"></i>
+              <span>4月</span>
+              <i class="fas fa-chevron-down ml-1"></i>
+            </div>
+          </div>
+          
+          <div class="text-3xl font-bold mb-2">¥8,530.45</div>
+          
+          <div class="flex justify-between text-sm opacity-80">
+            <span>已用预算: 71%</span>
+            <span>剩余: ¥3,469.55</span>
+          </div>
+          
+          <div class="mt-2 bg-white/10 h-2 rounded-full overflow-hidden">
+            <div class="bg-white h-full rounded-full" style="width: 71%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="p-4">
+        <!-- Quick Actions -->
+        <div class="flex justify-between mb-4">
+          <a href="expense_tracking.html" class="flex-1 bg-white rounded-lg shadow p-3 mr-2 flex flex-col items-center justify-center">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mb-2">
+              <i class="fas fa-plus text-green-600"></i>
+            </div>
+            <span class="text-xs font-medium">添加支出</span>
+          </a>
+          
+          <a href="bill_settlement.html" class="flex-1 bg-white rounded-lg shadow p-3 mx-2 flex flex-col items-center justify-center">
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+              <i class="fas fa-exchange-alt text-blue-600"></i>
+            </div>
+            <span class="text-xs font-medium">结算分账</span>
+          </a>
+          
+          <a href="financial_report.html" class="flex-1 bg-white rounded-lg shadow p-3 ml-2 flex flex-col items-center justify-center">
+            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mb-2">
+              <i class="fas fa-chart-bar text-purple-600"></i>
+            </div>
+            <span class="text-xs font-medium">分析报告</span>
+          </a>
+        </div>
+        
+        <!-- Category Spending -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">家庭支出分类</h2>
+            <a href="#" class="text-sm text-green-600">查看全部</a>
+          </div>
+          
+          <div class="space-y-3">
+            <!-- Category 1 -->
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="flex items-center">
+                  <i class="fas fa-home text-red-500 mr-2"></i>
+                  住房
+                </span>
+                <span>¥3,800 (44.5%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-red-500" style="width: 44.5%"></div>
+              </div>
+            </div>
+            
+            <!-- Category 2 -->
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="flex items-center">
+                  <i class="fas fa-shopping-cart text-blue-500 mr-2"></i>
+                  日常购物
+                </span>
+                <span>¥1,720 (20.2%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-blue-500" style="width: 20.2%"></div>
+              </div>
+            </div>
+            
+            <!-- Category 3 -->
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="flex items-center">
+                  <i class="fas fa-utensils text-amber-500 mr-2"></i>
+                  餐饮
+                </span>
+                <span>¥1,250 (14.7%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-amber-500" style="width: 14.7%"></div>
+              </div>
+            </div>
+            
+            <!-- Category 4 -->
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="flex items-center">
+                  <i class="fas fa-car text-green-500 mr-2"></i>
+                  交通
+                </span>
+                <span>¥850 (10.0%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-green-500" style="width: 10.0%"></div>
+              </div>
+            </div>
+            
+            <!-- Category 5 -->
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="flex items-center">
+                  <i class="fas fa-heartbeat text-pink-500 mr-2"></i>
+                  医疗
+                </span>
+                <span>¥520 (6.1%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-pink-500" style="width: 6.1%"></div>
+              </div>
+            </div>
+            
+            <!-- Other Categories -->
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="flex items-center">
+                  <i class="fas fa-ellipsis-h text-gray-500 mr-2"></i>
+                  其他
+                </span>
+                <span>¥390 (4.5%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-gray-400" style="width: 4.5%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Contribution Breakdown -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">家庭成员贡献</h2>
+            <a href="member_finances.html" class="text-sm text-green-600">查看详细分析</a>
+          </div>
+          
+          <div class="space-y-4">
+            <!-- Member 1 -->
+            <div class="flex items-center">
+              <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80" 
+                   alt="李明" 
+                   class="h-12 w-12 rounded-full object-cover mr-3" />
+              <div class="flex-1">
+                <div class="flex justify-between mb-1">
+                  <span class="font-medium">李明 (我)</span>
+                  <span class="font-medium">¥4,730.25 (55.4%)</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-bar-fill bg-indigo-500" style="width: 55.4%"></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Member 2 -->
+            <div class="flex items-center">
+              <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80" 
+                   alt="王丽" 
+                   class="h-12 w-12 rounded-full object-cover mr-3" />
+              <div class="flex-1">
+                <div class="flex justify-between mb-1">
+                  <span class="font-medium">王丽 (配偶)</span>
+                  <span class="font-medium">¥3,800.20 (44.6%)</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-bar-fill bg-pink-500" style="width: 44.6%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-4 pt-4 border-t border-gray-100">
+            <div class="flex justify-between text-gray-600 text-sm">
+              <span>目前结余状态</span>
+              <span class="text-green-600 font-medium">平衡</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Recent Family Expenses -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">近期家庭支出</h2>
+            <a href="transaction_history.html" class="text-sm text-green-600">查看全部</a>
+          </div>
+          
+          <div class="space-y-4">
+            <!-- Expense 1 -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-home text-red-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium">房租</h3>
+                  <div class="text-xs text-gray-500 flex items-center">
+                    <span>李明</span>
+                    <span class="mx-1">•</span>
+                    <span>3月30日</span>
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-medium text-red-600">-¥2,800.00</div>
+                <div class="text-xs text-gray-500">住房</div>
+              </div>
+            </div>
+            
+            <!-- Expense 2 -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-shopping-basket text-blue-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium">超市采购</h3>
+                  <div class="text-xs text-gray-500 flex items-center">
+                    <span>王丽</span>
+                    <span class="mx-1">•</span>
+                    <span>3月31日</span>
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-medium text-red-600">-¥486.30</div>
+                <div class="text-xs text-gray-500">日常购物</div>
+              </div>
+            </div>
+            
+            <!-- Expense 3 -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-utensils text-amber-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium">外出聚餐</h3>
+                  <div class="text-xs text-gray-500 flex items-center">
+                    <span>李明</span>
+                    <span class="mx-1">•</span>
+                    <span>今天</span>
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-medium text-red-600">-¥358.00</div>
+                <div class="text-xs text-gray-500">餐饮</div>
+              </div>
+            </div>
+            
+            <!-- Expense 4 -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-heartbeat text-pink-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium">牙医检查</h3>
+                  <div class="text-xs text-gray-500 flex items-center">
+                    <span>王丽</span>
+                    <span class="mx-1">•</span>
+                    <span>今天</span>
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-medium text-red-600">-¥280.00</div>
+                <div class="text-xs text-gray-500">医疗</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Family Budget Planning -->
+        <div class="card p-4 mb-6">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">家庭预算规划</h2>
+            <button class="text-sm text-green-600">
+              <i class="fas fa-pencil-alt"></i> 编辑
+            </button>
+          </div>
+          
+          <div class="space-y-3">
+            <!-- Budget Item 1 -->
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="flex items-center">
+                  <i class="fas fa-home text-gray-500 mr-2"></i>
+                  住房
+                </span>
+                <span>¥3,800 / ¥4,000</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-green-500" style="width: 95%"></div>
+              </div>
+            </div>
+            
+            <!-- Budget Item 2 -->
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="flex items-center">
+                  <i class="fas fa-shopping-cart text-gray-500 mr-2"></i>
+                  日常购物
+                </span>
+                <span class="text-red-500">¥1,720 / ¥1,500</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-red-500" style="width: 100%"></div>
+              </div>
+            </div>
+            
+            <!-- Budget Item 3 -->
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="flex items-center">
+                  <i class="fas fa-utensils text-gray-500 mr-2"></i>
+                  餐饮
+                </span>
+                <span>¥1,250 / ¥1,500</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-green-500" style="width: 83%"></div>
+              </div>
+            </div>
+            
+            <!-- Budget Item 4 -->
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="flex items-center">
+                  <i class="fas fa-car text-gray-500 mr-2"></i>
+                  交通
+                </span>
+                <span>¥850 / ¥1,000</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-green-500" style="width: 85%"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-4 bg-green-50 rounded-lg p-3">
+            <div class="flex items-start">
+              <div class="mt-0.5 mr-3 text-green-500">
+                <i class="fas fa-lightbulb"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-700">建议: 日常购物支出超出预算，可以考虑减少非必需品消费或增加此类别的预算额度。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Shared Expenses and Goals -->
+        <div class="card p-4 mb-6">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">共同储蓄目标</h2>
+          
+          <div class="space-y-4">
+            <!-- Goal 1 -->
+            <div class="bg-gray-50 rounded-lg p-3">
+              <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-home text-purple-600"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">住房首付</h3>
+                    <p class="text-xs text-gray-500">目标: ¥300,000</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="font-semibold">¥124,500</div>
+                  <div class="text-xs text-gray-500">已存41.5%</div>
+                </div>
+              </div>
+              
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-purple-500" style="width: 41.5%"></div>
+              </div>
+            </div>
+            
+            <!-- Goal 2 -->
+            <div class="bg-gray-50 rounded-lg p-3">
+              <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-car text-blue-600"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">家庭用车</h3>
+                    <p class="text-xs text-gray-500">目标: ¥150,000</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="font-semibold">¥35,800</div>
+                  <div class="text-xs text-gray-500">已存23.9%</div>
+                </div>
+              </div>
+              
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-blue-500" style="width: 23.9%"></div>
+              </div>
+            </div>
+            
+            <!-- Add New Goal Button -->
+            <button class="w-full py-3 text-center text-green-600 border border-green-600 rounded-lg font-medium flex items-center justify-center">
+              <i class="fas fa-plus mr-2"></i> 添加新目标
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="profile.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+</body>
+</html>

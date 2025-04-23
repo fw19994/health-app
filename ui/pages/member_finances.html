@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>家庭成员财务分析 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .member-header {
+      background: linear-gradient(to right, #4f46e5, #7c3aed);
+      color: white;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .member-selector {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: 0.5rem 0;
+      margin-top: 1rem;
+    }
+    
+    .member-selector::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .member-item {
+      flex: 0 0 auto;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      margin-right: 0.5rem;
+      background-color: rgba(255, 255, 255, 0.15);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    
+    .member-item.active {
+      background-color: white;
+      color: #4f46e5;
+      font-weight: 500;
+    }
+    
+    .compare-toggle {
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: 2rem;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      font-size: 0.875rem;
+    }
+    
+    .compare-toggle i {
+      opacity: 0.7;
+    }
+    
+    .metric-card {
+      background-color: #f9fafb;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+    
+    .metric-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    
+    .progress-bar {
+      height: 6px;
+      background-color: #e5e7eb;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+    
+    .contribution-chart {
+      position: relative;
+      width: 100%;
+      height: 40px;
+      background-color: #f3f4f6;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+    
+    .chart-segment {
+      position: absolute;
+      height: 100%;
+      top: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">10:33</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- Header -->
+      <div class="member-header">
+        <div class="flex items-center mb-4">
+          <a href="finance_dashboard.html" class="mr-3 text-white">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 class="text-xl font-bold">家庭成员财务分析</h1>
+        </div>
+        
+        <div class="flex justify-between items-center">
+          <div class="text-sm font-medium mb-2">查看和比较每个成员的财务状况</div>
+          <div class="compare-toggle">
+            <i class="fas fa-users"></i>
+            <span class="ml-1">比较模式</span>
+          </div>
+        </div>
+        
+        <!-- Member Selector -->
+        <div class="member-selector">
+          <div class="member-item active">全家</div>
+          <div class="member-item">爸爸 (李明)</div>
+          <div class="member-item">妈妈 (王芳)</div>
+          <div class="member-item">女儿 (李小美)</div>
+          <div class="member-item">儿子 (李小强)</div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="p-4">
+        <!-- Family Overview -->
+        <h2 class="text-lg font-semibold text-gray-800 mb-3">全家财务总览</h2>
+        
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <!-- Total Income -->
+          <div class="metric-card">
+            <div class="flex items-start">
+              <div class="metric-icon bg-indigo-500 mr-3">
+                <i class="fas fa-wallet"></i>
+              </div>
+              <div>
+                <div class="text-sm text-gray-500">家庭总收入</div>
+                <div class="text-xl font-bold">¥23,600</div>
+                <div class="text-xs text-green-600 mt-1">
+                  <i class="fas fa-arrow-up mr-1"></i>+5.2% vs 上月
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Total Expenses -->
+          <div class="metric-card">
+            <div class="flex items-start">
+              <div class="metric-icon bg-red-500 mr-3">
+                <i class="fas fa-shopping-cart"></i>
+              </div>
+              <div>
+                <div class="text-sm text-gray-500">家庭总支出</div>
+                <div class="text-xl font-bold">¥15,240</div>
+                <div class="text-xs text-red-600 mt-1">
+                  <i class="fas fa-arrow-up mr-1"></i>+7.8% vs 上月
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Income Contribution -->
+        <div class="card p-4 mb-4">
+          <h3 class="font-medium mb-3">收入贡献</h3>
+          
+          <div class="contribution-chart">
+            <div class="chart-segment" style="left: 0; width: 55%; background-color: #4f46e5;"></div>
+            <div class="chart-segment" style="left: 55%; width: 40%; background-color: #7c3aed;"></div>
+            <div class="chart-segment" style="left: 95%; width: 5%; background-color: #a78bfa;"></div>
+          </div>
+          
+          <div class="space-y-2">
+            <!-- Dad -->
+            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="w-3 h-3 rounded-full bg-indigo-600 mr-2"></div>
+                <span class="text-sm">爸爸 (李明)</span>
+              </div>
+              <div class="text-sm font-medium">¥12,980 (55%)</div>
+            </div>
+            
+            <!-- Mom -->
+            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="w-3 h-3 rounded-full bg-purple-600 mr-2"></div>
+                <span class="text-sm">妈妈 (王芳)</span>
+              </div>
+              <div class="text-sm font-medium">¥9,440 (40%)</div>
+            </div>
+            
+            <!-- Children -->
+            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="w-3 h-3 rounded-full bg-purple-400 mr-2"></div>
+                <span class="text-sm">孩子们 (兼职/补贴)</span>
+              </div>
+              <div class="text-sm font-medium">¥1,180 (5%)</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Expense Contribution -->
+        <div class="card p-4 mb-4">
+          <h3 class="font-medium mb-3">支出分布</h3>
+          
+          <div class="contribution-chart">
+            <div class="chart-segment" style="left: 0; width: 30%; background-color: #ef4444;"></div>
+            <div class="chart-segment" style="left: 30%; width: 35%; background-color: #f59e0b;"></div>
+            <div class="chart-segment" style="left: 65%; width: 25%; background-color: #10b981;"></div>
+            <div class="chart-segment" style="left: 90%; width: 10%; background-color: #3b82f6;"></div>
+          </div>
+          
+          <div class="space-y-2">
+            <!-- Dad -->
+            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                <span class="text-sm">爸爸 (李明)</span>
+              </div>
+              <div class="text-sm font-medium">¥4,572 (30%)</div>
+            </div>
+            
+            <!-- Mom -->
+            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
+                <span class="text-sm">妈妈 (王芳)</span>
+              </div>
+              <div class="text-sm font-medium">¥5,334 (35%)</div>
+            </div>
+            
+            <!-- Daughter -->
+            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="w-3 h-3 rounded-full bg-emerald-500 mr-2"></div>
+                <span class="text-sm">女儿 (李小美)</span>
+              </div>
+              <div class="text-sm font-medium">¥3,810 (25%)</div>
+            </div>
+            
+            <!-- Son -->
+            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                <span class="text-sm">儿子 (李小强)</span>
+              </div>
+              <div class="text-sm font-medium">¥1,524 (10%)</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Member Details (Dad) -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-user text-indigo-600 text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold">爸爸 (李明)</h3>
+                <div class="text-sm text-gray-500">家庭主要收入来源</div>
+              </div>
+            </div>
+            <a href="member_detail.html" class="text-sm text-indigo-600">
+              查看详情 <i class="fas fa-chevron-right ml-1"></i>
+            </a>
+          </div>
+          
+          <!-- Financial Metrics -->
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <div>
+              <div class="text-sm text-gray-500 mb-1">月收入</div>
+              <div class="text-lg font-semibold">¥12,980</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500 mb-1">月支出</div>
+              <div class="text-lg font-semibold">¥4,572</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500 mb-1">储蓄率</div>
+              <div class="text-lg font-semibold text-green-600">64.8%</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500 mb-1">消费主力</div>
+              <div class="text-lg font-semibold">住房 / 交通</div>
+            </div>
+          </div>
+          
+          <!-- Financial Health -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-medium">财务健康度</span>
+              <span class="text-sm font-medium text-green-600">优秀</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-green-500" style="width: 85%"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Member Details (Mom) -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-user text-purple-600 text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold">妈妈 (王芳)</h3>
+                <div class="text-sm text-gray-500">家庭第二收入来源</div>
+              </div>
+            </div>
+            <a href="member_detail.html?member=mom" class="text-sm text-indigo-600">
+              查看详情 <i class="fas fa-chevron-right ml-1"></i>
+            </a>
+          </div>
+          
+          <!-- Financial Metrics -->
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <div>
+              <div class="text-sm text-gray-500 mb-1">月收入</div>
+              <div class="text-lg font-semibold">¥9,440</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500 mb-1">月支出</div>
+              <div class="text-lg font-semibold">¥5,334</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500 mb-1">储蓄率</div>
+              <div class="text-lg font-semibold text-green-600">43.5%</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500 mb-1">消费主力</div>
+              <div class="text-lg font-semibold">餐饮 / 购物</div>
+            </div>
+          </div>
+          
+          <!-- Financial Health -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-medium">财务健康度</span>
+              <span class="text-sm font-medium text-green-600">良好</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-green-500" style="width: 75%"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Member Details (Daughter) -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-user text-pink-600 text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold">女儿 (李小美)</h3>
+                <div class="text-sm text-gray-500">大学生 / 兼职收入</div>
+              </div>
+            </div>
+            <a href="member_detail.html?member=daughter" class="text-sm text-indigo-600">
+              查看详情 <i class="fas fa-chevron-right ml-1"></i>
+            </a>
+          </div>
+          
+          <!-- Financial Metrics -->
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <div>
+              <div class="text-sm text-gray-500 mb-1">月收入</div>
+              <div class="text-lg font-semibold">¥850</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500 mb-1">月支出</div>
+              <div class="text-lg font-semibold">¥3,810</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500 mb-1">补贴比例</div>
+              <div class="text-lg font-semibold text-amber-600">77.7%</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500 mb-1">消费主力</div>
+              <div class="text-lg font-semibold">教育 / 娱乐</div>
+            </div>
+          </div>
+          
+          <!-- Financial Health -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-medium">消费合理性</span>
+              <span class="text-sm font-medium text-yellow-600">一般</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-yellow-500" style="width: 60%"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Member Details (Son) -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-user text-blue-600 text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold">儿子 (李小强)</h3>
+                <div class="text-sm text-gray-500">高中生 / 零花钱</div>
+              </div>
+            </div>
+            <a href="member_detail.html?member=son" class="text-sm text-indigo-600">
+              查看详情 <i class="fas fa-chevron-right ml-1"></i>
+            </a>
+          </div>
+          
+          <!-- Financial Metrics -->
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <div>
+              <div class="text-sm text-gray-500 mb-1">月收入</div>
+              <div class="text-lg font-semibold">¥330</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500 mb-1">月支出</div>
+              <div class="text-lg font-semibold">¥1,524</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500 mb-1">补贴比例</div>
+              <div class="text-lg font-semibold text-amber-600">78.3%</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500 mb-1">消费主力</div>
+              <div class="text-lg font-semibold">零食 / 游戏</div>
+            </div>
+          </div>
+          
+          <!-- Financial Health -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-medium">消费合理性</span>
+              <span class="text-sm font-medium text-yellow-600">一般</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-yellow-500" style="width: 65%"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="flex space-x-4 mb-6">
+          <button class="flex-1 bg-white border border-indigo-600 text-indigo-600 rounded-lg py-3 px-4 font-medium flex items-center justify-center">
+            <i class="fas fa-download mr-2"></i> 导出分析报告
+          </button>
+          <button class="flex-1 bg-indigo-600 text-white rounded-lg py-3 px-4 font-medium flex items-center justify-center">
+            <i class="fas fa-sliders-h mr-2"></i> 设置预算分配
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="profile.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+</body>
+</html>

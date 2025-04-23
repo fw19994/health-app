@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>设置 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- Header -->
+      <div class="bg-gray-800 text-white p-6">
+        <div class="flex items-center mb-4">
+          <a href="profile.html" class="mr-3">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 class="text-xl font-bold">设置</h1>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="p-4">
+        <!-- Account Settings -->
+        <div class="mb-6">
+          <h2 class="text-sm font-medium text-gray-500 mb-2 px-2">账户设置</h2>
+          
+          <div class="card overflow-hidden">
+            <a href="#" class="flex items-center justify-between p-4 border-b border-gray-100">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-user text-blue-600"></i>
+                </div>
+                <span>个人信息</span>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </a>
+            
+            <a href="#" class="flex items-center justify-between p-4 border-b border-gray-100">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-lock text-indigo-600"></i>
+                </div>
+                <span>隐私与安全</span>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </a>
+            
+            <a href="#" class="flex items-center justify-between p-4">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-bell text-purple-600"></i>
+                </div>
+                <span>通知设置</span>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </a>
+          </div>
+        </div>
+        
+        <!-- App Settings -->
+        <div class="mb-6">
+          <h2 class="text-sm font-medium text-gray-500 mb-2 px-2">应用设置</h2>
+          
+          <div class="card overflow-hidden">
+            <!-- Health Settings -->
+            <a href="#" class="flex items-center justify-between p-4 border-b border-gray-100">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-heartbeat text-green-600"></i>
+                </div>
+                <span>健康设置</span>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </a>
+            
+            <!-- Finance Settings -->
+            <a href="#" class="flex items-center justify-between p-4 border-b border-gray-100">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-wallet text-orange-600"></i>
+                </div>
+                <span>财务设置</span>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </a>
+            
+            <!-- Units -->
+            <a href="#" class="flex items-center justify-between p-4 border-b border-gray-100">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-ruler text-amber-600"></i>
+                </div>
+                <span>单位设置</span>
+              </div>
+              <div class="text-sm text-gray-500">公制</div>
+            </a>
+            
+            <!-- Language -->
+            <a href="#" class="flex items-center justify-between p-4 border-b border-gray-100">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-language text-teal-600"></i>
+                </div>
+                <span>语言</span>
+              </div>
+              <div class="text-sm text-gray-500">简体中文</div>
+            </a>
+            
+            <!-- Dark Mode -->
+            <div class="flex items-center justify-between p-4">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-moon text-gray-600"></i>
+                </div>
+                <span>深色模式</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" value="" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Integration Settings -->
+        <div class="mb-6">
+          <h2 class="text-sm font-medium text-gray-500 mb-2 px-2">连接与集成</h2>
+          
+          <div class="card overflow-hidden">
+            <!-- Health Connect -->
+            <a href="#" class="flex items-center justify-between p-4 border-b border-gray-100">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-heart text-red-600"></i>
+                </div>
+                <div>
+                  <span class="block">健康数据</span>
+                  <span class="text-xs text-gray-500">Apple健康, 小米运动</span>
+                </div>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </a>
+            
+            <!-- Bank Connect -->
+            <a href="#" class="flex items-center justify-between p-4 border-b border-gray-100">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-university text-blue-600"></i>
+                </div>
+                <div>
+                  <span class="block">银行账户</span>
+                  <span class="text-xs text-gray-500">工商银行, 微信支付</span>
+                </div>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </a>
+            
+            <!-- Calendar -->
+            <a href="#" class="flex items-center justify-between p-4">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-calendar-alt text-green-600"></i>
+                </div>
+                <div>
+                  <span class="block">日历</span>
+                  <span class="text-xs text-gray-500">同步训练和饮食计划</span>
+                </div>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </a>
+          </div>
+        </div>
+        
+        <!-- Support and About -->
+        <div class="mb-6">
+          <h2 class="text-sm font-medium text-gray-500 mb-2 px-2">支持与关于</h2>
+          
+          <div class="card overflow-hidden">
+            <a href="#" class="flex items-center justify-between p-4 border-b border-gray-100">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-question-circle text-amber-600"></i>
+                </div>
+                <span>帮助中心</span>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </a>
+            
+            <a href="#" class="flex items-center justify-between p-4 border-b border-gray-100">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-headset text-pink-600"></i>
+                </div>
+                <span>联系客服</span>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </a>
+            
+            <a href="#" class="flex items-center justify-between p-4 border-b border-gray-100">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-star text-purple-600"></i>
+                </div>
+                <span>评价应用</span>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </a>
+            
+            <a href="#" class="flex items-center justify-between p-4">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-info-circle text-indigo-600"></i>
+                </div>
+                <div>
+                  <span class="block">关于品质生活</span>
+                  <span class="text-xs text-gray-500">版本 1.0.0</span>
+                </div>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </a>
+          </div>
+        </div>
+        
+        <!-- Logout Button -->
+        <button class="w-full p-4 bg-red-50 text-red-600 rounded-lg font-medium mb-6 flex items-center justify-center">
+          <i class="fas fa-sign-out-alt mr-2"></i> 退出登录
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="profile.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+</body>
+</html>

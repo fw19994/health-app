@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日期选择器组件演示 - 品质生活</title>
+  <link rel="stylesheet" href="css/tailwind.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .page-section {
+      margin-bottom: 24px;
+    }
+    
+    .code-block {
+      background-color: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      font-size: 14px;
+      color: #334155;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">14:30</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="p-4">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center">
+          <a href="index.html" class="mr-3">
+            <i class="fas fa-arrow-left text-gray-600"></i>
+          </a>
+          <h1 class="text-xl font-bold text-gray-800">日期选择器组件演示</h1>
+        </div>
+      </div>
+      
+      <!-- Introduction -->
+      <div class="page-section">
+        <h2 class="text-lg font-semibold mb-2">组件介绍</h2>
+        <p class="text-gray-700 mb-4">日期选择器是一个可复用的组件，可以嵌入到任何需要日期选择功能的页面中。支持年月日选择，并提供多种配置选项。</p>
+      </div>
+      
+      <!-- Example 1: Basic Usage -->
+      <div class="page-section">
+        <h2 class="text-lg font-semibold mb-2">示例 1：基本用法</h2>
+        <div class="mb-4">
+          <button id="showDatePicker1" class="px-4 py-2 bg-orange-500 text-white rounded-lg">
+            选择日期
+          </button>
+          <div class="mt-2">
+            已选日期：<span id="selectedDate1">未选择</span>
+          </div>
+        </div>
+        <div id="datePickerContainer1" style="display: none;"></div>
+        <div class="code-block">
+// HTML:
+&lt;div id="datePickerContainer1"&gt;&lt;/div&gt;
+
+// JavaScript:
+const datePicker1 = new DatePicker({
+  containerId: 'datePickerContainer1',
+  onDateSelect: (date) => {
+    document.getElementById('selectedDate1').textContent = 
+      `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+    datePicker1.hide();
+  }
+});
+
+document.getElementById('showDatePicker1').addEventListener('click', () => {
+  datePicker1.show();
+});
+        </div>
+      </div>
+      
+      <!-- Example 2: Custom Configuration -->
+      <div class="page-section">
+        <h2 class="text-lg font-semibold mb-2">示例 2：自定义配置</h2>
+        <div class="mb-4">
+          <button id="showDatePicker2" class="px-4 py-2 bg-blue-500 text-white rounded-lg">
+            选择未来日期
+          </button>
+          <div class="mt-2">
+            已选日期：<span id="selectedDate2">未选择</span>
+          </div>
+        </div>
+        <div id="datePickerContainer2" style="display: none;"></div>
+        <div class="code-block">
+// HTML:
+&lt;div id="datePickerContainer2"&gt;&lt;/div&gt;
+
+// JavaScript:
+const datePicker2 = new DatePicker({
+  containerId: 'datePickerContainer2',
+  initialDate: new Date(2025, 5, 15), // 2025年6月15日
+  startYear: 2024,
+  endYear: 2030,
+  onDateSelect: (date) => {
+    document.getElementById('selectedDate2').textContent = 
+      `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+    datePicker2.hide();
+  }
+});
+
+document.getElementById('showDatePicker2').addEventListener('click', () => {
+  datePicker2.show();
+});
+        </div>
+      </div>
+      
+      <!-- API Documentation -->
+      <div class="page-section">
+        <h2 class="text-lg font-semibold mb-2">API 文档</h2>
+        <h3 class="font-medium mb-1 text-gray-800">构造函数选项</h3>
+        <ul class="list-disc pl-6 mb-4 text-gray-700">
+          <li><code>containerId</code>: 容器元素ID，默认为 'datePicker'</li>
+          <li><code>onDateSelect</code>: 日期选择回调函数</li>
+          <li><code>initialDate</code>: 初始日期，默认为当前日期</li>
+          <li><code>startYear</code>: 起始年份，默认为当前年份减5年</li>
+          <li><code>endYear</code>: 结束年份，默认为当前年份加5年</li>
+        </ul>
+        
+        <h3 class="font-medium mb-1 text-gray-800">方法</h3>
+        <ul class="list-disc pl-6 text-gray-700">
+          <li><code>show()</code>: 显示日期选择器</li>
+          <li><code>hide()</code>: 隐藏日期选择器</li>
+          <li><code>getDate()</code>: 获取选中的日期</li>
+          <li><code>setDate(date)</code>: 设置日期</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="app-footer">
+    <div class="nav-bar">
+      <a href="index.html" class="nav-item">
+        <i class="fas fa-home"></i>
+        <span>首页</span>
+      </a>
+      <a href="#" class="nav-item active">
+        <i class="fas fa-calendar"></i>
+        <span>组件</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fas fa-user"></i>
+        <span>我的</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/components/datePicker.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 示例 1：基本用法
+      const datePicker1 = new DatePicker({
+        containerId: 'datePickerContainer1',
+        onDateSelect: (date) => {
+          document.getElementById('selectedDate1').textContent = 
+            `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+          datePicker1.hide();
+        }
+      });
+
+      document.getElementById('showDatePicker1').addEventListener('click', () => {
+        datePicker1.show();
+      });
+      
+      // 示例 2：自定义配置
+      const datePicker2 = new DatePicker({
+        containerId: 'datePickerContainer2',
+        initialDate: new Date(2025, 5, 15), // 2025年6月15日
+        startYear: 2024,
+        endYear: 2030,
+        onDateSelect: (date) => {
+          document.getElementById('selectedDate2').textContent = 
+            `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+          datePicker2.hide();
+        }
+      });
+
+      document.getElementById('showDatePicker2').addEventListener('click', () => {
+        datePicker2.show();
+      });
+    });
+  </script>
+</body>
+</html> 

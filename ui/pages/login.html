@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 - 悦管家</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      overflow-x: hidden;
+    }
+    
+    /* 霓虹色彩动态背景 - 增强版 */
+    .neon-background {
+      background: linear-gradient(-45deg, #0ea5e9, #10b981, #8b5cf6, #ec4899, #f59e0b);
+      background-size: 400% 400%;
+      animation: gradient-shift 12s ease infinite;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* 背景光斑效果 */
+    .neon-background::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 30%);
+      animation: rotate-background 25s linear infinite;
+      pointer-events: none;
+    }
+    
+    @keyframes rotate-background {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* 闪光星星效果 */
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      filter: blur(1px);
+      opacity: 0;
+      animation: twinkle 6s infinite;
+    }
+    
+    @keyframes twinkle {
+      0% { opacity: 0; }
+      50% { opacity: 0.8; }
+      100% { opacity: 0; }
+    }
+    
+    @keyframes gradient-shift {
+      0% { background-position: 0% 25%; }
+      25% { background-position: 50% 50%; }
+      50% { background-position: 100% 75%; }
+      75% { background-position: 50% 50%; }
+      100% { background-position: 0% 25%; }
+    }
+    
+    /* 新升级动态波浪背景 */
+    .wave-container {
+      position: absolute;
+      width: 100%;
+      bottom: 0;
+      left: 0;
+      height: 40vh;
+      overflow: hidden;
+      z-index: 1;
+      mix-blend-mode: soft-light;
+    }
+    
+    .wave {
+      position: absolute;
+      width: 200%;
+      height: 100%;
+      background-repeat: repeat-x;
+      left: 0;
+      bottom: 0;
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+    }
+    
+    .wave-1 {
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' fill-opacity='0.3' d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z'%3E%3C/path%3E%3C/svg%3E");
+      background-size: 1200px 100%;
+      animation: wave-animation-1 15s linear infinite;
+      opacity: 0.8;
+    }
+    
+    .wave-2 {
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' fill-opacity='0.4' d='M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z'%3E%3C/path%3E%3C/svg%3E");
+      background-size: 1200px 100%;
+      animation: wave-animation-2 18s linear infinite;
+      opacity: 0.6;
+    }
+    
+    .wave-3 {
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' fill-opacity='0.2' d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' opacity='.25'%3E%3C/path%3E%3C/svg%3E");
+      background-size: 1200px 100%;
+      animation: wave-animation-3 20s linear infinite;
+      opacity: 0.4;
+      bottom: 10px;
+    }
+    
+    @keyframes wave-animation-1 {
+      0% { transform: translateX(0) translateY(0); }
+      50% { transform: translateX(-25%) translateY(5px); }
+      100% { transform: translateX(-50%) translateY(0); }
+    }
+    
+    @keyframes wave-animation-2 {
+      0% { transform: translateX(0) translateY(0); }
+      50% { transform: translateX(-25%) translateY(-5px); }
+      100% { transform: translateX(-50%) translateY(0); }
+    }
+    
+    @keyframes wave-animation-3 {
+      0% { transform: translateX(0) translateY(0); }
+      50% { transform: translateX(-25%) translateY(3px); }
+      100% { transform: translateX(-50%) translateY(0); }
+    }
+    
+    @keyframes wave-animation {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    
+    /* 气泡浮动动画元素 - 新升级版 */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 0;
+    }
+    
+    .bubble-1 {
+      width: 100px;
+      height: 100px;
+      top: 15%;
+      left: 8%;
+      animation: float-1 12s ease-in-out infinite;
+    }
+    
+    .bubble-2 {
+      width: 60px;
+      height: 60px;
+      top: 30%;
+      right: 12%;
+      animation: float-2 9s ease-in-out infinite;
+    }
+    
+    .bubble-3 {
+      width: 80px;
+      height: 80px;
+      bottom: 35%;
+      left: 5%;
+      animation: float-3 15s ease-in-out infinite;
+    }
+    
+    .bubble-4 {
+      width: 140px;
+      height: 140px;
+      bottom: 45%;
+      right: 3%;
+      animation: float-4 18s ease-in-out infinite;
+    }
+    
+    .bubble-5 {
+      width: 40px;
+      height: 40px;
+      top: 50%;
+      left: 20%;
+      animation: float-5 10s ease-in-out infinite;
+    }
+    
+    .bubble-6 {
+      width: 70px;
+      height: 70px;
+      top: 60%;
+      right: 25%;
+      animation: float-6 14s ease-in-out infinite;
+    }
+    
+    @keyframes float-1 {
+      0% { transform: translateY(0) translateX(0) rotate(0deg); }
+      50% { transform: translateY(-30px) translateX(15px) rotate(10deg); }
+      100% { transform: translateY(0) translateX(0) rotate(0deg); }
+    }
+    
+    @keyframes float-2 {
+      0% { transform: translateY(0) translateX(0) rotate(0deg); }
+      33% { transform: translateY(-25px) translateX(-10px) rotate(-8deg); }
+      66% { transform: translateY(10px) translateX(15px) rotate(8deg); }
+      100% { transform: translateY(0) translateX(0) rotate(0deg); }
+    }
+    
+    @keyframes float-3 {
+      0% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
+      50% { transform: translateY(-40px) translateX(20px) rotate(15deg) scale(1.05); }
+      100% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
+    }
+    
+    @keyframes float-4 {
+      0% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
+      33% { transform: translateY(30px) translateX(-15px) rotate(-5deg) scale(0.95); }
+      66% { transform: translateY(-15px) translateX(10px) rotate(10deg) scale(1.05); }
+      100% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
+    }
+    
+    @keyframes float-5 {
+      0% { transform: translateY(0) translateX(0) rotate(0deg); }
+      50% { transform: translateY(25px) translateX(-10px) rotate(-10deg); }
+      100% { transform: translateY(0) translateX(0) rotate(0deg); }
+    }
+    
+    @keyframes float-6 {
+      0% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
+      50% { transform: translateY(-20px) translateX(-20px) rotate(8deg) scale(1.1); }
+      100% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
+    }
+    
+    /* 现代玻瓷卡设计 */
+    .neomorphic-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      border-radius: 30px;
+      box-shadow: 
+        20px 20px 60px rgba(0, 0, 0, 0.15),
+        -20px -20px 60px rgba(255, 255, 255, 0.1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+        0 0 15px rgba(255, 255, 255, 0.5);
+      padding: 2.8rem;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+      z-index: 10;
+    }
+    
+    /* 卡片内部光效 */
+    .neomorphic-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, transparent 60%);
+      opacity: 0.2;
+      transform: rotate(30deg);
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    .neomorphic-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 
+        30px 30px 80px rgba(0, 0, 0, 0.2),
+        -30px -30px 80px rgba(255, 255, 255, 0.1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.8),
+        0 0 30px rgba(255, 255, 255, 0.6);
+    }
+    
+    /* 卡片边缘彩虹效果 */
+    .neomorphic-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border-radius: 30px;
+      padding: 2px;
+      background: linear-gradient(140deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.1));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+    
+    /* 现代输入框设计 */
+    .modern-input {
+      background: rgba(255, 255, 255, 0.5);
+      border: 2px solid transparent;
+      border-radius: 20px;
+      padding: 16px 20px;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .modern-input:focus-within {
+      border-color: #10b981;
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+      transform: scale(1.02);
+    }
+    
+    /* 创意按钮效果 */
+    .neon-button {
+      background: #10b981;
+      border-radius: 25px;
+      color: white;
+      font-weight: bold;
+      padding: 16px 25px;
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+      z-index: 1;
+      letter-spacing: 1px;
+    }
+    
+    .neon-button:hover {
+      transform: translateY(-5px) scale(1.03);
+      box-shadow: 0 15px 30px rgba(16, 185, 129, 0.6);
+    }
+    
+    .neon-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transform: translateX(-100%);
+      transition: 0.6s;
+      z-index: -1;
+    }
+    
+    .neon-button:hover::before {
+      transform: translateX(100%);
+    }
+    
+    /* 社交媒体按钮 */
+    .social-icon {
+      width: 65px;
+      height: 65px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .social-icon:hover {
+      transform: translateY(-8px) rotate(10deg);
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* 霓虹效果 */
+    .neon-text {
+      color: #fff;
+      text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #10b981, 0 0 20px #10b981;
+      font-weight: 700;
+    }
+    
+    .neon-border {
+      position: relative;
+    }
+    
+    .neon-border::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: #10b981;
+      box-shadow: 0 0 5px #10b981, 0 0 10px #10b981;
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.4s ease;
+    }
+    
+    .neon-border:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+    
+    /* 动画效果 */
+    .bounce-in {
+      animation: bounce-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      opacity: 0;
+      transform: translateY(40px) scale(0.9);
+    }
+    
+    @keyframes bounce-in {
+      0% { opacity: 0; transform: translateY(40px) scale(0.9); }
+      50% { opacity: 1; transform: translateY(-10px) scale(1.02); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    
+    .slide-in-right {
+      animation: slide-in-right 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      opacity: 0;
+      transform: translateX(40px);
+    }
+    
+    @keyframes slide-in-right {
+      0% { opacity: 0; transform: translateX(40px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+    
+    .fade-in {
+      animation: fade-in 0.8s ease forwards;
+      opacity: 0;
+    }
+    
+    @keyframes fade-in {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    
+    .delay-100 { animation-delay: 0.1s; }
+    .delay-200 { animation-delay: 0.2s; }
+    .delay-300 { animation-delay: 0.3s; }
+    .delay-400 { animation-delay: 0.4s; }
+    .delay-500 { animation-delay: 0.5s; }
+    .delay-600 { animation-delay: 0.6s; }
+    
+    /* 自定义滚动条 */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(16, 185, 129, 0.6);
+      border-radius: 10px;
+    }
+    
+    /* 品牌 Logo 动画 */
+    .brand-logo {
+      animation: brand-pulse 3s infinite;
+      filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6));
+    }
+    
+    @keyframes brand-pulse {
+      0% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6)); }
+      50% { transform: scale(1.1); filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.8)); }
+      100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6)); }
+    }
+    
+    /* 特殊字体 */
+    .fun-font {
+      font-family: 'ZCOOL KuaiLe', cursive;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content neon-background">
+    <!-- 动态波浪效果 -->
+    <div class="wave-container">
+      <div class="wave wave-1"></div>
+      <div class="wave wave-2"></div>
+    </div>
+    
+    <!-- 装饰性气泡 -->
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+    
+    <div class="scroll-container pt-8 pb-2">
+      <!-- Content Area -->
+      <div class="px-6 pb-4 relative">
+        <!-- 卡片容器 -->
+        <div class="neomorphic-card mt-6 mb-2 bounce-in">
+          <!-- Logo and Title -->
+          <div class="flex flex-col items-center mb-8">
+            <div class="w-24 h-24 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-3xl flex items-center justify-center shadow-xl brand-logo">
+              <i class="fas fa-bolt text-5xl text-white"></i>
+            </div>
+            <h1 class="text-3xl font-bold mt-6 tracking-wide neon-text fun-font">悦管家</h1>
+            <p id="subtitle" class="text-gray-700 mt-2 text-lg font-medium">与朋友一起享受生活的每一刻</p>
+            <div class="h-1.5 w-32 bg-gradient-to-r from-emerald-400 via-blue-500 to-purple-500 rounded-full mt-3"></div>
+          </div>
+          
+          <!-- Login Form -->
+          <div class="space-y-6 fade-in delay-100">
+            <!-- Phone Input -->
+            <div class="modern-input">
+              <div class="flex items-center">
+                <i class="fas fa-mobile-alt text-emerald-500 mr-4 text-xl"></i>
+                <input 
+                  type="tel" 
+                  id="phone" 
+                  placeholder="输入手机号，开启你的旅程" 
+                  class="w-full outline-none text-gray-700 bg-transparent font-medium text-base" 
+                  maxlength="11">
+              </div>
+            </div>
+            
+            <!-- Verification Code -->
+            <div class="flex items-center space-x-4">
+              <div class="modern-input flex-grow">
+                <div class="flex items-center">
+                  <i class="fas fa-shield-alt text-emerald-500 mr-4 text-xl"></i>
+                  <input 
+                    type="number" 
+                    id="verificationCode" 
+                    placeholder="验证码" 
+                    class="w-full outline-none text-gray-700 bg-transparent font-medium text-base">
+                </div>
+              </div>
+              <button id="sendCodeButton" class="neon-button whitespace-nowrap text-sm py-3.5 px-4 font-semibold">
+                获取验证码
+              </button>
+            </div>
+            
+            <!-- Login Options -->
+            <div class="flex justify-between items-center mt-2 px-2 slide-in-right delay-200">
+              <div class="flex items-center">
+                <input type="checkbox" id="rememberMe" class="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500">
+                <label for="rememberMe" class="ml-2 text-sm text-gray-600">记住我</label>
+              </div>
+              <a href="#" class="text-sm text-emerald-500 neon-border">忘记密码?</a>
+            </div>
+            
+            <!-- Submit Button -->
+            <button id="submitButton" class="w-full neon-button py-4 text-lg mt-8 bounce-in delay-300 font-bold">
+              登录悦管家
+            </button>
+            
+            <!-- Toggle Register/Login -->
+            <div class="text-center mt-6 fade-in delay-400">
+              <p class="text-gray-700 flex justify-center items-center space-x-2">
+                <span>还没有账号？</span>
+                <span id="toggleModeButton" class="text-emerald-500 font-bold relative inline-block neon-border">
+                  加入我们
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Social Login -->
+        <div class="mt-10 bounce-in delay-500">
+          <p class="text-center text-white text-sm mb-6 font-medium"><span class="px-3 py-1 rounded-full bg-white bg-opacity-20 backdrop-blur-md">一键登录</span></p>
+          <div class="flex justify-center space-x-6">
+            <div class="social-icon">
+              <i class="fab fa-weixin text-green-500 text-2xl"></i>
+            </div>
+            <div class="social-icon">
+              <i class="fab fa-qq text-blue-400 text-2xl"></i>
+            </div>
+            <div class="social-icon">
+              <i class="fab fa-apple text-black text-2xl"></i>
+            </div>
+            <div class="social-icon">
+              <i class="fab fa-twitter text-blue-500 text-2xl"></i>
+            </div>
+          </div>
+        </div>
+        
+        <!-- App Features Preview -->
+        <div class="mt-10 px-4 fade-in delay-600">
+          <div class="flex justify-between text-center text-white text-xs">
+            <div class="flex flex-col items-center">
+              <i class="fas fa-chart-line text-xl mb-2"></i>
+              <span>财务追踪</span>
+            </div>
+            <div class="flex flex-col items-center">
+              <i class="fas fa-heartbeat text-xl mb-2"></i>
+              <span>健康管理</span>
+            </div>
+            <div class="flex flex-col items-center">
+              <i class="fas fa-users text-xl mb-2"></i>
+              <span>家庭共享</span>
+            </div>
+            <div class="flex flex-col items-center">
+              <i class="fas fa-medal text-xl mb-2"></i>
+              <span>成就解锁</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const toggleModeButton = document.getElementById('toggleModeButton');
+    const subtitle = document.getElementById('subtitle');
+    const submitButton = document.getElementById('submitButton');
+    const sendCodeButton = document.getElementById('sendCodeButton');
+    const phoneInput = document.getElementById('phone');
+    const verificationCodeInput = document.getElementById('verificationCode');
+    const rememberMeCheckbox = document.getElementById('rememberMe');
+    
+    // State
+    let isLoginMode = true;
+    let isCodeSent = false;
+    let countdownSeconds = 60;
+    let countdownInterval;
+    
+    // 初始化动画和效果
+    document.addEventListener('DOMContentLoaded', () => {
+      // 随机气泡动画效果增强
+      document.querySelectorAll('.bubble').forEach(bubble => {
+        const randomX = Math.random() * 20 - 10; // -10 to 10
+        const randomDelay = Math.random() * 2;
+        bubble.style.animationDelay = `${randomDelay}s`;
+        bubble.style.transform = `translateX(${randomX}px)`;
+      });
+      
+      // 添加波浪位置随机偏移
+      document.querySelectorAll('.wave').forEach(wave => {
+        const randomOffset = Math.random() * 50;
+        wave.style.animationDelay = `-${randomOffset}s`;
+      });
+      
+      // 自动聚焦到手机号输入框
+      setTimeout(() => {
+        phoneInput.focus();
+      }, 800);
+    });
+    
+    // 登录/注册模式切换，添加炫酷效果
+    toggleModeButton.addEventListener('click', () => {
+      // 添加点击波纹效果
+      const ripple = document.createElement('span');
+      ripple.className = 'absolute inset-0 bg-white rounded-full opacity-30 transform scale-0';
+      ripple.style.animation = 'ripple 0.6s ease-out';
+      toggleModeButton.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 700);
+      
+      isLoginMode = !isLoginMode;
+      
+      // 更新UI和文案，展现年轻人喜欢的语言风格
+      if (isLoginMode) {
+        subtitle.textContent = '与朋友一起享受生活的每一刻';
+        submitButton.textContent = '登录悦管家';
+        document.querySelectorAll('p span')[0].textContent = '还没有账号？';
+        toggleModeButton.textContent = '加入我们';
+      } else {
+        subtitle.textContent = '加入悦管家，开启品质生活';
+        submitButton.textContent = '创建我的悦管家账号';
+        document.querySelectorAll('p span')[0].textContent = '已有账号？';
+        toggleModeButton.textContent = '直接登录';
+      }
+      
+      // 卡片动画效果
+      const card = document.querySelector('.neomorphic-card');
+      card.classList.add('scale-effect');
+      setTimeout(() => card.classList.remove('scale-effect'), 500);
+    });
+    
+    // 验证码发送与倒计时，添加有趣的反馈
+    sendCodeButton.addEventListener('click', () => {
+      // 手机号验证
+      if (phoneInput.value.length !== 11 || !/^1\d{10}$/.test(phoneInput.value)) {
+        showToast('需要有效的11位手机号 📱', 'warning');
+        phoneInput.focus();
+        return;
+      }
+      
+      if (isCodeSent) return;
+      
+      // 开始倒计时
+      isCodeSent = true;
+      countdownSeconds = 60;
+      
+      // 修改按钮样式与文本
+      sendCodeButton.innerHTML = `<span class="countdown">${countdownSeconds}</span>秒`;
+      sendCodeButton.classList.add('opacity-70');
+      sendCodeButton.classList.add('pointer-events-none');
+      
+      // 显示发送成功的消息
+      const maskedPhone = phoneInput.value.replace(/(?<=^\d{3})\d{4}(?=\d{4}$)/, '****');
+      showToast(`验证码已飞速送达 ${maskedPhone} 📲`, 'success');
+      
+      // 随机生成4位验证码并自动填充（仅用于演示）
+      const demoCode = Math.floor(1000 + Math.random() * 9000);
+      setTimeout(() => {
+        verificationCodeInput.value = demoCode;
+        verificationCodeInput.dispatchEvent(new Event('input'));
+        verificationCodeInput.focus();
+      }, 1500);
+      
+      countdownInterval = setInterval(() => {
+        countdownSeconds--;
+        document.querySelector('.countdown').textContent = countdownSeconds;
+        
+        if (countdownSeconds <= 0) {
+          clearInterval(countdownInterval);
+          sendCodeButton.innerHTML = '再次获取';
+          sendCodeButton.classList.remove('opacity-70');
+          sendCodeButton.classList.remove('pointer-events-none');
+          isCodeSent = false;
+        }
+      }, 1000);
+    });
+    
+    // 输入框验证与视觉反馈
+    phoneInput.addEventListener('input', function() {
+      if (this.value.length === 11 && /^1\d{10}$/.test(this.value)) {
+        this.parentElement.parentElement.classList.add('border-emerald-500');
+        this.parentElement.parentElement.classList.add('ring-1');
+        this.parentElement.parentElement.classList.add('ring-emerald-300');
+      } else {
+        this.parentElement.parentElement.classList.remove('border-emerald-500');
+        this.parentElement.parentElement.classList.remove('ring-1');
+        this.parentElement.parentElement.classList.remove('ring-emerald-300');
+      }
+    });
+    
+    verificationCodeInput.addEventListener('input', function() {
+      if (this.value.length >= 4) {
+        this.parentElement.parentElement.classList.add('border-emerald-500');
+        this.parentElement.parentElement.classList.add('ring-1');
+        this.parentElement.parentElement.classList.add('ring-emerald-300');
+      } else {
+        this.parentElement.parentElement.classList.remove('border-emerald-500');
+        this.parentElement.parentElement.classList.remove('ring-1');
+        this.parentElement.parentElement.classList.remove('ring-emerald-300');
+      }
+    });
+    
+    // 登录/注册提交动作
+    submitButton.addEventListener('click', () => {
+      // 真实感的表单验证
+      if (phoneInput.value.length !== 11 || !/^1\d{10}$/.test(phoneInput.value)) {
+        showToast('请输入正确的手机号 📱', 'warning');
+        phoneInput.focus();
+        return;
+      }
+      
+      if (!verificationCodeInput.value || verificationCodeInput.value.length < 4) {
+        showToast('需要4位验证码 🔢', 'warning');
+        verificationCodeInput.focus();
+        return;
+      }
+      
+      // 按钮加载状态，图标旋转
+      const originalText = submitButton.textContent;
+      submitButton.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> 正在连接...';
+      submitButton.disabled = true;
+      
+      // 模拟API调用
+      setTimeout(() => {
+        // 根据登录/注册模式显示不同消息
+        if (isLoginMode) {
+          showToast('登录成功! 欢迎回来~ 🎉', 'success');
+          // 成功后跳转到首页
+          setTimeout(() => {
+            // 添加转场动画
+            document.body.classList.add('page-transition');
+            setTimeout(() => {
+              window.location.href = 'home.html';
+            }, 500);
+          }, 1000);
+        } else {
+          showConfetti(); // 显示庆祝动画
+          showToast('注册成功! 欢迎加入我们 🚀', 'success');
+          
+          // 切换到登录模式
+          isLoginMode = true;
+          subtitle.textContent = '与朋友一起享受生活的每一刻';
+          submitButton.textContent = '开启个性化生活管家';
+          toggleModeButton.textContent = '加入我们';
+          document.querySelectorAll('p span')[0].textContent = '还没有账号？';
+          
+          // 清空输入
+          setTimeout(() => {
+            phoneInput.value = '';
+            verificationCodeInput.value = '';
+            phoneInput.focus();
+          }, 1000);
+        }
+        
+        // 重置按钮状态
+        submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
+      }, 1800);
+    });
+    
+    // 社交媒体登录按钮交互
+    document.querySelectorAll('.social-icon').forEach(icon => {
+      icon.addEventListener('click', function() {
+        // 显示登录中的状态
+        const originalContent = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin text-gray-600"></i>';
+        
+        setTimeout(() => {
+          this.innerHTML = originalContent;
+          showToast('第三方登录功能即将上线，敬请期待！', 'info');
+        }, 1500);
+      });
+    });
+    
+    // 记住我复选框动画
+    if (rememberMeCheckbox) {
+      rememberMeCheckbox.addEventListener('change', function() {
+        const label = this.nextElementSibling;
+        if (this.checked) {
+          label.classList.add('text-emerald-500');
+          label.classList.add('font-medium');
+        } else {
+          label.classList.remove('text-emerald-500');
+          label.classList.remove('font-medium');
+        }
+      });
+    }
+    
+    // 消息提示功能
+    function showToast(message, type = 'info') {
+      // 移除现有提示
+      const existingToast = document.querySelector('.toast-message');
+      if (existingToast) {
+        existingToast.remove();
+      }
+      
+      // 创建提示元素
+      const toast = document.createElement('div');
+      
+      // 根据类型设置颜色
+      let bgColor = 'bg-gray-800';
+      let icon = 'info-circle';
+      
+      if (type === 'success') {
+        bgColor = 'bg-emerald-500';
+        icon = 'check-circle';
+      } else if (type === 'warning') {
+        bgColor = 'bg-amber-500';
+        icon = 'exclamation-circle';
+      } else if (type === 'error') {
+        bgColor = 'bg-red-500';
+        icon = 'times-circle';
+      }
+      
+      toast.className = `toast-message fixed top-16 left-1/2 transform -translate-x-1/2 px-5 py-3 rounded-xl text-white text-sm font-medium shadow-lg z-50 ${bgColor}`;
+      toast.style.backdropFilter = 'blur(8px)';
+      toast.style.opacity = '0';
+      toast.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+      toast.style.transform = 'translate(-50%, -20px)';
+      
+      // 添加图标
+      toast.innerHTML = `<i class="fas fa-${icon} mr-2"></i>${message}`;
+      
+      // 添加到DOM
+      document.body.appendChild(toast);
+      
+      // 淡入动画
+      setTimeout(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translate(-50%, 0)';
+      }, 10);
+      
+      // 淡出动画
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translate(-50%, -20px)';
+        
+        // 动画完成后移除
+        setTimeout(() => {
+          toast.remove();
+        }, 400);
+      }, 3000);
+    }
+    
+    // 庆祝动画（用于注册成功）
+    function showConfetti() {
+      const confettiContainer = document.createElement('div');
+      confettiContainer.className = 'fixed inset-0 pointer-events-none z-50';
+      document.body.appendChild(confettiContainer);
+      
+      // 创建50个彩色纸屑
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        const colors = ['bg-emerald-500', 'bg-blue-500', 'bg-purple-500', 'bg-yellow-400', 'bg-pink-500'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        
+        confetti.className = `absolute ${color} opacity-80`;
+        confetti.style.width = `${Math.random() * 10 + 5}px`;
+        confetti.style.height = `${Math.random() * 10 + 5}px`;
+        confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        confetti.style.left = `${Math.random() * 100}%`;
+        confetti.style.top = '-20px';
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        
+        // 设置动画
+        confetti.style.animation = `confetti-fall ${Math.random() * 3 + 2}s linear forwards`;
+        confetti.style.animationDelay = `${Math.random() * 3}s`;
+        
+        confettiContainer.appendChild(confetti);
+      }
+      
+      // 3秒后移除
+      setTimeout(() => {
+        confettiContainer.remove();
+      }, 6000);
+    }
+    
+    // 添加动画样式
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes ripple {
+        0% { transform: scale(0); opacity: 0.8; }
+        100% { transform: scale(2); opacity: 0; }
+      }
+      
+      @keyframes confetti-fall {
+        0% { transform: translateY(0) rotate(0deg); }
+        100% { transform: translateY(100vh) rotate(720deg); }
+      }
+      
+      .scale-effect {
+        animation: scale-pulse 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      
+      @keyframes scale-pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+        100% { transform: scale(1); }
+      }
+      
+      .page-transition {
+        animation: fade-out 0.5s ease forwards;
+      }
+      
+      @keyframes fade-out {
+        0% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // 显示用户当前时间
+    function updateTime() {
+      const timeDisplay = document.querySelector('.status-bar-time');
+      if (timeDisplay) {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        timeDisplay.textContent = `${hours}:${minutes}`;
+      }
+    }
+    
+    updateTime();
+    setInterval(updateTime, 60000); // 每分钟更新一次
+  </script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>编辑健康信息 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .form-input {
+      width: 100%;
+      border-radius: 0.5rem;
+      border: 1px solid #e2e8f0;
+      padding: 0.75rem;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      background-color: #f9fafb;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #4b5563;
+      margin-bottom: 0.25rem;
+    }
+    .radio-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .radio-option input[type="radio"] {
+      accent-color: #4f46e5;
+    }
+    .select-input {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.5rem center;
+      background-repeat: no-repeat;
+      background-size: 1.5em 1.5em;
+      padding-right: 2.5rem;
+    }
+    .slider-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #e5e7eb;
+      outline: none;
+      margin-top: 0.5rem;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #4f46e5;
+      cursor: pointer;
+    }
+    .checkbox-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .checkbox-option {
+      flex-basis: calc(50% - 0.5rem);
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid #e5e7eb;
+      gap: 0.5rem;
+    }
+    .checkbox-option input[type="checkbox"] {
+      accent-color: #4f46e5;
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+    .checkbox-option.selected {
+      border-color: #4f46e5;
+      background-color: rgba(79, 70, 229, 0.05);
+    }
+    .goal-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .goal-option {
+      flex-basis: calc(50% - 0.5rem);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      border: 1px solid #e5e7eb;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .goal-option.selected {
+      border-color: #4f46e5;
+      background-color: rgba(79, 70, 229, 0.05);
+    }
+    .goal-option .icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #4f46e5;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- Header -->
+      <div class="bg-indigo-600 text-white">
+        <div class="pt-6 pb-4 px-6">
+          <div class="flex items-center">
+            <a href="profile.html" class="mr-4 text-white">
+              <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="text-xl font-bold">编辑健康信息</h1>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Form -->
+      <div class="p-4">
+        <div class="card p-4 mb-4">
+          <form>
+            <!-- 身高 -->
+            <div class="mb-4">
+              <label for="height" class="form-label">身高 (CM)</label>
+              <div class="flex items-center gap-4">
+                <input type="number" id="height" name="height" class="form-input" value="178" min="100" max="220" step="1">
+                <div class="text-2xl font-medium text-gray-700">CM</div>
+              </div>
+            </div>
+            
+            <!-- 体重 -->
+            <div class="mb-4">
+              <label for="weight" class="form-label">体重 (KG)</label>
+              <div class="flex items-center gap-4">
+                <input type="number" id="weight" name="weight" class="form-input" value="72" min="30" max="200" step="0.1">
+                <div class="text-2xl font-medium text-gray-700">KG</div>
+              </div>
+            </div>
+            
+            <!-- BMI展示 -->
+            <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700 font-medium">BMI指数</span>
+                <span class="text-indigo-600 font-bold">22.7</span>
+              </div>
+              <div class="mt-2 text-sm text-gray-500">
+                您的体重指数正常，处于健康范围。
+              </div>
+            </div>
+            
+            <!-- 血型 -->
+            <div class="mb-4">
+              <label for="blood_type" class="form-label">血型</label>
+              <select id="blood_type" name="blood_type" class="form-input select-input">
+                <option value="A">A型</option>
+                <option value="B">B型</option>
+                <option value="AB">AB型</option>
+                <option value="O" selected>O型</option>
+                <option value="A+">A+型</option>
+                <option value="A-">A-型</option>
+                <option value="B+">B+型</option>
+                <option value="B-">B-型</option>
+                <option value="AB+">AB+型</option>
+                <option value="AB-">AB-型</option>
+                <option value="O+">O+型</option>
+                <option value="O-">O-型</option>
+              </select>
+            </div>
+            
+            <!-- 活动水平 -->
+            <div class="mb-4">
+              <label class="form-label">活动水平</label>
+              <div class="slider-container">
+                <div class="flex justify-between text-sm text-gray-500 mb-2">
+                  <span>久坐不动</span>
+                  <span>轻度活动</span>
+                  <span>中度活动</span>
+                  <span>高度活动</span>
+                </div>
+                <input type="range" min="1" max="4" value="3" class="slider" id="activity_level">
+              </div>
+            </div>
+            
+            <!-- 饮食偏好 -->
+            <div class="mb-4">
+              <label class="form-label">饮食偏好（可多选）</label>
+              <div class="checkbox-container">
+                <label class="checkbox-option selected">
+                  <input type="checkbox" name="diet_preference" value="balanced" checked>
+                  <span>均衡饮食</span>
+                </label>
+                <label class="checkbox-option">
+                  <input type="checkbox" name="diet_preference" value="low_fat">
+                  <span>低脂</span>
+                </label>
+                <label class="checkbox-option selected">
+                  <input type="checkbox" name="diet_preference" value="low_carb" checked>
+                  <span>低碳水</span>
+                </label>
+                <label class="checkbox-option">
+                  <input type="checkbox" name="diet_preference" value="high_protein">
+                  <span>高蛋白</span>
+                </label>
+                <label class="checkbox-option">
+                  <input type="checkbox" name="diet_preference" value="vegetarian">
+                  <span>素食</span>
+                </label>
+              </div>
+            </div>
+            
+            <!-- 健身目标 -->
+            <div class="mb-4">
+              <label class="form-label">健身目标</label>
+              <div class="goal-selector">
+                <div class="goal-option">
+                  <div class="icon"><i class="fas fa-weight-scale"></i></div>
+                  <div class="text-sm font-medium">减肥</div>
+                </div>
+                <div class="goal-option selected">
+                  <div class="icon"><i class="fas fa-heart-pulse"></i></div>
+                  <div class="text-sm font-medium">保持体形</div>
+                </div>
+                <div class="goal-option">
+                  <div class="icon"><i class="fas fa-dumbbell"></i></div>
+                  <div class="text-sm font-medium">增肌</div>
+                </div>
+                <div class="goal-option">
+                  <div class="icon"><i class="fas fa-person-running"></i></div>
+                  <div class="text-sm font-medium">提高耐力</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 慢性病 -->
+            <div class="mb-4">
+              <label class="form-label">慢性病（可多选）</label>
+              <div class="checkbox-container">
+                <label class="checkbox-option">
+                  <input type="checkbox" name="chronic_disease" value="hypertension">
+                  <span>高血压</span>
+                </label>
+                <label class="checkbox-option">
+                  <input type="checkbox" name="chronic_disease" value="diabetes">
+                  <span>糖尿病</span>
+                </label>
+                <label class="checkbox-option">
+                  <input type="checkbox" name="chronic_disease" value="heart_disease">
+                  <span>心脏病</span>
+                </label>
+                <label class="checkbox-option">
+                  <input type="checkbox" name="chronic_disease" value="hyperlipidemia">
+                  <span>高血脂</span>
+                </label>
+                <label class="checkbox-option">
+                  <input type="checkbox" name="chronic_disease" value="none" checked>
+                  <span>无</span>
+                </label>
+              </div>
+            </div>
+            
+            <!-- 过敏源 -->
+            <div class="mb-4">
+              <label for="allergies" class="form-label">过敏源</label>
+              <input type="text" id="allergies" name="allergies" class="form-input" placeholder="请输入您的过敏源，用逗号分隔" value="花粉,虾">
+              <div class="text-xs text-gray-500">如有多个过敏源，请用逗号分隔</div>
+            </div>
+            
+            <!-- 保存按钮 -->
+            <div class="flex justify-end mt-6">
+              <a href="profile.html" class="mr-3 py-2 px-4 rounded-lg border border-gray-300 text-gray-700 bg-white inline-block text-center">
+                取消
+              </a>
+              <button type="submit" class="py-2 px-6 rounded-lg bg-indigo-600 text-white font-medium">
+                保存
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

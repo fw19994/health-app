@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>预算和储蓄设置 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .budget-header {
+      background: linear-gradient(to right, #f97316, #f59e0b);
+      color: white;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .category-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .month-selector {
+      display: flex;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .month-selector::-webkit-scrollbar {
+      display: none;
+    }
+
+    .month-item {
+      flex: 0 0 auto;
+      padding: 0.5rem 1rem;
+      margin-right: 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .month-item.active {
+      background-color: white;
+      color: #f97316;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 1rem;
+      width: 91.666667%;
+      max-width: 28rem;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .number-input {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .number-input input {
+      padding-left: 2rem;
+      padding-right: 3rem;
+      width: 100%;
+      height: 2.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid #e5e7eb;
+      outline: none;
+    }
+
+    .number-input input:focus {
+      border-color: #f97316;
+      box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+    }
+
+    .number-input .currency {
+      position: absolute;
+      left: 0.75rem;
+      color: #6b7280;
+    }
+
+    .number-input .controls {
+      position: absolute;
+      right: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .number-input button {
+      color: #6b7280;
+    }
+
+    .number-input button:hover {
+      color: #f97316;
+    }
+
+    /* Switch 开关样式 */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #e5e7eb;
+      transition: .4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: .4s;
+    }
+
+    .slider.round {
+      border-radius: 24px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #f97316;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #f97316;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- Header -->
+      <div class="budget-header">
+        <div class="flex items-center mb-4">
+          <button onclick="history.back()" class="mr-3">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="text-xl font-bold">预算和储蓄设置</h1>
+        </div>
+
+        <!-- Month Selector -->
+        <div class="month-selector mb-4">
+          <div class="month-item">2025年1月</div>
+          <div class="month-item">2月</div>
+          <div class="month-item">3月</div>
+          <div class="month-item active">4月</div>
+          <div class="month-item">5月</div>
+          <div class="month-item">6月</div>
+          <div class="month-item">7月</div>
+        </div>
+        
+        <!-- Monthly Budget Overview -->
+        <div class="bg-white/10 rounded-lg p-4">
+          <div class="flex justify-between items-center mb-2">
+            <div class="text-sm opacity-90">4月预算</div>
+            <button class="text-sm bg-white/20 px-3 py-1 rounded-full">
+              编辑
+            </button>
+          </div>
+          <div class="text-3xl font-bold mb-1">¥5,000.00</div>
+          <div class="text-sm opacity-75">4月 1日 - 4月 30日</div>
+          
+          <!-- Budget Progress -->
+          <div class="mt-3">
+            <div class="flex justify-between text-sm mb-1">
+              <span>已用 ¥3,245</span>
+              <span>65%</span>
+            </div>
+            <div class="progress-bar bg-white/20">
+              <div class="progress-bar-fill bg-white" style="width: 65%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="p-4">
+        <!-- Budget Categories -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">分类预算</h2>
+            <div class="flex items-center space-x-4">
+              <button class="text-sm text-orange-500">
+                <i class="fas fa-copy"></i> 复制上月
+              </button>
+              <button class="text-sm text-orange-500">
+                <i class="fas fa-plus"></i> 添加类别
+              </button>
+            </div>
+          </div>
+          
+          <div class="space-y-4">
+            <!-- Category 1: Housing -->
+            <div class="bg-gray-50 rounded-lg p-3">
+              <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center">
+                  <div class="category-icon bg-red-100 mr-3">
+                    <i class="fas fa-home text-red-600"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">住房</h3>
+                    <p class="text-xs text-gray-500">包含房租、物业费等</p>
+                  </div>
+                </div>
+                <button class="text-gray-400">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+              </div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>已用 ¥2,800 / ¥3,000</span>
+                <span class="text-red-600">93%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-red-500" style="width: 93%"></div>
+              </div>
+              <!-- Month-over-Month Comparison -->
+              <div class="mt-2 text-xs text-gray-500 flex items-center">
+                <i class="fas fa-chart-line mr-1"></i>
+                较上月 <span class="text-red-500 ml-1">+5%</span>
+              </div>
+            </div>
+            
+            <!-- Category 2: Food -->
+            <div class="bg-gray-50 rounded-lg p-3">
+              <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center">
+                  <div class="category-icon bg-purple-100 mr-3">
+                    <i class="fas fa-utensils text-purple-600"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">餐饮</h3>
+                    <p class="text-xs text-gray-500">包含日常饮食、外卖</p>
+                  </div>
+                </div>
+                <button class="text-gray-400">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+              </div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>已用 ¥650 / ¥1,000</span>
+                <span>65%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-purple-500" style="width: 65%"></div>
+              </div>
+              <!-- Month-over-Month Comparison -->
+              <div class="mt-2 text-xs text-gray-500 flex items-center">
+                <i class="fas fa-chart-line mr-1"></i>
+                较上月 <span class="text-green-500 ml-1">-8%</span>
+              </div>
+            </div>
+            
+            <!-- Category 3: Shopping -->
+            <div class="bg-gray-50 rounded-lg p-3">
+              <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center">
+                  <div class="category-icon bg-blue-100 mr-3">
+                    <i class="fas fa-shopping-cart text-blue-600"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">购物</h3>
+                    <p class="text-xs text-gray-500">包含日用品、服装等</p>
+                  </div>
+                </div>
+                <button class="text-gray-400">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+              </div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>已用 ¥450 / ¥800</span>
+                <span>56%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-blue-500" style="width: 56%"></div>
+              </div>
+              <!-- Month-over-Month Comparison -->
+              <div class="mt-2 text-xs text-gray-500 flex items-center">
+                <i class="fas fa-chart-line mr-1"></i>
+                较上月 <span class="text-gray-600 ml-1">持平</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Savings Goals -->
+        <div class="card p-4 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">储蓄目标</h2>
+            <button class="text-sm text-orange-500">
+              <i class="fas fa-plus"></i> 添加目标
+            </button>
+          </div>
+          
+          <div class="space-y-4">
+            <!-- Savings Goal 1 -->
+            <div class="savings-goal bg-gray-50 rounded-lg p-3 cursor-pointer hover:bg-gray-100">
+              <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center">
+                  <div class="category-icon bg-blue-100 mr-3">
+                    <i class="fas fa-plane text-blue-600"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">旅行基金</h3>
+                    <p class="text-xs text-gray-500">目标日期：2025年7月</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="font-medium">¥8,500 / ¥15,000</div>
+                  <div class="text-xs text-gray-500">每月储蓄 ¥1,000</div>
+                </div>
+              </div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>已完成</span>
+                <span class="text-blue-600">57%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-blue-500" style="width: 57%"></div>
+              </div>
+            </div>
+
+            <!-- Savings Goal 2 -->
+            <div class="savings-goal bg-gray-50 rounded-lg p-3 cursor-pointer hover:bg-gray-100">
+              <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center">
+                  <div class="category-icon bg-green-100 mr-3">
+                    <i class="fas fa-graduation-cap text-green-600"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">教育基金</h3>
+                    <p class="text-xs text-gray-500">目标日期：2026年9月</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="font-medium">¥12,000 / ¥50,000</div>
+                  <div class="text-xs text-gray-500">每月储蓄 ¥2,000</div>
+                </div>
+              </div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>已完成</span>
+                <span class="text-green-600">24%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill bg-green-500" style="width: 24%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Budget Tips -->
+        <div class="card p-4 mb-6">
+          <div class="flex items-start">
+            <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center mr-3 mt-1">
+              <i class="fas fa-lightbulb text-amber-600"></i>
+            </div>
+            <div>
+              <h3 class="font-medium mb-2">本月预算建议</h3>
+              <ul class="text-sm text-gray-600 space-y-2">
+                <li>• 住房支出占比过高，建议控制在预算的30%以内</li>
+                <li>• 餐饮支出趋势向好，继续保持</li>
+                <li>• 考虑为突发支出预留10-20%的机动资金</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Add bottom padding to prevent content from being hidden by tab bar -->
+        <div style="height: 100px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="profile.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+
+  <!-- Edit Total Budget Modal -->
+  <div id="editTotalBudgetModal" class="modal">
+    <div class="modal-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold">编辑4月预算</h3>
+        <button class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            总预算金额
+          </label>
+          <div class="number-input">
+            <span class="currency">¥</span>
+            <input type="number" value="5000.00" step="100" min="0" class="text-lg">
+            <div class="controls">
+              <button><i class="fas fa-minus"></i></button>
+              <button><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            预算周期
+          </label>
+          <select class="block w-full px-3 h-11 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+            <option value="current">仅限本月 (4月)</option>
+            <option value="future">本月及以后</option>
+            <option value="all">所有月份</option>
+          </select>
+        </div>
+
+        <div class="pt-4 border-t">
+          <div class="flex justify-between items-center text-sm mb-2">
+            <span class="text-gray-600">建议预算范围</span>
+            <span class="text-orange-600">¥4,500 - ¥6,000</span>
+          </div>
+          <p class="text-xs text-gray-500">基于您过去3个月的支出情况计算</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <button class="py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700">
+            取消
+          </button>
+          <button class="py-2.5 bg-orange-500 text-white rounded-lg font-medium">
+            保存
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Category Budget Modal -->
+  <div id="editCategoryBudgetModal" class="modal">
+    <div class="modal-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold">编辑类别预算</h3>
+        <button class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="space-y-6">
+        <div class="flex items-center">
+          <div class="category-icon bg-red-100 mr-3">
+            <i class="fas fa-home text-red-600"></i>
+          </div>
+          <div>
+            <h3 class="font-medium">住房</h3>
+            <p class="text-xs text-gray-500">包含房租、物业费等</p>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            类别预算
+          </label>
+          <div class="number-input">
+            <span class="currency">¥</span>
+            <input type="number" value="3000.00" step="100" min="0" class="text-lg">
+            <div class="controls">
+              <button><i class="fas fa-minus"></i></button>
+              <button><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            预算周期
+          </label>
+          <select class="block w-full px-3 h-11 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+            <option value="current">仅限本月 (4月)</option>
+            <option value="future">本月及以后</option>
+            <option value="all">所有月份</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            超支提醒
+          </label>
+          <select class="block w-full px-3 h-11 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+            <option value="80">使用80%时提醒</option>
+            <option value="90">使用90%时提醒</option>
+            <option value="100">预算用完时提醒</option>
+            <option value="none">不提醒</option>
+          </select>
+        </div>
+
+        <div class="pt-4 border-t">
+          <div class="flex justify-between items-center text-sm mb-2">
+            <span class="text-gray-600">近3月平均支出</span>
+            <span class="text-orange-600">¥2,850</span>
+          </div>
+          <div class="flex justify-between items-center text-sm mb-2">
+            <span class="text-gray-600">建议预算范围</span>
+            <span class="text-orange-600">¥2,700 - ¥3,200</span>
+          </div>
+          <p class="text-xs text-gray-500">根据历史支出和总预算占比计算得出</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <button class="py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700">
+            取消
+          </button>
+          <button class="py-2.5 bg-orange-500 text-white rounded-lg font-medium">
+            保存
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Category Modal -->
+  <div id="addCategoryModal" class="modal">
+    <div class="modal-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold">添加预算类别</h3>
+        <button class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            选择类别
+          </label>
+          <div class="grid grid-cols-4 gap-3">
+            <button class="p-3 border border-gray-200 rounded-lg flex flex-col items-center hover:border-orange-500 hover:text-orange-500">
+              <i class="fas fa-car text-xl mb-1"></i>
+              <span class="text-xs">交通</span>
+            </button>
+            <button class="p-3 border border-gray-200 rounded-lg flex flex-col items-center hover:border-orange-500 hover:text-orange-500">
+              <i class="fas fa-gamepad text-xl mb-1"></i>
+              <span class="text-xs">娱乐</span>
+            </button>
+            <button class="p-3 border border-gray-200 rounded-lg flex flex-col items-center hover:border-orange-500 hover:text-orange-500">
+              <i class="fas fa-graduation-cap text-xl mb-1"></i>
+              <span class="text-xs">教育</span>
+            </button>
+            <button class="p-3 border border-gray-200 rounded-lg flex flex-col items-center hover:border-orange-500 hover:text-orange-500">
+              <i class="fas fa-plus text-xl mb-1"></i>
+              <span class="text-xs">更多</span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            预算金额
+          </label>
+          <div class="number-input">
+            <span class="currency">¥</span>
+            <input type="number" value="500.00" step="100" min="0" class="text-lg">
+            <div class="controls">
+              <button><i class="fas fa-minus"></i></button>
+              <button><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            预算周期
+          </label>
+          <select class="block w-full px-3 h-11 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+            <option value="current">仅限本月 (4月)</option>
+            <option value="future">本月及以后</option>
+            <option value="all">所有月份</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            超支提醒
+          </label>
+          <select class="block w-full px-3 h-11 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+            <option value="80">使用80%时提醒</option>
+            <option value="90">使用90%时提醒</option>
+            <option value="100">预算用完时提醒</option>
+            <option value="none">不提醒</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <button class="py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700">
+            取消
+          </button>
+          <button class="py-2.5 bg-orange-500 text-white rounded-lg font-medium">
+            添加
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Savings Goal Modal -->
+  <div id="editSavingsGoalModal" class="modal">
+    <div class="modal-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold">编辑储蓄目标</h3>
+        <button class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="space-y-6">
+        <!-- Goal Icon & Name -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            目标图标
+          </label>
+          <div class="grid grid-cols-5 gap-3">
+            <button class="p-3 border border-gray-200 rounded-lg flex flex-col items-center hover:border-orange-500 hover:text-orange-500">
+              <i class="fas fa-plane text-xl"></i>
+            </button>
+            <button class="p-3 border border-gray-200 rounded-lg flex flex-col items-center hover:border-orange-500 hover:text-orange-500">
+              <i class="fas fa-car text-xl"></i>
+            </button>
+            <button class="p-3 border border-gray-200 rounded-lg flex flex-col items-center hover:border-orange-500 hover:text-orange-500">
+              <i class="fas fa-home text-xl"></i>
+            </button>
+            <button class="p-3 border border-gray-200 rounded-lg flex flex-col items-center hover:border-orange-500 hover:text-orange-500">
+              <i class="fas fa-graduation-cap text-xl"></i>
+            </button>
+            <button class="p-3 border border-gray-200 rounded-lg flex flex-col items-center hover:border-orange-500 hover:text-orange-500">
+              <i class="fas fa-plus text-xl"></i>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            目标名称
+          </label>
+          <input type="text" value="旅行基金" 
+            class="block w-full px-3 h-11 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+        </div>
+
+        <!-- Goal Amount -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            目标金额
+          </label>
+          <div class="number-input">
+            <span class="currency">¥</span>
+            <input type="number" value="15000.00" step="1000" min="0" class="text-lg">
+            <div class="controls">
+              <button><i class="fas fa-minus"></i></button>
+              <button><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monthly Savings -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            每月储蓄
+          </label>
+          <div class="number-input">
+            <span class="currency">¥</span>
+            <input type="number" value="1000.00" step="100" min="0" class="text-lg">
+            <div class="controls">
+              <button><i class="fas fa-minus"></i></button>
+              <button><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+          <p class="mt-1 text-xs text-gray-500">按此金额预计需要15个月完成目标</p>
+        </div>
+
+        <!-- Target Date -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            目标日期
+          </label>
+          <input type="date" value="2025-07-01"
+            class="block w-full px-3 h-11 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+          <p class="mt-1 text-xs text-gray-500">距离目标日期还有456天</p>
+        </div>
+
+        <!-- Priority -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            优先级
+          </label>
+          <select class="block w-full px-3 h-11 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+            <option value="high">高 - 优先储蓄</option>
+            <option value="medium" selected>中 - 平衡储蓄</option>
+            <option value="low">低 - 有余则存</option>
+          </select>
+        </div>
+
+        <!-- Reminders -->
+        <div>
+          <div class="flex items-center justify-between">
+            <label class="text-sm font-medium text-gray-700">
+              提醒设置
+            </label>
+            <label class="switch">
+              <input type="checkbox" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <select class="mt-2 block w-full px-3 h-11 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+            <option value="weekly">每周提醒</option>
+            <option value="monthly" selected>每月提醒</option>
+            <option value="quarterly">每季度提醒</option>
+          </select>
+        </div>
+
+        <!-- Notes -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            备注
+          </label>
+          <textarea
+            class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 resize-none"
+            rows="2"
+            placeholder="添加关于这个储蓄目标的备注..."
+          >计划明年7月去日本旅行，预计费用15000元。</textarea>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-2 gap-3">
+          <button class="py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700">
+            取消
+          </button>
+          <button class="py-2.5 bg-orange-500 text-white rounded-lg font-medium">
+            保存
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 在body结束标签前添加JavaScript代码 -->
+  <script>
+    // 获取所有模态框和按钮
+    const editTotalBudgetModal = document.getElementById('editTotalBudgetModal');
+    const editCategoryBudgetModal = document.getElementById('editCategoryBudgetModal');
+    const addCategoryModal = document.getElementById('addCategoryModal');
+    const editSavingsGoalModal = document.getElementById('editSavingsGoalModal');
+
+    // 打开总预算编辑弹窗
+    document.querySelector('.budget-header button').addEventListener('click', () => {
+      editTotalBudgetModal.classList.add('show');
+    });
+
+    // 打开分类预算编辑弹窗
+    document.querySelectorAll('.category-icon, .fa-ellipsis-v').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const categoryCard = e.target.closest('.bg-gray-50');
+        const categoryName = categoryCard.querySelector('h3').textContent;
+        const currentBudget = categoryCard.querySelector('span').textContent.match(/¥(\d+,?\d*)/)[1];
+        
+        // 更新弹窗内容
+        editCategoryBudgetModal.querySelector('h3').textContent = categoryName;
+        editCategoryBudgetModal.querySelector('input').value = currentBudget.replace(',', '');
+        
+        editCategoryBudgetModal.classList.add('show');
+      });
+    });
+
+    // 打开添加类别弹窗
+    document.querySelector('.fa-plus').parentElement.addEventListener('click', () => {
+      addCategoryModal.classList.add('show');
+    });
+
+    // 打开储蓄目标编辑弹窗
+    document.querySelectorAll('.savings-goal').forEach(goal => {
+      goal.addEventListener('click', () => {
+        // 获取目标信息
+        const name = goal.querySelector('h3').textContent;
+        const targetDate = goal.querySelector('p').textContent.split('：')[1];
+        const [current, total] = goal.querySelector('.font-medium').textContent
+          .replace('¥', '').split(' / ¥').map(num => parseFloat(num.replace(',', '')));
+        const monthlySaving = parseFloat(goal.querySelector('.text-xs.text-gray-500').textContent
+          .split('¥')[1].replace(',', ''));
+        
+        // 更新弹窗内容
+        const modal = editSavingsGoalModal;
+        modal.querySelector('input[type="text"]').value = name;
+        modal.querySelector('input[type="date"]').value = 
+          targetDate.replace(/(\d{4})年(\d{1,2})月/, '$1-$2-01');
+        modal.querySelector('input[value="15000.00"]').value = total.toFixed(2);
+        modal.querySelector('input[value="1000.00"]').value = monthlySaving.toFixed(2);
+        
+        // 显示弹窗
+        editSavingsGoalModal.classList.add('show');
+      });
+    });
+
+    // 打开添加储蓄目标弹窗
+    document.querySelector('.card:nth-of-type(2) .fa-plus').parentElement.addEventListener('click', () => {
+      // 重置表单
+      const modal = editSavingsGoalModal;
+      modal.querySelector('input[type="text"]').value = '';
+      modal.querySelector('input[type="date"]').value = '';
+      modal.querySelector('input[value="15000.00"]').value = '0.00';
+      modal.querySelector('input[value="1000.00"]').value = '0.00';
+      modal.querySelector('textarea').value = '';
+      
+      // 显示弹窗
+      editSavingsGoalModal.classList.add('show');
+    });
+
+    // 关闭所有弹窗
+    document.querySelectorAll('.modal .fa-times').forEach(closeBtn => {
+      closeBtn.addEventListener('click', () => {
+        closeBtn.closest('.modal').classList.remove('show');
+      });
+    });
+
+    // 点击弹窗外部区域关闭弹窗
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('show');
+        }
+      });
+    });
+
+    // 数字输入框加减按钮功能
+    document.querySelectorAll('.number-input').forEach(container => {
+      const input = container.querySelector('input');
+      const [minusBtn, plusBtn] = container.querySelectorAll('.controls button');
+      const step = parseFloat(input.getAttribute('step')) || 100;
+
+      minusBtn.addEventListener('click', () => {
+        let value = parseFloat(input.value);
+        if (value >= step) {
+          input.value = (value - step).toFixed(2);
+        }
+      });
+
+      plusBtn.addEventListener('click', () => {
+        let value = parseFloat(input.value);
+        input.value = (value + step).toFixed(2);
+      });
+    });
+
+    // 计算目标完成时间
+    document.querySelectorAll('#editSavingsGoalModal .number-input').forEach(container => {
+      const input = container.querySelector('input');
+      input.addEventListener('change', () => {
+        const goalAmount = parseFloat(document.querySelector('#editSavingsGoalModal input[value="15000.00"]').value);
+        const monthlySaving = parseFloat(document.querySelector('#editSavingsGoalModal input[value="1000.00"]').value);
+        if (monthlySaving > 0) {
+          const months = Math.ceil(goalAmount / monthlySaving);
+          container.nextElementSibling.textContent = `按此金额预计需要${months}个月完成目标`;
+        }
+      });
+    });
+
+    // 月份选择器功能
+    document.querySelectorAll('.month-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelector('.month-item.active').classList.remove('active');
+        item.classList.add('active');
+        
+        // 更新显示的月份
+        const month = item.textContent.replace('年', '').trim();
+        document.querySelector('.budget-header .opacity-90').textContent = `${month}预算`;
+        document.querySelector('.budget-header .opacity-75').textContent = 
+          `${month.slice(-2)} 1日 - ${month.slice(-2)} 30日`;
+      });
+    });
+
+    // 取消按钮功能
+    document.querySelectorAll('.modal button:first-of-type').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.closest('.modal').classList.remove('show');
+      });
+    });
+
+    // 保存/添加按钮功能
+    document.querySelectorAll('.modal button:last-of-type').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modal = btn.closest('.modal');
+        // TODO: 在这里添加保存数据的逻辑
+        modal.classList.remove('show');
+      });
+    });
+  </script>
+</body>
+</html> 
