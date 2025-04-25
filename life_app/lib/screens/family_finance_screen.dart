@@ -6,7 +6,7 @@ import 'family_members_screen.dart';
 import 'finance_report_screen.dart';
 import 'member_finances/member_finances_screen.dart';
 import 'transaction_history/transaction_history_screen.dart';
-import 'expense_tracking/expense_tracking_screen.dart';
+import 'expense_tracking_screen.dart';
 
 class FamilyFinanceScreen extends StatefulWidget {
   const FamilyFinanceScreen({super.key});
