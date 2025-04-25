@@ -150,6 +150,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             gender: gender,
             phone: userData['phone'] ?? baseProfile.phone,
             email: userData['email'] ?? baseProfile.email,
+            bio: userData['bio'] ?? baseProfile.bio,
             healthInfo: healthInfo,
           );
           
@@ -188,43 +189,81 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Column(
+      builder: (context) => Container(
+        color: Colors.white,
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // 标题
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 18),
             width: double.infinity,
             alignment: Alignment.center,
             decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1)),
+                color: Colors.white,
+                border: Border(bottom: BorderSide(color: Color(0xFFF3F4F6), width: 1)),
             ),
             child: const Text(
               '个人资料编辑',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 17, 
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF111827),
+                ),
             ),
           ),
           // 选项
           ListTile(
-            leading: const Icon(Icons.edit, color: Color(0xFF4F46E5)),
-            title: const Text('修改昵称'),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEEF2FF),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.edit, color: Color(0xFF4F46E5), size: 24),
+              ),
+              title: const Text(
+                '修改昵称',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
             onTap: () {
               Navigator.pop(context);
               _showEditNicknameDialog();
             },
           ),
           ListTile(
-            leading: const Icon(Icons.photo_camera, color: Color(0xFF4F46E5)),
-            title: const Text('修改头像'),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEEF2FF),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.photo_camera, color: Color(0xFF4F46E5), size: 24),
+              ),
+              title: const Text(
+                '修改头像',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
             onTap: () {
               Navigator.pop(context);
               _showUploadAvatarOptions();
             },
           ),
-          const SizedBox(height: 8),
+            const SizedBox(height: 24),
         ],
+        ),
       ),
     );
   }
@@ -235,29 +274,152 @@ class _ProfileScreenState extends State<ProfileScreen> {
     
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('修改昵称'),
-        content: TextField(
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                spreadRadius: 0,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 内容区域
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '你的昵称',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF6B7280),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
           controller: _nameController,
-          decoration: const InputDecoration(
-            labelText: '昵称',
-            border: OutlineInputBorder(),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Color(0xFF111827),
+                      ),
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFF9FAFB),
+                        hintText: '请输入你的昵称',
+                        hintStyle: const TextStyle(
+                          color: Color(0xFF9CA3AF),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE5E7EB),
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF4F46E5),
+                            width: 1.5,
+                          ),
+                        ),
+                        suffixIcon: _nameController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(
+                                  Icons.clear,
+                                  color: Color(0xFF9CA3AF),
+                                  size: 18,
+                                ),
+                                onPressed: () => _nameController.clear(),
+                              )
+                            : null,
           ),
           maxLength: 20,
-        ),
-        actions: [
+                      textInputAction: TextInputAction.done,
+                      onChanged: (value) {
+                        // 强制刷新以显示或隐藏清除按钮
+                        setState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    
+                    // 按钮区域
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color(0xFF6B7280),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                          ),
+                          child: const Text(
+                            '取消',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
           ),
-          TextButton(
+                        const SizedBox(width: 12),
+                        ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               _updateNickname(_nameController.text.trim());
             },
-            child: const Text('保存', style: TextStyle(color: Color(0xFF4F46E5))),
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: const Color(0xFF4F46E5),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            '保存',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
           ),
         ],
+          ),
+        ),
       ),
     );
   }
@@ -268,41 +430,79 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Column(
+      builder: (context) => Container(
+        color: Colors.white,
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 18),
             width: double.infinity,
             alignment: Alignment.center,
             decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1)),
+                color: Colors.white,
+                border: Border(bottom: BorderSide(color: Color(0xFFF3F4F6), width: 1)),
             ),
             child: const Text(
               '选择头像来源',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 17, 
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF111827),
+                ),
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.photo_library, color: Color(0xFF4F46E5)),
-            title: const Text('从相册选择'),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEEF2FF),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.photo_library, color: Color(0xFF4F46E5), size: 24),
+              ),
+              title: const Text(
+                '从相册选择',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
             onTap: () {
               Navigator.pop(context);
               _pickImageFromGallery();
             },
           ),
           ListTile(
-            leading: const Icon(Icons.camera_alt, color: Color(0xFF4F46E5)),
-            title: const Text('拍照'),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEEF2FF),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.camera_alt, color: Color(0xFF4F46E5), size: 24),
+              ),
+              title: const Text(
+                '拍照',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
             onTap: () {
               Navigator.pop(context);
               _pickImageFromCamera();
             },
           ),
-          const SizedBox(height: 8),
+            const SizedBox(height: 24),
         ],
+        ),
       ),
     );
   }
@@ -466,23 +666,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ).then((_) => _loadFamilyMembers());
   }
 
-  void _navigateToSettings() {
-    // TODO: 导航到设置页面
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('导航到设置页面')),
-    );
-  }
-
   void _showLogoutConfirmation() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('退出登录'),
-        content: const Text('确定要退出登录吗？'),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          '退出登录',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1F2937),
+          ),
+        ),
+        content: const Text(
+          '确定要退出登录吗？',
+          style: TextStyle(
+            fontSize: 16,
+            color: Color(0xFF6B7280),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            style: TextButton.styleFrom(
+              foregroundColor: Color(0xFF6B7280),
+              backgroundColor: Color(0xFFF9FAFB),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
+            child: const Text(
+              '取消',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -499,9 +720,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (!mounted) return;
               Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
             },
-            child: const Text('确定'),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Color(0xFFEF4444),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
+            child: const Text(
+              '确定',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
           ),
         ],
+        contentPadding: EdgeInsets.fromLTRB(24, 20, 24, 24),
+        actionsPadding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+        titlePadding: EdgeInsets.fromLTRB(24, 24, 24, 8),
       ),
     );
   }
@@ -518,6 +753,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ProfileHeader(
                 profile: _userProfile,
                 onEditAvatar: _onEditAvatar,
+                onEditInfo: _onEditBasicInfo,
               ),
           
               // 内容区域
@@ -526,18 +762,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      // 基本信息卡片
-                      InfoCard(
-                        title: '基本信息',
-                        rows: [
-                          InfoRow(label: '姓名', value: _userProfile.name),
-                          InfoRow(label: '年龄', value: '${_userProfile.age}岁'),
-                          InfoRow(label: '性别', value: _userProfile.gender),
-                          InfoRow(label: '电话', value: _userProfile.phone),
-                        ],
-                        onEdit: _onEditBasicInfo,
-                      ),
-                      
                       // 家庭成员卡片
                       FamilyMembersCard(
                         members: _familyMembers,
@@ -545,25 +769,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onMemberTap: _onFamilyMemberTap,
                       ),
                       
-                      // 账户操作
-                      AccountActions(
-                        actions: [
-                          AccountActionItem(
-                            title: '设置',
-                            icon: Icons.settings,
-                            iconBackgroundColor: Colors.grey[100]!,
-                            iconColor: Colors.grey[700]!,
-                            onTap: _navigateToSettings,
-                          ),
-                          AccountActionItem(
-                            title: '退出登录',
-                            icon: Icons.logout,
-                            iconBackgroundColor: const Color(0xFFFFE4E6),
-                            iconColor: const Color(0xFFEF4444),
-                            isWarning: true,
+                      // 账户操作 - 只保留退出登录
+                      Container(
+                        margin: const EdgeInsets.only(top: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.06),
+                              blurRadius: 12,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: InkWell(
                             onTap: _showLogoutConfirmation,
+                          borderRadius: BorderRadius.circular(16),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFE4E6),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.logout,
+                                    color: Color(0xFFEF4444),
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text(
+                                  '退出登录',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFFEF4444),
+                                  ),
+                                ),
+                                const Spacer(),
+                                const Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Color(0xFFD1D5DB),
+                                  size: 16,
                           ),
                         ],
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),

@@ -113,8 +113,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      body: SafeArea(
-        child: Column(
+      body: Column(
           children: [
             _buildHeader(),
             Expanded(
@@ -131,12 +130,6 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
               ),
             ),
           ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showSavingsGoalModal(context),
-        backgroundColor: AppTheme.primaryColor,
-        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
@@ -153,36 +146,85 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
           ],
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      padding: EdgeInsets.only(
+        left: 16, 
+        right: 16, 
+        top: MediaQuery.of(context).padding.top + 8, 
+        bottom: 16
+      ),
       child: Column(
         children: [
+          // 导航栏
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
+              // 返回按钮和标题
+              Row(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () => Navigator.pop(context),
-                padding: EdgeInsets.zero,
+                      padding: EdgeInsets.all(4),
                 constraints: BoxConstraints(),
+                      iconSize: 18,
+                    ),
               ),
               const SizedBox(width: 8),
               const Text(
                 '储蓄目标设置',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 18,
+                      fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          _buildSavingsSummary(),
+              
+              // 添加按钮 - 移到右上角
+              InkWell(
+                onTap: () => _showSavingsGoalModal(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.add, color: Colors.white, size: 16),
+                      const SizedBox(width: 2),
+                      Text(
+                        '新增目标',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // 简化的储蓄摘要
+          _buildSimplifiedSavingsSummary(),
         ],
       ),
     );
   }
 
-  Widget _buildSavingsSummary() {
+  // 简化的储蓄摘要
+  Widget _buildSimplifiedSavingsSummary() {
     // 计算总目标金额和当前总金额（进行中的目标）
     double totalTargetInProgress = 0;
     double totalCurrentInProgress = 0;
@@ -201,31 +243,21 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
     // 计算所有目标的总金额（进行中 + 已完成）
     double totalAllTargets = totalTargetInProgress + totalCompletedAmount;
     
-    // 计算进行中目标的进度百分比
-    double inProgressProgress = totalTargetInProgress > 0 ? totalCurrentInProgress / totalTargetInProgress : 0;
-    int inProgressPercent = (inProgressProgress * 100).round();
-    
     // 计算整体完成率（已存金额 + 已完成目标金额）/ 总目标金额
     double overallCompletion = totalAllTargets > 0 
         ? (totalCurrentInProgress + totalCompletedAmount) / totalAllTargets 
         : 0;
     int overallCompletionPercent = (overallCompletion * 100).round();
     
-    // 计算目标完成数量比例
-    int totalGoalsCount = _savingsGoals.length + _completedGoals.length;
-    double goalsCompletionRate = totalGoalsCount > 0 
-        ? _completedGoals.length / totalGoalsCount 
-        : 0;
-    int goalsCompletionPercent = (goalsCompletionRate * 100).round();
-    
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
+          // 总储蓄进度和进度条
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -233,66 +265,94 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
                 '总储蓄进度',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 14,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              Text(
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
                 '$overallCompletionPercent%',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 14,
+                    fontSize: 11,
                   fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           LinearProgressIndicator(
             value: overallCompletion,
             backgroundColor: Colors.white.withOpacity(0.2),
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-            minHeight: 6,
-            borderRadius: BorderRadius.circular(3),
+            minHeight: 4,
+            borderRadius: BorderRadius.circular(2),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          
+          // 金额信息
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.savings_outlined,
+                    color: Colors.white,
+                    size: 14,
+                  ),
+                  const SizedBox(width: 4),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '已储蓄/已完成',
+                      Text(
+                        '已储蓄',
                     style: TextStyle(
                       color: Colors.white70,
-                      fontSize: 12,
+                          fontSize: 10,
                     ),
                   ),
                   Text(
                     '¥${(totalCurrentInProgress + totalCompletedAmount).toStringAsFixed(0)}',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                          fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                ],
+              ),
+              Row(
                 children: [
-                  const Text(
+                  Icon(
+                    Icons.flag_outlined,
+                    color: Colors.white,
+                    size: 14,
+                  ),
+                  const SizedBox(width: 4),
+              Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                      Text(
                     '总目标',
                     style: TextStyle(
                       color: Colors.white70,
-                      fontSize: 12,
+                          fontSize: 10,
                     ),
                   ),
                   Text(
                     '¥${totalAllTargets.toStringAsFixed(0)}',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                          fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -300,66 +360,29 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildStatCard(
-                '进行中目标进度', 
-                '$inProgressPercent%',
-                '${_savingsGoals.length}个目标'
-              ),
-              const SizedBox(width: 12),
-              _buildStatCard(
-                '目标完成率', 
-                '$goalsCompletionPercent%',
-                '已完成${_completedGoals.length}个目标'
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-  
-  // 构建统计卡片
-  Widget _buildStatCard(String title, String value, String subtitle) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              title,
-              style: const TextStyle(
+                    '进行中目标',
+                    style: TextStyle(
                 color: Colors.white70,
-                fontSize: 11,
+                      fontSize: 10,
               ),
             ),
-            const SizedBox(height: 4),
             Text(
-              value,
+                    '${_savingsGoals.length}个',
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 16,
+                      fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 10,
-              ),
+                ],
             ),
           ],
         ),
+        ],
       ),
     );
   }

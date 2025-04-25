@@ -145,40 +145,15 @@ class _BudgetHeaderState extends State<BudgetHeader> {
       ),
       child: SafeArea(
         bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
         child: Column(
           children: [
-            // 月度预算概览
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Container(
-                padding: const EdgeInsets.all(12.0),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      spreadRadius: 0,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: _isLoading
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      ),
-                    )
-                  : Column(
-                      children: [
-                        // 预算标题和编辑按钮
+              // 顶部导航栏和月份选择器
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                  // 返回按钮和标题
                             Row(
                               children: [
                                 Container(
@@ -199,40 +174,14 @@ class _BudgetHeaderState extends State<BudgetHeader> {
                                   '${_currentDate.month}月预算',
                                   style: TextStyle(
                                     color: Colors.white.withOpacity(0.9),
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            // 移除编辑按钮
-                          ],
-                        ),
-
-                        // 预算金额
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '¥${_totalBudget.toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 26,
+                          fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],
-                          ),
                         ),
 
-                        // 预算周期 (可点击)
-                        const SizedBox(height: 8),
+                  // 预算周期选择器
                         InkWell(
                           onTap: _showMonthPicker,
                           child: Container(
@@ -261,21 +210,60 @@ class _BudgetHeaderState extends State<BudgetHeader> {
                             ),
                           ),
                         ),
-
-                        // 预算进度
-                        const SizedBox(height: 10),
-                        Column(
+                ],
+              ),
+              
+              const SizedBox(height: 8),
+              
+              // 预算金额和进度条
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: _isLoading
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Column(
+                      children: [
+                        // 金额和百分比
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            // 预算金额
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  '已用 ¥${_totalSpent.toStringAsFixed(0)}',
+                                const Text(
+                                  '预算: ',
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: Colors.white70,
                                     fontSize: 12,
                                   ),
                                 ),
+                                Text(
+                                  '¥${_totalBudget.toStringAsFixed(0)}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            
+                            // 已用百分比
                                 Container(
                                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
@@ -283,7 +271,7 @@ class _BudgetHeaderState extends State<BudgetHeader> {
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
-                                    '${_usagePercent}%',
+                                '已用 ${_usagePercent}%',
                                     style: TextStyle(
                                       color: Colors.white.withOpacity(0.9),
                                       fontSize: 12,
@@ -293,15 +281,40 @@ class _BudgetHeaderState extends State<BudgetHeader> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 6),
+                        
+                        const SizedBox(height: 8),
+                        
+                        // 进度条
                             ClipRRect(
                               borderRadius: BorderRadius.circular(4),
                               child: ProgressBar(
                                 progress: _usagePercent,
                                 backgroundColor: Colors.white.withOpacity(0.2),
                                 fillColor: Colors.white,
-                                height: 5,
+                            height: 4,
                                 borderRadius: 4,
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 4),
+                        
+                        // 已用和剩余金额
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '已用: ¥${_totalSpent.toStringAsFixed(0)}',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 11,
+                              ),
+                            ),
+                            Text(
+                              '剩余: ¥${_remainingAmount.toStringAsFixed(0)}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
@@ -309,8 +322,8 @@ class _BudgetHeaderState extends State<BudgetHeader> {
                       ],
                     ),
               ),
+            ],
             ),
-          ],
         ),
       ),
     );

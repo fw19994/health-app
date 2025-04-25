@@ -4,7 +4,22 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e1b89c6-fa57-4e16-9de3-db71ea4265ae" name="更改" comment="init" />
+    <list default="true" id="2e1b89c6-fa57-4e16-9de3-db71ea4265ae" name="更改" comment="init">
+      <change beforePath="$PROJECT_DIR$/../life_app/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/ios/Flutter/Debug.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/ios/Flutter/Debug.xcconfig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/ios/Flutter/Release.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/ios/Flutter/Release.xcconfig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/constants/api_constants.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/constants/api_constants.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/profile/profile_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/profile/profile_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/api_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/themes/app_theme.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/themes/app_theme.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/web/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/web/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/config.dev.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.dev.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/handler/user_profile_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/handler/user_profile_handler.go" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -12,7 +27,7 @@
   </component>
   <component name="GOROOT" url="file://$USER_HOME$/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.0.darwin-arm64" />
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
@@ -156,7 +171,7 @@
         </line-breakpoint>
         <line-breakpoint type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/internal/handler/user_profile_handler.go</url>
-          <line>62</line>
+          <line>63</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint type="DlvLineBreakpoint">

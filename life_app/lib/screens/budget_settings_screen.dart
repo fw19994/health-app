@@ -117,8 +117,7 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      body: SafeArea(
-        child: Column(
+      body: Column(
           children: [
             _buildHeader(),
             Expanded(
@@ -133,7 +132,6 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
               ),
             ),
           ],
-        ),
       ),
     );
   }

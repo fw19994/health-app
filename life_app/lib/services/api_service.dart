@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -7,6 +9,7 @@ import '../constants/api_constants.dart';
 import '../models/user_model.dart';
 import '../models/auth_token_model.dart';
 import '../services/auth_service.dart';
+import 'dns_service.dart';
 
 class ApiResponse<T> {
   final bool success;
@@ -24,6 +27,7 @@ class ApiResponse<T> {
 
 class ApiService {
   final http.Client _client = http.Client();
+  final DnsService _dnsService = DnsService();
   
   // GET请求
   Future<Map<String, dynamic>> get({
@@ -82,61 +86,121 @@ class ApiService {
     }
   }
   
+  // 获取域名的IP地址
+  Future<String> _getHostIp(String url) async {
+    final uri = Uri.parse(url);
+    try {
+      final address = await _dnsService.getBestAddress(uri.host);
+      if (address != null) {
+        // 替换域名为IP地址，保持协议和路径不变
+        return url.replaceFirst(uri.host, address.address);
+      }
+    } catch (e) {
+      print('获取IP地址失败: $e');
+    }
+    return url;
+  }
+
   // POST请求
   Future<Map<String, dynamic>> post({
     required String path,
     dynamic data,
     BuildContext? context,
   }) async {
-    try {
-      final uri = Uri.parse('${ApiConstants.baseUrl}$path');
-      
-      // 获取访问令牌 (如果有context)
-      String? token;
-      if (context != null) {
-        try {
-          final authService = Provider.of<AuthService>(context, listen: false);
-          token = authService.tokens?.accessToken;
-        } catch (e) {
-          print('获取令牌失败: $e');
+    int retryCount = 0;
+    const maxRetries = 3;
+    const retryDelay = Duration(seconds: 1);
+
+    while (retryCount < maxRetries) {
+      try {
+        final baseUrl = await _getHostIp(ApiConstants.baseUrl);
+        final uri = Uri.parse('$baseUrl$path');
+        
+        // 获取访问令牌 (如果有context)
+        String? token;
+        if (context != null) {
+          try {
+            final authService = Provider.of<AuthService>(context, listen: false);
+            token = authService.tokens?.accessToken;
+          } catch (e) {
+            print('获取令牌失败: $e');
+          }
         }
+        
+        // 设置请求头，如果有token则添加授权头
+        final headers = <String, String>{
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Connection': 'keep-alive',
+          'Host': Uri.parse(ApiConstants.baseUrl).host, // 添加原始主机名
+        };
+        
+        if (token != null) {
+          headers['Authorization'] = 'Bearer $token';
+        }
+        
+        // 转换请求数据为JSON
+        final body = data != null ? json.encode(data) : null;
+        
+        // 打印详细的请求信息
+        print('=== 发送POST请求 [尝试 ${retryCount + 1}/$maxRetries] ===');
+        print('原始URL: ${ApiConstants.baseUrl}$path');
+        print('解析后URL: $uri');
+        print('Headers: $headers');
+        print('Body: $body');
+        
+        // 发送请求并设置超时
+        final response = await http.post(
+          uri, 
+          headers: headers, 
+          body: body
+        ).timeout(
+          const Duration(seconds: 15),
+          onTimeout: () {
+            print('请求超时');
+            throw TimeoutException('请求超时');
+          },
+        );
+        
+        // 打印详细的响应信息
+        print('=== 收到响应 ===');
+        print('状态码: ${response.statusCode}');
+        print('响应头: ${response.headers}');
+        print('响应体: ${response.body}');
+        
+        // 解析响应数据
+        final jsonData = json.decode(response.body);
+        return jsonData;
+      } catch (e, stackTrace) {
+        print('=== POST请求失败 [尝试 ${retryCount + 1}/$maxRetries] ===');
+        print('错误类型: ${e.runtimeType}');
+        print('错误信息: $e');
+        print('堆栈跟踪: $stackTrace');
+
+        if (e.toString().contains('Failed host lookup') || 
+            e.toString().contains('SocketException')) {
+          // DNS或网络连接错误，尝试重试
+          if (retryCount < maxRetries - 1) {
+            print('等待 ${retryDelay.inSeconds} 秒后重试...');
+            // 清除DNS缓存
+            _dnsService.clearCache();
+            await Future.delayed(retryDelay);
+            retryCount++;
+            continue;
+          }
+        }
+        
+        return {
+          'code': -1,
+          'message': '网络请求失败: ${e.toString()}',
+        };
       }
-      
-      // 设置请求头，如果有token则添加授权头
-      final headers = <String, String>{
-        'Content-Type': 'application/json',
-      };
-      
-      if (token != null) {
-        headers['Authorization'] = 'Bearer $token';
-      }
-      
-      // 转换请求数据为JSON
-      final body = data != null ? json.encode(data) : null;
-      
-      // 打印请求信息
-      print('发送POST请求: $uri');
-      print('请求数据: $data');
-      
-      // 发送请求
-      final response = await http.post(uri, headers: headers, body: body);
-      
-      // 打印响应信息
-      print('响应状态码: ${response.statusCode}');
-      print('响应头: ${response.headers}');
-      
-      // 解析响应数据
-      final jsonData = json.decode(response.body);
-      print('响应数据: $jsonData');
-      
-      return jsonData;
-    } catch (e) {
-      print('POST请求失败: $e');
-      return {
-        'code': -1,
-        'message': e.toString(),
-      };
     }
+
+    return {
+      'code': -1,
+      'message': '网络请求失败: 已达到最大重试次数',
+    };
   }
   
   // PUT请求
@@ -416,7 +480,7 @@ class ApiService {
     } catch (e) {
       // 记录原始错误信息，但向用户展示简化的错误
       print('原始错误信息: ${e.toString()}');
-      throw Exception(e.toString().contains('登录已过期') ? e.toString() : '系统繁忙，请稍后再试');
+      throw Exception(e.toString().contains('登录已过期') ? e.toString() : e.toString());
     }
   }
   

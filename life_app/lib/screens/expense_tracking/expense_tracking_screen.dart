@@ -443,64 +443,6 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
               fontWeight: FontWeight.w400,
             ),
           ),
-          
-          const SizedBox(height: 16),
-          
-          // 余额信息
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '当前余额',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.8),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '¥${NumberFormat('#,##0.00').format(_currentBalance)}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '本月预算剩余',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.8),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '¥${NumberFormat('#,##0.00').format(_remainingBudget)}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

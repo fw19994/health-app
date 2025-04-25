@@ -66,8 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      body: SafeArea(
-        child: Column(
+      body: Column(
           children: [
             _buildHeader(context),
             Expanded(
@@ -75,21 +74,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   _buildFinancialSummary(context),
-                  const SizedBox(height: 16),
-                  _buildHealthSummary(context),
+                const SizedBox(height: 16),
+                _buildHealthSummary(context),
                   const SizedBox(height: 16),
                   _buildTodayPlans(context),
                 ],
               ),
             ),
           ],
-        ),
       ),
     );
   }
 
   // 首页头部 - 蓝紫色渐变背景
   Widget _buildHeader(BuildContext context) {
+    // 获取状态栏高度
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    
     // 获取当前日期和时间
     final now = DateTime.now();
     final hour = now.hour;
@@ -117,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final dateStr = dateFormat.format(now);
     
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      padding: EdgeInsets.fromLTRB(16, statusBarHeight + 10, 16, 10),
       decoration: const BoxDecoration(
         gradient: AppTheme.homeGradient,
         borderRadius: BorderRadius.only(
@@ -143,8 +144,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 clipBehavior: Clip.none,
                 children: [
                   Container(
-                    width: 42,
-                    height: 42,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(15),
                       border: Border.all(
@@ -195,17 +196,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     bottom: -5,
                     right: -5,
                     child: Container(
-                      width: 20,
-                      height: 20,
+                      width: 18,
+                      height: 18,
                       decoration: BoxDecoration(
                         color: const Color(0xFF22C55E),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(9),
                         border: Border.all(color: Colors.white, width: 2),
                       ),
                       child: const Center(
                         child: Icon(
                           Icons.workspace_premium,
-                          size: 9,
+                          size: 8,
                           color: Colors.white,
                         ),
                       ),
@@ -225,16 +226,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       '$greeting，${_userName.isNotEmpty ? _userName : '用户'}',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     const Text(
                       '今天有2个重要提醒，点击查看详情',
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: FontWeight.normal,
                       ),
                     ),
@@ -244,192 +245,104 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           
-          // 天气信息卡片（包含日期）
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          // 整合天气信息和快捷操作到一行
+          Row(
+            children: [
+              // 天气信息 - 占据左侧60%
+              Expanded(
+                flex: 6,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                // 日期显示
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.calendar_today,
-                        size: 12,
-                        color: Colors.white70,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        dateStr,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
                   ),
-                ),
-                const SizedBox(height: 8),
-                // 天气信息
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
+                  child: Row(
                       children: [
                         const Icon(
                           Icons.wb_sunny,
                           color: Colors.amber,
-                          size: 32,
+                        size: 24,
                         ),
-                        const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              '北京市',
+                        children: [
+                          const Text(
+                            '北京市 21°C',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                              fontSize: 14,
                               ),
                             ),
-                            SizedBox(height: 2),
                             Text(
-                              '晴间多云，空气优',
+                            dateStr,
                               style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 10,
                               ),
                             ),
                           ],
                         ),
                       ],
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: const [
-                        Text(
-                          '21°C',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 22,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          '体感温度：19°C',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                 ),
-              ],
-            ),
           ),
           
-          const SizedBox(height: 20),
+              const SizedBox(width: 8),
           
-          // 快捷操作胶囊按钮
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              children: [
-                _buildActionPill(
-                  icon: Icons.account_balance_wallet,
-                  label: '查看预算',
+              // 快捷按钮 - 占据右侧40%
+              Expanded(
+                flex: 4,
+                child: InkWell(
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const BudgetSettingsScreen()),
-                    );
-                  },
-                ),
-                const SizedBox(width: 12),
-                _buildActionPill(
-                  icon: Icons.smart_toy,
-                  label: '小财助手',
-                  onTap: () {},
-                ),
-                const SizedBox(width: 12),
-                _buildActionPill(
-                  icon: Icons.pie_chart,
-                  label: '数据分析',
-                  onTap: () {},
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
-  }
-
-  // 胶囊形状的快捷操作按钮
-  Widget _buildActionPill({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(50),
+                  },
+                  borderRadius: BorderRadius.circular(16),
         child: Ink(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(50),
+                      borderRadius: BorderRadius.circular(16),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 28,
-                height: 28,
+                          padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.3),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  icon,
+                          child: const Icon(
+                            Icons.account_balance_wallet,
                   color: Colors.white,
-                  size: 14,
+                            size: 12,
                 ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
+                        const SizedBox(width: 4),
+                        const Text(
+                          '查看预算',
+                          style: TextStyle(
                   color: Colors.white,
-                  fontSize: 14,
+                            fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
         ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

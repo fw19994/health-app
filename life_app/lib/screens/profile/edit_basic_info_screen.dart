@@ -217,9 +217,33 @@ class _EditBasicInfoScreenState extends State<EditBasicInfoScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF4F46E5), // 主题色与UI一致
-              onPrimary: Colors.white,
+            colorScheme: ColorScheme.light(
+              primary: Colors.white, // 主要颜色设为白色
+              onPrimary: Color(0xFF6366F1), // 主要颜色上的文字为紫色
+              surface: Colors.white,
+              onSurface: Color(0xFF1F2937),
+              background: Colors.white,
+              secondary: Color(0xFF6366F1), // 次要颜色为紫色
+              secondaryContainer: Color(0xFFEEF2FF), // 选中日期的背景色
+              outline: Color(0xFF6366F1).withOpacity(0.5), // 边框颜色
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Color(0xFF6366F1), // 按钮文字颜色
+              ),
+            ),
+            dialogBackgroundColor: Colors.white,
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.white,
+              foregroundColor: Color(0xFF1F2937),
+              elevation: 0,
+            ),
+            dialogTheme: DialogTheme(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 5,
+              backgroundColor: Colors.white,
             ),
           ),
           child: child!,
@@ -238,35 +262,101 @@ class _EditBasicInfoScreenState extends State<EditBasicInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('编辑基本信息'),
+        title: const Text(
+          '编辑基本信息',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
         backgroundColor: const Color(0xFF4F46E5),
         foregroundColor: Colors.white,
         elevation: 0,
+        actions: [
+          if (!_isLoading)
+            TextButton(
+              onPressed: _isSaving ? null : _saveUserInfo,
+              style: TextButton.styleFrom(foregroundColor: Colors.white),
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text(
+                      '保存',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+            ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Color(0xFF4F46E5)))
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
+          : Form(
                 key: _formKey,
-                child: Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 头像部分
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF4F46E5), Color(0xFF6366F1)],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            offset: const Offset(0, 2),
+                            blurRadius: 5,
+                          ),
+                        ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 5),
+                            Text(
+                              '完善您的个人资料',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white.withOpacity(0.9),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    
+                    // 表单部分
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                          const SizedBox(height: 20),
+                          
+                          // 基本信息部分
+                          _buildSectionTitle('基本信息'),
+                          _buildInfoCard([
                         // 姓名
                         _buildTextField(
                           controller: _nameController,
                           label: '姓名',
                           hintText: '请输入您的姓名',
-                          icon: Icons.person,
+                              icon: Icons.person_outline,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return '请输入姓名';
@@ -292,18 +382,22 @@ class _EditBasicInfoScreenState extends State<EditBasicInfoScreen> {
                           controller: _phoneController,
                           label: '联系电话',
                           hintText: '请输入您的联系电话',
-                          icon: Icons.phone,
+                              icon: Icons.phone_outlined,
                           keyboardType: TextInputType.phone,
                         ),
+                          ]),
                         
-
+                          const SizedBox(height: 20),
                         
+                          // 其他信息部分
+                          _buildSectionTitle('其他信息'),
+                          _buildInfoCard([
                         // 居住地址
                         _buildTextField(
                           controller: _addressController,
                           label: '居住地址',
                           hintText: '请输入您的居住地址',
-                          icon: Icons.home,
+                              icon: Icons.home_outlined,
                         ),
                         
                         // 职业
@@ -311,64 +405,65 @@ class _EditBasicInfoScreenState extends State<EditBasicInfoScreen> {
                           controller: _occupationController,
                           label: '职业',
                           hintText: '请输入您的职业',
-                          icon: Icons.work,
+                              icon: Icons.work_outline,
                         ),
-                        
-
                         
                         // 个人简介
                         _buildTextField(
                           controller: _bioController,
                           label: '个人简介',
                           hintText: '请简单介绍一下自己',
-                          icon: Icons.description,
+                              icon: Icons.description_outlined,
                           maxLines: 3,
                         ),
+                          ]),
                         
-                        const SizedBox(height: 24),
-                        
-                        // 保存按钮
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed: _isSaving ? null : () => Navigator.pop(context),
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  side: const BorderSide(color: Colors.grey),
+                          const SizedBox(height: 50),
+                        ],
                                 ),
-                              ),
-                              child: const Text('取消'),
-                            ),
-                            const SizedBox(width: 12),
-                            ElevatedButton(
-                              onPressed: _isSaving ? null : _saveUserInfo,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF4F46E5),
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: _isSaving
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Text('保存'),
                             ),
                           ],
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
+              ),
+            ),
+    );
+  }
+  
+  // 构建区域标题
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10, left: 4),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF374151),
+        ),
+      ),
+    );
+  }
+  
+  // 构建信息卡片
+  Widget _buildInfoCard(List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            offset: const Offset(0, 1),
+            blurRadius: 4,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
               ),
             ),
     );
@@ -388,22 +483,37 @@ class _EditBasicInfoScreenState extends State<EditBasicInfoScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildLabel(label),
-        TextFormField(
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.01),
+                offset: const Offset(0, 1),
+                blurRadius: 2,
+              ),
+            ],
+          ),
+          child: TextFormField(
           controller: controller,
           decoration: InputDecoration(
             hintText: hintText,
-            prefixIcon: Icon(icon, color: const Color(0xFF4F46E5)),
+              hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+              prefixIcon: Icon(icon, color: const Color(0xFF4F46E5), size: 20),
             filled: true,
-            fillColor: Colors.grey[100],
+              fillColor: const Color(0xFFF9FAFB),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide.none,
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              isDense: true,
           ),
+            style: const TextStyle(fontSize: 15),
           keyboardType: keyboardType,
           maxLines: maxLines,
           validator: validator,
+          ),
         ),
         const SizedBox(height: 16),
       ],
@@ -421,21 +531,44 @@ class _EditBasicInfoScreenState extends State<EditBasicInfoScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildLabel(label),
-        TextFormField(
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.01),
+                offset: const Offset(0, 1),
+                blurRadius: 2,
+              ),
+            ],
+          ),
+          child: TextFormField(
           controller: controller,
           decoration: InputDecoration(
             hintText: hintText,
-            prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFF4F46E5)),
+              hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+              prefixIcon: const Icon(
+                Icons.calendar_today_outlined, 
+                color: Color(0xFF4F46E5),
+                size: 20,
+              ),
+              suffixIcon: const Icon(
+                Icons.arrow_drop_down,
+                color: Color(0xFF9CA3AF),
+              ),
             filled: true,
-            fillColor: Colors.grey[100],
+              fillColor: const Color(0xFFF9FAFB),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide.none,
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              isDense: true,
           ),
+            style: const TextStyle(fontSize: 15),
           readOnly: true,
           onTap: onTap,
+          ),
         ),
         const SizedBox(height: 16),
       ],
@@ -445,13 +578,13 @@ class _EditBasicInfoScreenState extends State<EditBasicInfoScreen> {
   // 构建标签文本
   Widget _buildLabel(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 6, left: 2),
       child: Text(
         text,
         style: const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: Color(0xFF4B5563),
+          color: Color(0xFF6B7280),
         ),
       ),
     );
@@ -463,16 +596,16 @@ class _EditBasicInfoScreenState extends State<EditBasicInfoScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
-          _buildGenderOption('男'),
-          const SizedBox(width: 16),
-          _buildGenderOption('女'),
+          Expanded(child: _buildGenderOption('男', Icons.male)),
+          const SizedBox(width: 12),
+          Expanded(child: _buildGenderOption('女', Icons.female)),
         ],
       ),
     );
   }
 
   // 构建性别选项
-  Widget _buildGenderOption(String gender) {
+  Widget _buildGenderOption(String gender, IconData icon) {
     final isSelected = _selectedGender == gender;
     
     return InkWell(
@@ -481,29 +614,32 @@ class _EditBasicInfoScreenState extends State<EditBasicInfoScreen> {
           _selectedGender = gender;
         });
       },
+      borderRadius: BorderRadius.circular(10),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF4F46E5).withOpacity(0.1) : Colors.grey[100],
-          borderRadius: BorderRadius.circular(8),
+          color: isSelected ? const Color(0xFFEEF2FF) : const Color(0xFFF9FAFB),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? const Color(0xFF4F46E5) : Colors.grey[300]!,
-            width: 1,
+            color: isSelected ? const Color(0xFF4F46E5) : const Color(0xFFE5E7EB),
+            width: 1.5,
           ),
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              gender == '男' ? Icons.male : Icons.female,
-              color: isSelected ? const Color(0xFF4F46E5) : Colors.grey[600],
+              icon,
+              color: isSelected ? const Color(0xFF4F46E5) : const Color(0xFF9CA3AF),
               size: 20,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             Text(
               gender,
               style: TextStyle(
-                color: isSelected ? const Color(0xFF4F46E5) : Colors.grey[700],
-                fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                color: isSelected ? const Color(0xFF4F46E5) : const Color(0xFF6B7280),
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                fontSize: 14,
               ),
             ),
           ],

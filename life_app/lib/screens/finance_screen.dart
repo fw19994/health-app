@@ -146,6 +146,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
       debugPrint('加载预算数据失败: $e');
       if (mounted) {
         setState(() {
+          _currentBudget = null;
           _isLoadingBudget = false;
         });
       }
@@ -201,7 +202,6 @@ class _FinanceScreenState extends State<FinanceScreen> {
     
     try {
       // 创建当前月份的起始日期和结束日期
-      final now = DateTime.now();
       final startDate = DateTime(_currentYear, _currentMonth, 1); // 当月第一天
       final lastDay = DateTime(_currentYear, _currentMonth + 1, 0).day; // 当月最后一天
       final endDate = DateTime(_currentYear, _currentMonth, lastDay, 23, 59, 59); // 当月最后一天的23:59:59
@@ -213,27 +213,52 @@ class _FinanceScreenState extends State<FinanceScreen> {
         endDate: endDate,
       );
       
-      if (mounted && response.success && response.data != null) {
+      if (mounted) {
         setState(() {
-          // 解析支出分析数据
-          if (response.data['data'] != null) {
-            _expenseAnalysisData = List<Map<String, dynamic>>.from(response.data['data']);
+          if (response.success && response.data != null) {
+            // 解析支出分析数据，增加错误处理
+            try {
+              if (response.data['data'] != null) {
+                final rawData = List.from(response.data['data']);
+                
+                // 验证并过滤数据
+                _expenseAnalysisData = rawData.where((item) {
+                  return item is Map && 
+                         item['amount'] != null && 
+                         item['category_name'] != null &&
+                         item['percentage'] != null;
+                }).map((item) => Map<String, dynamic>.from(item)).toList();
+                
+                // 处理百分比数据
+                for (var item in _expenseAnalysisData) {
+                  // 确保percentage是整数
+                  if (item['percentage'] is num) {
+                    item['percentage'] = (item['percentage'] as num).toInt();
+                  } else {
+                    item['percentage'] = 0;
+                  }
+                }
+              } else {
+                _expenseAnalysisData = [];
+              }
+            } catch (e) {
+              print('解析支出分析数据出错: $e');
+              _expenseAnalysisData = [];
+            }
           } else {
             _expenseAnalysisData = [];
           }
           _isLoadingExpenseAnalysis = false;
         });
-      } else {
-        debugPrint('加载支出分析数据失败: ${response.message}');
+      }
+    } catch (e) {
+      print('加载支出分析数据出错: $e');
+      if (mounted) {
         setState(() {
+          _expenseAnalysisData = [];
           _isLoadingExpenseAnalysis = false;
         });
       }
-    } catch (e) {
-      debugPrint('加载支出分析数据出错: $e');
-      setState(() {
-        _isLoadingExpenseAnalysis = false;
-      });
     }
   }
   
@@ -335,9 +360,9 @@ class _FinanceScreenState extends State<FinanceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      body: SafeArea(
-        child: Column(
+      body: Column(
           children: [
+          // 移除SafeArea，让头部延伸到状态栏
             _buildHeader(context),
             Expanded(
               child: ListView(
@@ -356,13 +381,15 @@ class _FinanceScreenState extends State<FinanceScreen> {
               ),
             ),
           ],
-        ),
       ),
     );
   }
 
   // 财务仪表盘头部 - 橙黄色渐变背景
   Widget _buildHeader(BuildContext context) {
+    // 获取状态栏高度
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    
     // 格式化数字
     final formatter = NumberFormat('#,##0.00', 'zh_CN');
     
@@ -372,7 +399,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
         : '¥${formatter.format(_currentBudget!.remainingAmount)}';
     
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      padding: EdgeInsets.fromLTRB(12, statusBarHeight + 8, 12, 8),
       decoration: const BoxDecoration(
         gradient: AppTheme.primaryGradient,
         borderRadius: BorderRadius.only(
@@ -383,21 +410,11 @@ class _FinanceScreenState extends State<FinanceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 余额卡片
-          Container(
-            margin: const EdgeInsets.only(top: 5),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          // 标题与余额并排
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    Text(
+            children: [
+              const Text(
                       '财务仪表盘',
                       style: TextStyle(
                         color: Colors.white,
@@ -405,28 +422,31 @@ class _FinanceScreenState extends State<FinanceScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(
+              const Text(
                       '本月余额',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 14,
+                  fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 2),
+          
+          // 金额和上月比较
+          Row(
+            children: [
+              // 金额
                 Text(
-                  remainingAmount, // 使用与预算剩余相同的值
+                remainingAmount,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 24,
+                  fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
+              const SizedBox(width: 8),
+              // 变化指示器
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
@@ -442,7 +462,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
                             color: _isLoadingBudget || _currentBudget == null || _currentBudget!.changePercent >= 0
                                 ? const Color(0xFF16A34A)
                                 : const Color(0xFFEF4444),
-                            size: 12,
+                      size: 10,
                           ),
                           const SizedBox(width: 2),
                           Text(
@@ -453,7 +473,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
                               color: _isLoadingBudget || _currentBudget == null || _currentBudget!.changePercent >= 0
                                   ? const Color(0xFF16A34A)
                                   : const Color(0xFFEF4444),
-                              fontSize: 12,
+                        fontSize: 10,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -462,15 +482,28 @@ class _FinanceScreenState extends State<FinanceScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+          
+          const SizedBox(height: 8),
+          
+          // 收入和支出
                 Container(
-                  height: 1,
-                  color: Colors.white.withOpacity(0.2),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(10),
                 ),
-                const SizedBox(height: 12),
-                Row(
+            child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                // 收入
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.arrow_upward_rounded,
+                      color: Colors.greenAccent,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 4),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -478,22 +511,33 @@ class _FinanceScreenState extends State<FinanceScreen> {
                           '总收入',
                           style: TextStyle(
                             color: Colors.white70,
-                            fontSize: 12,
+                            fontSize: 10,
                           ),
                         ),
-                        const SizedBox(height: 4),
                         Text(
                           _isLoadingTransactionSummary
                               ? '加载中...'
                               : '¥${formatter.format(_totalIncome)}',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 16,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
+                  ],
+                ),
+                
+                // 支出
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.arrow_downward_rounded,
+                      color: Colors.redAccent,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 4),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -501,17 +545,16 @@ class _FinanceScreenState extends State<FinanceScreen> {
                           '总支出',
                           style: TextStyle(
                             color: Colors.white70,
-                            fontSize: 12,
+                            fontSize: 10,
                           ),
                         ),
-                        const SizedBox(height: 4),
                         Text(
                           _isLoadingTransactionSummary
                               ? '加载中...'
                               : '¥${formatter.format(_totalExpense)}',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 16,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -553,7 +596,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
             _buildQuickActionCard(
               context,
               icon: Icons.tune,
-              label: '预算和储蓄设置',
+              label: '预算设置',
               bgColor: AppTheme.budgetButtonBg,
               iconColor: AppTheme.budgetButtonIcon,
               onTap: () {
@@ -863,14 +906,17 @@ class _FinanceScreenState extends State<FinanceScreen> {
 
   // 预算概览卡片 - 使用API数据
   Widget _buildBudgetOverview(MonthlyBudget budget) {
+    try {
     // 格式化数字
     final formatter = NumberFormat('#,##0.00', 'zh_CN');
     
-    // 直接使用API返回的原始百分比值，不乘以100
-    final displayPercent = budget.usagePercent.toStringAsFixed(2);
+      // 确保百分比在0-100之间
+      final safePercent = budget.usagePercent.clamp(0.0, 100.0);
+      final displayPercent = safePercent.toStringAsFixed(2);
     
     // 安全地计算进度条宽度 - 使用小数形式百分比与100的比率
-    final progressWidth = (MediaQuery.of(context).size.width - 64) * (budget.usagePercent / 100); 
+      final availableWidth = MediaQuery.of(context).size.width - 64;
+      final progressWidth = availableWidth * (safePercent / 100.0);
 
     return Card(
       margin: EdgeInsets.zero,
@@ -928,6 +974,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
                           fontWeight: FontWeight.bold,
                           color: AppTheme.textPrimary,
                         ),
+                          overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -952,6 +999,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF10B981),
                         ),
+                          overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -976,6 +1024,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
                           fontWeight: FontWeight.bold,
                           color: AppTheme.textPrimary,
                         ),
+                          overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -1018,7 +1067,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
                 // 实际进度
                 Container(
                   height: 8,
-                  width: progressWidth.clamp(0, MediaQuery.of(context).size.width - 64),
+                    width: progressWidth.clamp(0, availableWidth),
                   decoration: BoxDecoration(
                     gradient: AppTheme.primaryGradient,
                     borderRadius: BorderRadius.circular(4),
@@ -1030,6 +1079,10 @@ class _FinanceScreenState extends State<FinanceScreen> {
         ),
       ),
     );
+    } catch (e) {
+      print('预算展示错误: $e');
+      return _buildBudgetOverviewError("数据异常: 请刷新重试");
+    }
   }
 
   // 月度支出分析
@@ -1150,38 +1203,77 @@ class _FinanceScreenState extends State<FinanceScreen> {
   
   // 构建支出柱状图列
   List<Widget> _buildSpendingColumns() {
-    // 排序支出数据并限制最多显示7条
-    final sortedData = List<Map<String, dynamic>>.from(_expenseAnalysisData)
-      ..sort((a, b) => (b['amount'] as double).compareTo(a['amount'] as double));
-    final displayData = sortedData.take(7).toList();
-    
-    // 找出金额最高的类别
-    double maxAmount = 0;
-    if (displayData.isNotEmpty) {
-      maxAmount = displayData.first['amount'];
+    // 防御性检查：确保有数据
+    if (_expenseAnalysisData.isEmpty) {
+      return [
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Text("暂无数据", style: TextStyle(color: Colors.grey))
+            ],
+          )
+        )
+      ];
     }
     
-    // 构建柱状图列
-    return displayData.map((item) {
-      final double amount = item['amount'];
-      // 计算高度比例
-      final double heightRatio = maxAmount > 0 ? amount / maxAmount : 0;
-      // 是否是最高的柱子
-      final bool isHighlighted = amount == maxAmount;
+    try {
+      // 排序支出数据并限制最多显示7条
+      final sortedData = List<Map<String, dynamic>>.from(_expenseAnalysisData)
+        ..sort((a, b) {
+          num amountA = a['amount'];
+          num amountB = b['amount'];
+          return amountB.compareTo(amountA);
+        });
+      final displayData = sortedData.take(7).toList();
       
-      return _buildSpendingColumn(
-        item['category_name'], 
-        heightRatio, 
-        isHighlighted
-      );
-    }).toList();
+      // 找出金额最高的类别
+      double maxAmount = 0;
+      if (displayData.isNotEmpty) {
+        maxAmount = (displayData.first['amount'] as num).toDouble();
+      }
+      
+      // 构建柱状图列
+      return displayData.map((item) {
+        final double amount = (item['amount'] as num).toDouble();
+        // 计算高度比例，防止除零错误
+        final double heightRatio = maxAmount > 0 ? (amount / maxAmount).clamp(0.0, 1.0) : 0;
+        // 是否是最高的柱子
+        final bool isHighlighted = amount == maxAmount;
+        
+        return _buildSpendingColumn(
+          item['category_name'] ?? "未知", 
+          heightRatio, 
+          isHighlighted
+        );
+      }).toList();
+    } catch (e) {
+      // 捕获任何解析错误，提供优雅的降级
+      print('构建柱状图时出错: $e');
+      return [
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, color: Colors.red[300], size: 24),
+              const SizedBox(height: 8),
+              const Text("数据解析错误", style: TextStyle(color: Colors.grey))
+            ],
+          )
+        )
+      ];
+    }
   }
   
   // 构建类别进度条列表
   List<Widget> _buildCategoryProgressBars() {
     // 排序支出数据并限制最多显示4条
     final sortedData = List<Map<String, dynamic>>.from(_expenseAnalysisData)
-      ..sort((a, b) => (b['amount'] as double).compareTo(a['amount'] as double));
+      ..sort((a, b) {
+        num amountA = a['amount'];
+        num amountB = b['amount'];
+        return amountB.compareTo(amountA);
+      });
     final displayData = sortedData.take(4).toList();
     
     // 构建类别进度条列表
@@ -1290,6 +1382,9 @@ class _FinanceScreenState extends State<FinanceScreen> {
     required String amount,
     required int percentage,
   }) {
+    // 安全计算进度条宽度，确保不会超出屏幕宽度
+    final double progressWidth = (MediaQuery.of(context).size.width - 64) * (percentage.clamp(0, 100) / 100);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1336,7 +1431,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
             ),
             Container(
               height: 6,
-              width: MediaQuery.of(context).size.width * percentage / 100 - 32,
+              width: progressWidth.clamp(0, MediaQuery.of(context).size.width - 64),
               decoration: BoxDecoration(
                 color: color,
                 borderRadius: BorderRadius.circular(3),
@@ -1350,6 +1445,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
 
   // 财务健康和储蓄目标
   Widget _buildSavingsGoal(BuildContext context) {
+    try {
     return Column(
       children: [
         // 财务健康部分
@@ -1475,22 +1571,75 @@ class _FinanceScreenState extends State<FinanceScreen> {
         
         const SizedBox(height: 16),
         
-        // 储蓄目标部分
-        Card(
+          // 储蓄目标部分 - 根据加载状态显示不同内容
+          _buildSavingsGoalsCard(),
+        ],
+      );
+    } catch (e) {
+      print('构建财务健康和储蓄目标时发生错误: $e');
+      // 提供降级的UI，确保用户界面不会完全崩溃
+      return Card(
           margin: EdgeInsets.zero,
-          color: Colors.white, // 设置为白色背景
-          elevation: 0, // 移除阴影效果
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Icon(Icons.error_outline, color: Colors.orange, size: 24),
+              const SizedBox(height: 8),
+              const Text('加载财务指标时出现错误'),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                child: const Text('刷新'),
+                onPressed: () {
+                  // 重新加载数据
+                  _loadSavingsGoals();
+                  _loadTransactionSummary();
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+  
+  // 储蓄目标卡片 - 抽取为单独方法以增强可维护性
+  Widget _buildSavingsGoalsCard() {
+    // 加载中状态
+    if (_isLoadingSavingsGoals) {
+      return Card(
+        margin: EdgeInsets.zero,
+        color: Colors.white,
+        elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey.shade100), // 添加细边框
+          side: BorderSide(color: Colors.grey.shade100),
           ),
+        child: const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.symmetric(vertical: 20.0),
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+        ),
+      );
+    }
+    
+    // 错误状态
+    if (_savingsGoalsError.isNotEmpty) {
+      return Card(
+        margin: EdgeInsets.zero,
+        color: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.shade100),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
                       '储蓄目标',
@@ -1500,120 +1649,191 @@ class _FinanceScreenState extends State<FinanceScreen> {
                         color: AppTheme.textPrimary,
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SavingsGoalsScreen()),
-                        ).then((_) => _loadSavingsGoals()); // 返回时刷新数据
-                      },
-                      child: const Text(
-                        '查看全部',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppTheme.primaryColor,
+              const SizedBox(height: 16),
+              Icon(Icons.error_outline, color: Colors.orange, size: 24),
+              const SizedBox(height: 8),
+              Text(
+                '加载储蓄目标失败',
+                style: TextStyle(color: Colors.grey[700]),
                         ),
-                      ),
+              const SizedBox(height: 4),
+              Text(
+                '请稍后再试',
+                style: TextStyle(color: Colors.grey[500], fontSize: 12),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: _loadSavingsGoals,
+                child: const Text('重试'),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                
-                // 加载状态
-                if (_isLoadingSavingsGoals)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                // 错误状态
-                else if (_savingsGoalsError.isNotEmpty && _savingsGoals.isEmpty)
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+        ),
+      );
+    }
+    
+    // 空数据状态
+    if (_savingsGoals.isEmpty) {
+      return Card(
+        margin: EdgeInsets.zero,
+        color: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.shade100),
+                  ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
                   child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 32,
-                            color: Colors.red[300],
-                              ),
-                          const SizedBox(height: 8),
-                                  Text(
-                            '加载失败',
-                                    style: TextStyle(
-                              color: Colors.red[300],
-                                  fontSize: 14,
-                            ),
-                            textAlign: TextAlign.center,
-                                ),
-                          const SizedBox(height: 8),
-                          TextButton(
-                            onPressed: _loadSavingsGoals,
-                            child: const Text('重试'),
-                              ),
-                            ],
-                          ),
-                    ),
-                  )
-                // 数据为空
-                else if (_savingsGoals.isEmpty) 
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                          Icon(
-                            Icons.savings_outlined,
-                            size: 32,
-                            color: Colors.grey,
-                              ),
-                          const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
                                   const Text(
-                            '暂无储蓄目标',
+                    '储蓄目标',
                                     style: TextStyle(
-                              color: Colors.grey,
-                                      fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const SavingsGoalsScreen()),
-                              ).then((_) => _loadSavingsGoals());
-                            },
-                            child: const Text('添加目标'),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                                      color: AppTheme.textPrimary,
+                                    ),
+                                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SavingsGoalsScreen()),
+                      );
+                    },
+                    child: const Text('去设置'),
                                   ),
                                 ],
                               ),
-                    ),
-                  )
-                // 储蓄目标列表
-                else
-                  ...List.generate(
-                    _savingsGoals.length > 2 ? 2 : _savingsGoals.length, // 最多显示2个
-                    (index) => Padding(
-                      padding: EdgeInsets.only(bottom: index < (_savingsGoals.length > 2 ? 1 : _savingsGoals.length - 1) ? 12 : 0),
-                      child: SimplifiedSavingsGoalCard(
-                        goal: _savingsGoals[index],
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const SavingsGoalsScreen()),
-                          ).then((_) => _loadSavingsGoals());
-                        },
-                      ),
+              const SizedBox(height: 16),
+              Center(
+                child: Column(
+                            children: [
+                    Icon(
+                      Icons.savings_outlined,
+                      color: Colors.grey[400],
+                      size: 48,
                                 ),
+                    const SizedBox(height: 8),
+                              Text(
+                      '您还没有设置储蓄目标',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                        fontSize: 14,
+                              ),
+                      ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const SavingsGoalsScreen()),
+                        );
+                      },
+                      child: const Text('设置目标'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                            ),
+                          ),
+                        ],
+                      ),
+                  ),
+      );
+    }
+    
+    // 有数据状态 - 显示储蓄目标
+    try {
+      return Card(
+        margin: EdgeInsets.zero,
+        color: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.shade100),
+                  ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+                  child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                    '储蓄目标',
+                                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                                      color: AppTheme.textPrimary,
+                                    ),
+                                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SavingsGoalsScreen()),
+                      );
+                    },
+                    child: const Text('查看更多'),
+                                  ),
+                                ],
+                              ),
+              const SizedBox(height: 8),
+              
+              // 只显示前两个进行中的目标
+              ..._savingsGoals.take(2).map((goal) => 
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: SimplifiedSavingsGoalCard(goal: goal),
+                )
+              ).toList(),
+            ],
+          ),
+        ),
+      );
+    } catch (e) {
+      print('构建储蓄目标卡片时发生错误: $e');
+      // 发生错误时的降级UI
+      return Card(
+        margin: EdgeInsets.zero,
+        color: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.shade100),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+                            children: [
+                              const Text(
+                '储蓄目标',
+                                style: TextStyle(
+                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.textPrimary,
+                                ),
+                              ),
+              const SizedBox(height: 16),
+              const Text('加载目标数据时出错'),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: _loadSavingsGoals,
+                child: const Text('重试'),
                               ),
                             ],
                           ),
-          ),
         ),
-      ],
-    );
+      );
+    }
   }
 
   // 近期交易列表 - 重新实现，参考记一笔页面

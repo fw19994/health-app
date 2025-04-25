@@ -19,6 +19,7 @@ class LoginCard extends StatelessWidget {
   final Animation<double> animation;
   final String? phoneError;
   final String? codeError;
+  final VoidCallback? onNetworkDiagnostics;
 
   const LoginCard({
     Key? key,
@@ -37,6 +38,7 @@ class LoginCard extends StatelessWidget {
     required this.animation,
     this.phoneError,
     this.codeError,
+    this.onNetworkDiagnostics,
   }) : super(key: key);
 
   @override
@@ -80,7 +82,7 @@ class LoginCard extends StatelessWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
             child: Container(
-              padding: const EdgeInsets.all(28),
+              padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
                 border: Border.all(
                   color: Colors.white.withOpacity(0.6),
@@ -91,7 +93,7 @@ class LoginCard extends StatelessWidget {
               child: Column(
                 children: [
                   _buildLogo(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   _buildForm(),
                 ],
               ),
@@ -107,8 +109,8 @@ class LoginCard extends StatelessWidget {
       children: [
         // Logo
         Container(
-          width: 96,
-          height: 96,
+          width: 80,
+          height: 80,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -132,7 +134,7 @@ class LoginCard extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         
         // 应用名称
         AnimatedDefaultTextStyle(
@@ -153,7 +155,7 @@ class LoginCard extends StatelessWidget {
           child: const Text('悦管家'),
         ),
         
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         
         // 副标题
         AnimatedSwitcher(
@@ -169,7 +171,7 @@ class LoginCard extends StatelessWidget {
           ),
         ),
         
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         
         // 分隔线
         Container(
@@ -193,7 +195,7 @@ class LoginCard extends StatelessWidget {
   Widget _buildForm() {
     return Column(
       children: [
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         
         // 手机号输入框
         _buildInputField(
@@ -209,7 +211,7 @@ class LoginCard extends StatelessWidget {
           ],
         ),
         
-        const SizedBox(height: 20),
+        const SizedBox(height: 14),
         
         // 验证码输入行
         Row(
@@ -233,7 +235,7 @@ class LoginCard extends StatelessWidget {
           ],
         ),
         
-        const SizedBox(height: 20),
+        const SizedBox(height: 14),
         
         // 记住我和忘记密码
         Row(
@@ -263,6 +265,21 @@ class LoginCard extends StatelessWidget {
                 ),
               ],
             ),
+            Row(
+              children: [
+                if (onNetworkDiagnostics != null)
+                  IconButton(
+                    icon: const Icon(
+                      Icons.wifi_tethering,
+                      size: 16,
+                      color: Color(0xFF10B981),
+                    ),
+                    onPressed: onNetworkDiagnostics,
+                    tooltip: '网络诊断',
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.only(right: 8),
+                    visualDensity: VisualDensity.compact,
+            ),
             TextButton(
               onPressed: () {
                 // 忘记密码功能
@@ -276,16 +293,18 @@ class LoginCard extends StatelessWidget {
                 '忘记密码?',
                 style: TextStyle(fontSize: 14),
               ),
+                ),
+              ],
             ),
           ],
         ),
         
-        const SizedBox(height: 30),
+        const SizedBox(height: 20),
         
         // 提交按钮
         _buildSubmitButton(),
         
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         
         // 切换登录/注册
         Row(
@@ -316,6 +335,37 @@ class LoginCard extends StatelessWidget {
             ),
           ],
         ),
+        
+        if (onNetworkDiagnostics != null) ...[
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                '登录遇到问题？',
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(width: 4),
+              InkWell(
+                onTap: onNetworkDiagnostics,
+                borderRadius: BorderRadius.circular(4),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Text(
+                    '点击进行网络诊断',
+                    style: TextStyle(
+                      color: Color(0xFF10B981),
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -332,29 +382,62 @@ class LoginCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // 字段标签
+        Padding(
+          padding: const EdgeInsets.only(left: 12, bottom: 4),
+          child: Text(
+            keyboardType == TextInputType.phone ? '手机号码' : '验证码',
+            style: const TextStyle(
+              color: Color(0xFF4B5563),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        // 输入框
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.7),
-            borderRadius: BorderRadius.circular(15),
+            color: Colors.white.withOpacity(0.95),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: errorText != null ? Colors.red : Colors.grey.withOpacity(0.3),
-              width: errorText != null ? 1.5 : 1.0,
+              color: errorText != null 
+                ? Colors.red.withOpacity(0.8) 
+                : focusNode.hasFocus 
+                  ? const Color(0xFF10B981).withOpacity(0.8)
+                  : Colors.grey.withOpacity(0.2),
+              width: errorText != null || focusNode.hasFocus ? 2.0 : 1.0,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: errorText != null 
+                  ? Colors.red.withOpacity(0.1)
+                  : focusNode.hasFocus
+                    ? const Color(0xFF10B981).withOpacity(0.15)
+                    : Colors.black.withOpacity(0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
+                spreadRadius: 1,
               ),
             ],
           ),
           child: Row(
             children: [
-              Icon(
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: errorText != null 
+                    ? Colors.red.withOpacity(0.1)
+                    : const Color(0xFF10B981).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
                 icon,
                 size: 22,
-                color: errorText != null ? Colors.red : const Color(0xFF10B981),
+                  color: errorText != null 
+                    ? Colors.red 
+                    : const Color(0xFF10B981),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -366,13 +449,36 @@ class LoginCard extends StatelessWidget {
                     border: InputBorder.none,
                     hintStyle: TextStyle(
                       color: Colors.grey.withOpacity(0.7),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
                     ),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   keyboardType: keyboardType,
                   inputFormatters: inputFormatters,
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Colors.black87,
+                    color: Color(0xFF1F2937),
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              // 清除按钮
+              if (controller.text.isNotEmpty)
+                GestureDetector(
+                  onTap: () => controller.clear(),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.close,
+                      size: 16,
+                      color: Colors.grey.withOpacity(0.8),
                   ),
                 ),
               ),
@@ -381,10 +487,24 @@ class LoginCard extends StatelessWidget {
         ),
         if (errorText != null)
           Padding(
-            padding: const EdgeInsets.only(left: 16, top: 4, bottom: 4),
-            child: Text(
+            padding: const EdgeInsets.only(left: 16, top: 4, bottom: 0),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 14,
+                ),
+                const SizedBox(width: 4),
+                Text(
               errorText,
-              style: const TextStyle(color: Colors.red, fontSize: 12),
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
       ],
@@ -393,7 +513,7 @@ class LoginCard extends StatelessWidget {
 
   Widget _buildSendCodeButton() {
     return SizedBox(
-      height: 55,
+      height: 52,
       child: ElevatedButton(
         onPressed: isCodeSent ? null : onSendCode,
         style: ElevatedButton.styleFrom(
@@ -401,19 +521,47 @@ class LoginCard extends StatelessWidget {
           foregroundColor: Colors.white,
           disabledBackgroundColor: Colors.grey.withOpacity(0.3),
           disabledForegroundColor: Colors.white70,
-          elevation: 5,
+          elevation: isCodeSent ? 0 : 5,
           shadowColor: const Color(0x7010B981),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: isCodeSent 
+                ? Colors.transparent 
+                : const Color(0xFF10B981).withOpacity(0.3),
+              width: 1,
+            ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16),
         ),
-        child: Text(
-          isCodeSent ? '${countdownSeconds}s' : '获取验证码',
+        child: isCodeSent 
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '${countdownSeconds}s',
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.timer, size: 14),
+              ],
+            )
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Text(
+                  '获取验证码',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(width: 4),
+                Icon(Icons.send_outlined, size: 14),
+              ],
         ),
       ),
     );
@@ -421,35 +569,55 @@ class LoginCard extends StatelessWidget {
 
   Widget _buildSubmitButton() {
     return Container(
-      height: 55,
+      height: 52,
       width: double.infinity,
       decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0x7010B981),
+            color: const Color(0xFF10B981).withOpacity(0.3),
             blurRadius: 15,
             offset: const Offset(0, 5),
+            spreadRadius: 1,
           ),
         ],
+        gradient: const LinearGradient(
+          colors: [Color(0xFF10B981), Color(0xFF059669)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
       ),
       child: ElevatedButton(
         onPressed: onSubmit,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF10B981),
+          backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
           elevation: 0,
+          shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
-        child: Text(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isLoginMode ? Icons.login : Icons.person_add,
+              size: 20,
+            ),
+            const SizedBox(width: 10),
+            Text(
           isLoginMode ? '登录悦管家' : '创建我的悦管家账号',
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
           ),
+          ],
         ),
       ),
     );
   }
 }
+

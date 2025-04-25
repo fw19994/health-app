@@ -48,6 +48,7 @@ dependencies:
   flutter_slidable: ^3.0.1
   font_awesome_flutter: ^10.8.0
   image_picker: ^1.1.2
+  permission_handler: ^11.3.0
   # 暂时移除这些依赖以解决构建问题
   # speech_to_text: ^6.5.1
   # flutter_tts: ^3.8.5

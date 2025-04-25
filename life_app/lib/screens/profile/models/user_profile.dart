@@ -73,6 +73,7 @@ class UserProfile {
   final int age;
   final String gender;
   final String phone;
+  final String bio; // 个人简介
   final HealthInfo healthInfo;
   final ActivityLevel activityLevel;
   final List<DietPreference> dietPreferences;
@@ -86,6 +87,7 @@ class UserProfile {
     required this.age,
     required this.gender,
     required this.phone,
+    this.bio = '', // 默认为空字符串
     required this.healthInfo,
     required this.activityLevel,
     required this.dietPreferences,
@@ -101,6 +103,7 @@ class UserProfile {
     int? age,
     String? gender,
     String? phone,
+    String? bio,
     HealthInfo? healthInfo,
     ActivityLevel? activityLevel,
     List<DietPreference>? dietPreferences,
@@ -114,6 +117,7 @@ class UserProfile {
       age: age ?? this.age,
       gender: gender ?? this.gender,
       phone: phone ?? this.phone,
+      bio: bio ?? this.bio,
       healthInfo: healthInfo ?? this.healthInfo,
       activityLevel: activityLevel ?? this.activityLevel,
       dietPreferences: dietPreferences ?? this.dietPreferences,
@@ -131,6 +135,7 @@ class UserProfile {
       age: 32,
       gender: '男',
       phone: '138****5678',
+      bio: '热爱健身和户外运动，追求健康生活方式。工作是软件工程师，闲暇时喜欢阅读和旅行。',
       healthInfo: HealthInfo(
         height: 178,
         weight: 72,

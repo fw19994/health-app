@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:io' if (dart.library.html) 'package:life_app/utils/web_stub.dart' as io;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -15,9 +17,27 @@ import 'widgets/assistant/assistant_floating_button.dart';
 import 'widgets/assistant/assistant_chat_screen.dart';
 import 'services/auth_service.dart';
 import 'constants/api_constants.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // 添加网络调试 - 仅在Android平台
+  if (!kIsWeb && io.Platform.isAndroid) {
+    io.HttpOverrides.global = MyHttpOverrides();
+  }
+  
+  // 请求必要权限 - 仅在移动平台
+  if (!kIsWeb) {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.storage,
+    ].request();
+    
+    statuses.forEach((permission, status) {
+      debugPrint('$permission: $status');
+    });
+  }
+  
   // 初始化本地化日期格式数据
   await initializeDateFormatting('zh_CN', null);
   
@@ -27,10 +47,13 @@ void main() async {
     isProduction ? Environment.production : Environment.local
   );
   
+  // 仅在移动平台设置屏幕方向
+  if (!kIsWeb) {
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+  }
   
   // 创建认证服务实例
   final authService = AuthService();
@@ -189,5 +212,28 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
     );
+  }
+}
+
+// 添加自定义HTTP覆盖
+class MyHttpOverrides extends io.HttpOverrides {
+  @override
+  io.HttpClient createHttpClient(io.SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (io.X509Certificate cert, String host, int port) {
+        print('=== SSL证书验证 ===');
+        print('主机: $host');
+        print('端口: $port');
+        print('证书: ${cert.subject}');
+        return true; // 允许所有证书，仅用于调试
+      }
+      ..connectionTimeout = const Duration(seconds: 15)
+      ..maxConnectionsPerHost = 5
+      ..findProxy = (uri) {
+        // 添加DNS配置
+        print('=== DNS解析 ===');
+        print('正在解析域名: ${uri.host}');
+        return 'DIRECT';
+      };
   }
 }

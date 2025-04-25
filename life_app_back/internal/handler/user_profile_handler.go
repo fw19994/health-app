@@ -23,6 +23,7 @@ type UpdateUserProfileRequest struct {
 	EmergContact *string  `json:"emerg_contact,omitempty"`
 	EmergPhone   *string  `json:"emerg_phone,omitempty"`
 	Bio          *string  `json:"bio,omitempty"`
+	Nickname     *string  `json:"nickname,omitempty"`
 }
 
 // GetUserProfile 获取用户基本信息
@@ -136,6 +137,13 @@ func UpdateUserProfile(c *gin.Context) {
 		updateData["bio"] = *req.Bio
 	}
 
+	if req.Nickname != nil {
+		if len(*req.Nickname) > 100 {
+			utils.ParameterError(c, "姓名不能超过100个字符")
+			return
+		}
+		updateData["nickname"] = *req.Nickname
+	}
 	// 更新用户基本信息
 	profileResp, err := service.UpdateUserProfile(uint(userID), updateData)
 	if err != nil {

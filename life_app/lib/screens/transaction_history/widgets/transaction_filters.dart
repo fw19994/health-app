@@ -340,12 +340,12 @@ class _TransactionFiltersState extends State<TransactionFilters> {
           end: Alignment.centerRight,
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
           children: [
@@ -356,7 +356,7 @@ class _TransactionFiltersState extends State<TransactionFilters> {
                 const Text(
                   '筛选条件',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: Colors.white,
                   ),
@@ -366,19 +366,19 @@ class _TransactionFiltersState extends State<TransactionFilters> {
                   child: const Text(
                     '清除全部',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 11,
                       color: Colors.white,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
             
             // 筛选选项
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: 6,
+              runSpacing: 6,
               children: [
                 _buildFilterChip(
                   label: '分类: ${_getSelectedCategoriesText()}',
@@ -401,10 +401,10 @@ class _TransactionFiltersState extends State<TransactionFilters> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.25),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -413,16 +413,16 @@ class _TransactionFiltersState extends State<TransactionFilters> {
               label,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 14,
+                fontSize: 12,
               ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 2),
             const Opacity(
               opacity: 0.7,
               child: Icon(
                 Icons.keyboard_arrow_down,
                 color: Colors.white,
-                size: 14,
+                size: 12,
               ),
             ),
           ],

@@ -5,13 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/login/animated_background.dart';
 import '../../widgets/login/login_card.dart';
-import '../../widgets/login/social_login_buttons.dart';
 import '../../widgets/login/feature_preview.dart';
 import '../../widgets/login/custom_toast.dart';
 import '../../widgets/login/error_dialog.dart';
 import '../../services/auth_service.dart';
 import '../../services/api_service.dart';
 import '../../utils/validators.dart';
+import '../network_diagnostics_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -298,19 +298,25 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         onSendCode: startCountdown,
                         onSubmit: submitForm,
                         animation: _animation,
+                        onNetworkDiagnostics: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NetworkDiagnosticsScreen(),
+                            ),
+                          );
+                        },
                       ),
                       
                       const SizedBox(height: 40),
                       
-                      // 社交登录按钮
-                      SocialLoginButtons(),
+                      // 功能预览模块 - 添加水平内边距，增加视觉空间
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: FeaturePreview(),
+                      ),
                       
-                      const SizedBox(height: 40),
-                      
-                      // 功能预览
-                      FeaturePreview(),
-                      
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 30),
                     ],
                   ),
                 ),

@@ -30,6 +30,7 @@ class AppTheme {
   static const Color warning = Color(0xFFFFC107);
   static const Color error = Color(0xFFF44336);
   static const Color info = Color(0xFF2196F3);
+  static const Color lightGreen = Color(0xFF4CAF50);
   
   // 渐变色 - 更新为橙黄色渐变
   static const LinearGradient primaryGradient = LinearGradient(

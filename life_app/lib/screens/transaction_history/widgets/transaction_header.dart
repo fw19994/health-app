@@ -351,7 +351,7 @@ class _TransactionHeaderState extends State<TransactionHeader> {
           end: Alignment.centerRight,
         ),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -373,7 +373,7 @@ class _TransactionHeaderState extends State<TransactionHeader> {
                   const Text(
                     '交易记录',
                     style: TextStyle(
-                      fontSize: 20,
+                  fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -381,81 +381,40 @@ class _TransactionHeaderState extends State<TransactionHeader> {
                 ],
               ),
           
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
           
-          // 页面描述和搜索按钮
+          // 成员选择行 - 优化后的布局
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // 页面描述
               Opacity(
-                opacity: 0.9,
+                opacity: 0.8,
                 child: const Text(
                   '查看所有收支明细',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 11,
                     color: Colors.white,
                   ),
                 ),
               ),
               
-              // 搜索按钮
+              // 成员选择按钮 - 减小高度
               GestureDetector(
-                onTap: () {
-                  // 显示搜索弹窗或导航到搜索页面
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('搜索功能点击'),
-                      duration: Duration(milliseconds: 500),
-                    ),
-                  );
-                },
+                onTap: _showMemberPicker,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: const [
-                      Icon(
-                        Icons.search,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                      SizedBox(width: 6),
-                      Text(
-                        '搜索',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // 成员选择按钮
-          GestureDetector(
-            onTap: _showMemberPicker,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (_selectedMember != null && _selectedMember!.avatarUrl.isNotEmpty)
                     Container(
-                      width: 24,
-                      height: 24,
+                          width: 16,
+                          height: 16,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         image: DecorationImage(
@@ -466,8 +425,8 @@ class _TransactionHeaderState extends State<TransactionHeader> {
                     )
                   else
           Container(
-                      width: 24,
-                      height: 24,
+                          width: 16,
+                          height: 16,
             decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.3),
                         shape: BoxShape.circle,
@@ -475,10 +434,10 @@ class _TransactionHeaderState extends State<TransactionHeader> {
                       child: const Icon(
                         Icons.people,
                         color: Colors.white,
-                        size: 14,
+                            size: 10,
                       ),
                     ),
-                  const SizedBox(width: 8),
+                      const SizedBox(width: 3),
                   Text(
                     _selectedMember != null 
                         ? (_selectedMember!.nickname.isNotEmpty 
@@ -487,18 +446,20 @@ class _TransactionHeaderState extends State<TransactionHeader> {
                         : '全部成员',
                     style: const TextStyle(
                           color: Colors.white,
-                      fontSize: 14,
+                          fontSize: 11,
                     ),
                   ),
-                  const SizedBox(width: 4),
+                      const SizedBox(width: 1),
                   const Icon(
                     Icons.arrow_drop_down,
                     color: Colors.white,
-                    size: 18,
+                        size: 14,
                     ),
                   ],
                 ),
             ),
+              ),
+            ],
           ),
         ],
       ),
