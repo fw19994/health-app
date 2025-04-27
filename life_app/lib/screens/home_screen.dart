@@ -6,7 +6,7 @@ import '../themes/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'family_finance_screen.dart';
+import 'finance/family_finance/family_finance_screen.dart';
 import 'expense_tracking_screen.dart';
 import 'budget_settings_screen.dart';
 

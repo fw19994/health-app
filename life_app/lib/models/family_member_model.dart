@@ -12,6 +12,7 @@ class FamilyMember {
   final String joinTime;
   final String permission;
   final bool isCurrentUser;
+  Map<String, dynamic>? financeData;
 
   FamilyMember({
     required this.id,
@@ -27,6 +28,7 @@ class FamilyMember {
     required this.joinTime,
     required this.permission,
     required this.isCurrentUser,
+    this.financeData,
   });
 
   factory FamilyMember.fromJson(Map<String, dynamic> json) {
@@ -61,6 +63,7 @@ class FamilyMember {
       joinTime: joinDate,
       permission: json['permission'] ?? '',
       isCurrentUser: currentUser is bool ? currentUser : currentUser.toString().toLowerCase() == 'true',
+      financeData: null, // 初始化为空，需要单独加载
     );
   }
 
@@ -76,7 +79,9 @@ class FamilyMember {
       'role': role,
       'gender': gender,
       'avatar_url': avatarUrl,
+      'join_time': joinTime,
       'permission': permission,
+      'is_current_user': isCurrentUser,
     };
   }
 
@@ -120,6 +125,21 @@ class FamilyMember {
         return role.isNotEmpty ? role : '其他';
     }
   }
+
+  // 获取收入
+  double get income => financeData?['income'] ?? 0.0;
+  
+  // 获取支出
+  double get expense => financeData?['expense'] ?? 0.0;
+  
+  // 获取余额
+  double get balance => financeData?['balance'] ?? 0.0;
+  
+  // 获取收入百分比
+  double get incomePercentage => financeData?['income_percentage'] ?? 0.0;
+  
+  // 获取支出百分比
+  double get expensePercentage => financeData?['expense_percentage'] ?? 0.0;
 }
 
 // 成员角色枚举，与现有的前端枚举保持一致

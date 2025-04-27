@@ -47,3 +47,8 @@ func (r IconRepository) DeleteUserIcon(userID, iconID int) error {
 	return model.DB.Where("user_id = ? AND icon_id = ?", userID, iconID).
 		Delete(&model.UserIcon{}).Error
 }
+
+func (r IconRepository) GetIcon(iconID int) (re model.Icon, err error) {
+	model.DB.Model(&model.Icon{}).Where("id = ?", iconID).Find(&re)
+	return
+}

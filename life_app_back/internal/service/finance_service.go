@@ -261,3 +261,48 @@ func (s *FinanceService) GetExpenseAnalysis(userID uint, startDate, endDate time
 	// 调用Repository方法获取按类别统计的支出数据
 	return s.repo.GetCategoryExpenseStats(userID, startDate, endDate, memberIDs)
 }
+
+// GetMemberIncome 获取成员在指定时间段内的收入总额
+func (s *FinanceService) GetMemberIncome(userID int64, startTime, endTime time.Time) (float64, error) {
+	var totalIncome float64
+
+	// 查询指定用户在时间段内的所有收入
+	query := `
+		SELECT COALESCE(SUM(amount), 0) 
+		FROM transactions 
+		WHERE user_id = ? AND type = 'income' AND date BETWEEN ? AND ?
+	`
+
+	err := model.DB.Raw(query, userID, startTime, endTime).Scan(&totalIncome).Error
+	if err != nil {
+		return 0, err
+	}
+
+	return totalIncome, nil
+}
+
+// GetMemberExpense 获取成员在指定时间段内的支出总额
+func (s *FinanceService) GetMemberExpense(userID int64, startTime, endTime time.Time) (float64, error) {
+	var totalExpense float64
+
+	// 查询指定用户在时间段内的所有支出
+	query := `
+		SELECT COALESCE(SUM(amount), 0) 
+		FROM transactions 
+		WHERE user_id = ? AND type = 'expense' AND date BETWEEN ? AND ?
+	`
+
+	err := model.DB.Raw(query, userID, startTime, endTime).Scan(&totalExpense).Error
+	if err != nil {
+		return 0, err
+	}
+
+	return totalExpense, nil
+}
+
+// GetMembersFinanceData 批量获取多个成员的财务数据
+// 返回一个map，key为成员ID，value为包含收入和支出的map
+func (s *FinanceService) GetMembersFinanceData(userIDs []int64, startTime, endTime time.Time) (map[int64]map[string]float64, error) {
+	// 调用Repository层的方法获取数据
+	return s.repo.GetMembersFinanceData(userIDs, startTime, endTime)
+}

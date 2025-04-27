@@ -385,14 +385,16 @@ func (r FinanceRepository) GetCategoryExpenseStats(userID uint, startDate, endDa
 	}
 
 	var results []Result
-	query := db.Model(&model.Transaction{}).
+	query := db.Debug().Model(&model.Transaction{}).
 		Select("icon_id, SUM(amount) as total_amount").
-		Where("user_id = ? AND type = ? AND date BETWEEN ? AND ?", userID, model.Expense, startDate, endDate).
+		Where("type = ? AND date BETWEEN ? AND ?", model.Expense, startDate, endDate).
 		Group("icon_id").
 		Order("total_amount DESC")
 
 	if len(memberIDs) > 0 {
 		query = query.Where("recorder_id IN ?", memberIDs)
+	} else {
+		query = query.Where("user_id = ? ", userID)
 	}
 
 	if err := query.Find(&results).Error; err != nil {
@@ -403,14 +405,14 @@ func (r FinanceRepository) GetCategoryExpenseStats(userID uint, startDate, endDa
 	stats := make([]model.CategoryExpenseStats, 0, len(results))
 	for _, res := range results {
 		// 获取分类名称 (假设有一个图标服务)
-		categoryName := GetCategoryNameByIconID(res.IconID) // 这个方法需要实现或调整
+		categoryName, _ := IconRepository{}.GetIcon(res.IconID) // 这个方法需要实现或调整
 
 		// 计算百分比
 		percentage := (res.TotalAmount / totalExpense) * 100
 
 		stats = append(stats, model.CategoryExpenseStats{
 			IconID:       res.IconID,
-			CategoryName: categoryName,
+			CategoryName: categoryName.Name,
 			Amount:       res.TotalAmount,
 			Percentage:   percentage,
 		})
@@ -419,29 +421,81 @@ func (r FinanceRepository) GetCategoryExpenseStats(userID uint, startDate, endDa
 	return stats, nil
 }
 
-// GetCategoryNameByIconID 根据图标ID获取类别名称
+// GetCategoryNameByIconID 根据图标ID获取分类名称
 func GetCategoryNameByIconID(iconID int) string {
-	// 这里可以实现从数据库获取类别名称的逻辑
-	// 简单起见，这里返回默认值，实际应用中应该查询数据库
+	// 默认分类名称
+	defaultName := fmt.Sprintf("分类%d", iconID)
 
-	// 以下是一个简单的映射关系，你可以根据实际情况修改
-	iconNameMap := map[int]string{
-		1:  "餐饮",
-		2:  "购物",
-		3:  "住房",
-		4:  "交通",
-		5:  "娱乐",
-		6:  "医疗",
-		7:  "教育",
-		8:  "旅行",
-		9:  "服装",
-		10: "通讯",
-		// 可以添加更多映射...
+	// 查询预算分类表获取分类名称
+	var category model.BudgetCategory
+	if err := model.DB.Where("icon_id = ?", iconID).First(&category).Error; err != nil {
+		return defaultName
 	}
 
-	if name, ok := iconNameMap[iconID]; ok {
-		return name
+	return category.Name
+}
+
+// GetMembersFinanceData 批量获取多个用户的财务数据
+// 返回一个map，key为用户ID，value为包含收入和支出的map
+func (r FinanceRepository) GetMembersFinanceData(userIDs []int64, startTime, endTime time.Time) (map[int64]map[string]float64, error) {
+	if len(userIDs) == 0 {
+		return make(map[int64]map[string]float64), nil
 	}
 
-	return "其他" // 默认名称
+	// 结果map，key是用户ID，value是包含income和expense的map
+	result := make(map[int64]map[string]float64)
+
+	// 初始化结果map，确保每个用户ID都有一个条目
+	for _, id := range userIDs {
+		result[id] = map[string]float64{
+			"income":  0,
+			"expense": 0,
+		}
+	}
+
+	// 定义查询结果的结构
+	type QueryResult struct {
+		RecorderID uint    `gorm:"column:recorder_id"`
+		Total      float64 `gorm:"column:total"`
+	}
+
+	// 批量查询收入数据 - 使用GORM构建器而非原生SQL
+	var incomeResults []QueryResult
+	if err := model.DB.Debug().Model(&model.Transaction{}).
+		Select("recorder_id, COALESCE(SUM(amount), 0) as total").
+		Where("recorder_id IN ?", userIDs).
+		Where("type = ?", model.Income).
+		Where("date BETWEEN ? AND ?", startTime, endTime).
+		Group("recorder_id").
+		Find(&incomeResults).Error; err != nil {
+		return nil, fmt.Errorf("查询收入数据失败: %w", err)
+	}
+
+	// 处理收入查询结果
+	for _, item := range incomeResults {
+		if data, exists := result[int64(item.RecorderID)]; exists {
+			data["income"] = item.Total
+		}
+	}
+
+	// 批量查询支出数据 - 使用GORM构建器而非原生SQL
+	var expenseResults []QueryResult
+	if err := model.DB.Debug().Model(&model.Transaction{}).
+		Select("recorder_id, COALESCE(SUM(amount), 0) as total").
+		Where("recorder_id IN ?", userIDs).
+		Where("type = ?", model.Expense).
+		Where("date BETWEEN ? AND ?", startTime, endTime).
+		Group("recorder_id").
+		Find(&expenseResults).Error; err != nil {
+		return nil, fmt.Errorf("查询支出数据失败: %w", err)
+	}
+
+	// 处理支出查询结果
+	for _, item := range expenseResults {
+		if data, exists := result[int64(item.RecorderID)]; exists {
+			data["expense"] = item.Total
+		}
+	}
+
+	return result, nil
 }

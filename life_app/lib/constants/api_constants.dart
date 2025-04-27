@@ -17,7 +17,7 @@ class ApiConstants {
   static String get baseUrl {
     switch (_environment) {
       case Environment.local:
-        return 'https://api.shoppingfw.cn';
+        return 'http://127.0.0.1:8082';//https://api.shoppingfw.cn
       case Environment.production:
         return 'https://api.shoppingfw.cn';
     }

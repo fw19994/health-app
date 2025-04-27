@@ -421,4 +421,40 @@ class FinanceService {
       );
     }
   }
+
+  // 获取家庭成员财务贡献数据
+  Future<ApiResponse> getFamilyContributions({
+    required BuildContext context,
+    int? year,
+    int? month,
+  }) async {
+    try {
+      // 构建查询参数
+      Map<String, String> params = {};
+      if (year != null) params['year'] = year.toString();
+      if (month != null) params['month'] = month.toString();
+      
+      // 发起请求
+      final response = await _apiService.get(
+        path: '/api/v1/finance/family-contributions',
+        params: params,
+        context: context,
+      );
+      
+      // 返回响应
+      bool success = response['code'] == 0 || response['code'] == 200;
+      return ApiResponse(
+        success: success,
+        message: response['message'] ?? (success ? '获取成功' : '获取失败'),
+        data: success ? response['data'] : null,
+      );
+    } catch (e) {
+      debugPrint('获取家庭成员财务贡献数据失败: $e');
+      return ApiResponse(
+        success: false,
+        message: '获取家庭成员财务贡献数据失败: $e',
+        data: null,
+      );
+    }
+  }
 } 

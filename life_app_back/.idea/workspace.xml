@@ -5,20 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2e1b89c6-fa57-4e16-9de3-db71ea4265ae" name="更改" comment="init">
-      <change beforePath="$PROJECT_DIR$/../life_app/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/android/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/ios/Flutter/Debug.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/ios/Flutter/Debug.xcconfig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/ios/Flutter/Release.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/ios/Flutter/Release.xcconfig" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/lib/constants/api_constants.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/constants/api_constants.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/profile/profile_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/profile/profile_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/api_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/themes/app_theme.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/themes/app_theme.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/web/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/web/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/models/family_member_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/models/family_member_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/family_finance_screen.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/home_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/finance_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/finance_service.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/config.dev.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.dev.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/handler/user_profile_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/handler/user_profile_handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/repository/finance_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/repository/finance_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/repository/icon_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/repository/icon_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/router/setupRouter.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/router/setupRouter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/service/finance_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/service/finance_service.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -233,6 +230,21 @@
           <url>file://$PROJECT_DIR$/internal/repository/finance_repository.go</url>
           <line>187</line>
           <option name="timeStamp" value="45" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/repository/finance_repository.go</url>
+          <line>381</line>
+          <option name="timeStamp" value="46" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/service/finance_service.go</url>
+          <line>306</line>
+          <option name="timeStamp" value="49" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/repository/finance_repository.go</url>
+          <line>463</line>
+          <option name="timeStamp" value="50" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

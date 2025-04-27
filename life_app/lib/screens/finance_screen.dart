@@ -10,7 +10,7 @@ import '../services/icon_service.dart';
 import '../models/icon.dart';
 import '../models/savings_goal.dart';
 import 'expense_tracking_screen.dart';
-import 'family_finance_screen.dart' hide SavingsGoal;
+import 'finance/family_finance/family_finance_screen.dart' hide SavingsGoal;
 import 'finance_report_screen.dart';
 import 'budget_settings_screen.dart';
 import 'savings_goals_screen.dart';

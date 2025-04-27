@@ -82,6 +82,7 @@ func SetupRouter(router *gin.Engine) *gin.Engine {
 				finance.GET("/trend", handler.GetTransactionTrend)                 // 获取交易趋势数据
 				finance.GET("/member-stats", handler.GetMemberExpenseStats)        // 获取成员支出统计
 				finance.GET("/expense-analysis", handler.GetExpenseAnalysis)       // 获取支出分析数据，按类别统计
+				finance.GET("/family-contributions", handler.GetFamilyContributions) // 获取家庭成员财务贡献数据
 			}
 
 			// 预算模块路由
