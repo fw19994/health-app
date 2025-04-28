@@ -51,9 +51,13 @@ class FamilyExpense {
   final double amount;
   final DateTime date;
   final String payerName;
+  final int payerId;      // 添加支付人ID字段
+  final String avatarUrl; // 添加支付人头像URL字段
   final IconData icon;
   final Color iconBgColor;
   final Color iconColor;
+  final String iconName;
+  final String notes;
   
   FamilyExpense({
     required this.title,
@@ -61,9 +65,13 @@ class FamilyExpense {
     required this.amount,
     required this.date,
     required this.payerName,
+    this.payerId = 0,      // 默认为0
+    this.avatarUrl = '',   // 默认为空字符串
     required this.icon,
     required this.iconBgColor,
     required this.iconColor,
+    this.iconName = '',
+    this.notes = '',
   });
 }
 

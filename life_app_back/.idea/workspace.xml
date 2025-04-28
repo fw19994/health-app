@@ -5,17 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2e1b89c6-fa57-4e16-9de3-db71ea4265ae" name="更改" comment="init">
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/constants/api_constants.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/constants/api_constants.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/models/family_member_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/models/family_member_model.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/family_finance_screen.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/home_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/finance_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/finance_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/family_member/add_edit/add_family_member_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/family_member/add_edit/add_family_member_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/family_member/add_edit/common_components.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/family_member/add_edit/common_components.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/family_member/add_edit/create_virtual_form.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/family_member/add_edit/create_virtual_form.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/family_members_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/family_members_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/family_finance_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/family_finance_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/models.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/models.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/recent_expenses_widget.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/recent_expenses_widget.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/widgets/family_member_card.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/widgets/family_member_card.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/repository/finance_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/repository/finance_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/repository/icon_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/repository/icon_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/router/setupRouter.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/router/setupRouter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/service/finance_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/service/finance_service.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -39,15 +39,15 @@ class FamilyMemberCard extends StatelessWidget {
     final Color roleColor = roleColors[roleEnum] ?? const Color(0xFFA855F7);
     
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -55,15 +55,16 @@ class FamilyMemberCard extends StatelessWidget {
         children: [
           // 成员信息区域
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(10),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 头像
                 Stack(
                   children: [
                     Container(
-                      width: 60,
-                      height: 60,
+                      width: 50,
+                      height: 50,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         image: DecorationImage(
@@ -80,8 +81,8 @@ class FamilyMemberCard extends StatelessWidget {
                         right: 0,
                         bottom: 0,
                         child: Container(
-                          width: 16,
-                          height: 16,
+                          width: 14,
+                          height: 14,
                           decoration: BoxDecoration(
                             color: const Color(0xFF10B981),
                             shape: BoxShape.circle,
@@ -94,7 +95,7 @@ class FamilyMemberCard extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 10),
                 // 成员信息
                 Expanded(
                   child: Column(
@@ -105,25 +106,25 @@ class FamilyMemberCard extends StatelessWidget {
                           Text(
                             displayName + (member.isCurrentUser ? ' (我)' : ''),
                             style: const TextStyle(
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF1F2937),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
+                              horizontal: 6,
+                              vertical: 2,
                             ),
                             decoration: BoxDecoration(
                               color: roleColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
                               member.role,
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 11,
                                 color: roleColor,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -132,17 +133,51 @@ class FamilyMemberCard extends StatelessWidget {
                         ],
                       ),
                       if (member.description.isNotEmpty) ...[
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Text(
                           member.description,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             color: Color(0xFF6B7280),
                           ),
                         ),
                       ],
                     ],
                   ),
+                ),
+                // 右上角操作按钮
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!member.isCurrentUser)
+                      InkWell(
+                        onTap: onRemove,
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: Icon(
+                            Icons.person_remove_outlined,
+                            color: const Color(0xFFEF4444),
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(width: 4),
+                    InkWell(
+                      onTap: onEdit,
+                      borderRadius: BorderRadius.circular(16),
+                      child: Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: Icon(
+                          member.isCurrentUser
+                              ? Icons.person_outline
+                              : Icons.edit_outlined,
+                          color: const Color(0xFF4F46E5),
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -154,7 +189,7 @@ class FamilyMemberCard extends StatelessWidget {
           ),
           // 详细信息区域
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -164,63 +199,18 @@ class FamilyMemberCard extends StatelessWidget {
                     '电话',
                     member.phone,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                 ],
                 _buildInfoRow(
                   Icons.calendar_today_outlined,
                   '加入时间',
                   member.joinTime,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 _buildInfoRow(
                   Icons.security_outlined,
                   '权限',
                   member.permission,
-                ),
-              ],
-            ),
-          ),
-          // 分隔线
-          Container(
-            height: 1,
-            color: const Color(0xFFF3F4F6),
-          ),
-          // 操作按钮区域
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (!member.isCurrentUser) ...[
-                  TextButton.icon(
-                    onPressed: onRemove,
-                    icon: const Icon(
-                      Icons.person_remove_outlined,
-                      color: Color(0xFFEF4444),
-                    ),
-                    label: const Text(
-                      '移除',
-                      style: TextStyle(
-                        color: Color(0xFFEF4444),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                ],
-                TextButton.icon(
-                  onPressed: onEdit,
-                  icon: Icon(
-                    member.isCurrentUser
-                        ? Icons.person_outline
-                        : Icons.edit_outlined,
-                    color: const Color(0xFF4F46E5),
-                  ),
-                  label: Text(
-                    member.isCurrentUser ? '编辑资料' : '编辑',
-                    style: const TextStyle(
-                      color: Color(0xFF4F46E5),
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -236,18 +226,18 @@ class FamilyMemberCard extends StatelessWidget {
       children: [
         Icon(
           icon,
-          size: 16,
+          size: 14,
           color: Colors.grey.shade600,
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: 3),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 11,
             color: Colors.grey.shade600,
           ),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: 3),
         Text(
           value,
           style: const TextStyle(

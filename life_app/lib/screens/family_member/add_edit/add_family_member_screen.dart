@@ -139,6 +139,13 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -160,18 +167,35 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
   
   // 对话框头部
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 24, 16, 16),
+      decoration: const BoxDecoration(
+        color: Color(0xFF059669),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            widget.isEditing ? '编辑家庭成员' : '添加家庭成员',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1F2937),
-            ),
+          Row(
+            children: [
+              const Icon(
+                Icons.people_alt_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                widget.isEditing ? '编辑家庭成员' : '添加家庭成员',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
           IconButton(
             onPressed: () {
@@ -184,7 +208,7 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
             icon: const Icon(Icons.close, size: 20),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            color: Colors.grey.shade500,
+            color: Colors.white,
           ),
         ],
       ),
@@ -195,74 +219,92 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
   Widget _buildTabSelector() {
     // 编辑模式下不显示标签选择器
     if (widget.isEditing) {
-      return const SizedBox.shrink();
+      return Container(
+        color: const Color(0xFFF9FAFB),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: const Center(
+          child: Text(
+            '请完善以下信息',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF6B7280),
+            ),
+          ),
+        ),
+      );
     }
     
     return Container(
-      margin: const EdgeInsets.fromLTRB(24, 0, 24, 20),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade200),
-        borderRadius: BorderRadius.circular(12),
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+      decoration: const BoxDecoration(
+        color: Color(0xFFF9FAFB),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _currentTab = 0),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: _currentTab == 0 
-                    ? const Color(0xFF059669) 
-                    : Colors.transparent,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    bottomLeft: Radius.circular(12),
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  '查找已有用户',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFEEEEEE),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => _currentTab = 0),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
                     color: _currentTab == 0 
-                      ? Colors.white 
-                      : const Color(0xFF4B5563),
+                      ? const Color(0xFF059669) 
+                      : Colors.transparent,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      bottomLeft: Radius.circular(12),
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '查找已有用户',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: _currentTab == 0 
+                        ? Colors.white 
+                        : const Color(0xFF4B5563),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _currentTab = 1),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: _currentTab == 1 
-                    ? const Color(0xFF059669) 
-                    : Colors.transparent,
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  '创建虚拟成员',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+            Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => _currentTab = 1),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
                     color: _currentTab == 1 
-                      ? Colors.white 
-                      : const Color(0xFF4B5563),
+                      ? const Color(0xFF059669) 
+                      : Colors.transparent,
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '创建虚拟成员',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: _currentTab == 1 
+                        ? Colors.white 
+                        : const Color(0xFF4B5563),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

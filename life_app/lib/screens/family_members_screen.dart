@@ -332,12 +332,12 @@ class _FamilyMembersScreenState extends State<FamilyMembersScreen> {
             color: const Color(0xFF1F2937),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: _members.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 16),
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final member = _members[index];
             print('渲染成员卡片 #$index: ${member.name}, 角色: ${member.role}, ID: ${member.id}');

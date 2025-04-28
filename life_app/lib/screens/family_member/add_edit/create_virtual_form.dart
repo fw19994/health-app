@@ -59,16 +59,41 @@ class _CreateVirtualFormState extends State<CreateVirtualForm> {
       children: [
         // 头像上传
         Center(
-          child: AvatarUploader(
-            selectedAvatar: widget.selectedAvatar,
-            avatarUrl: widget.avatarUrl,
-            isUploading: widget.isUploading,
-            onAvatarSelected: widget.onAvatarSelected,
-            onUrlReceived: widget.onAvatarUrlReceived,
-            onUploadingChanged: widget.onUploadingChanged,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 8),
+            child: AvatarUploader(
+              selectedAvatar: widget.selectedAvatar,
+              avatarUrl: widget.avatarUrl,
+              isUploading: widget.isUploading,
+              onAvatarSelected: widget.onAvatarSelected,
+              onUrlReceived: widget.onAvatarUrlReceived,
+              onUploadingChanged: widget.onUploadingChanged,
+            ),
           ),
         ),
-        const SizedBox(height: 24),
+        
+        // 虚拟成员提示
+        widget.isEditing ? const SizedBox.shrink() : Center(
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEF9C3),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Text(
+              '虚拟成员不会自动接收邀请通知',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFFCA8A04),
+              ),
+            ),
+          ),
+        ),
+        
+        // 分隔线
+        Divider(color: Colors.grey.shade200, height: 32),
         
         // 表单字段
         components.FormField(
@@ -86,35 +111,57 @@ class _CreateVirtualFormState extends State<CreateVirtualForm> {
         ),
         const SizedBox(height: 16),
         
-        // 性别字段
-        const Text(
-          '性别',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF4B5563),
-          ),
-        ),
-        const SizedBox(height: 6),
-        components.GenderDropdown(
-          selectedGender: widget.selectedGender,
-          onChanged: widget.onGenderChanged,
-        ),
-        const SizedBox(height: 16),
-        
-        // 家庭关系
-        const Text(
-          '家庭关系',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF4B5563),
-          ),
-        ),
-        const SizedBox(height: 6),
-        components.RelationDropdown(
-          selectedRelation: widget.selectedRelation,
-          onChanged: widget.onRelationChanged,
+        // 性别和家庭关系放在同一行
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 性别字段
+            Expanded(
+              flex: 1,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '性别',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF4B5563),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  components.GenderDropdown(
+                    selectedGender: widget.selectedGender,
+                    onChanged: widget.onGenderChanged,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            
+            // 家庭关系
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '家庭关系',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF4B5563),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  components.RelationDropdown(
+                    selectedRelation: widget.selectedRelation,
+                    onChanged: widget.onRelationChanged,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
         
@@ -133,7 +180,7 @@ class _CreateVirtualFormState extends State<CreateVirtualForm> {
           placeholder: '简短描述，如"大学生"',
           isRequired: false,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         
         // 虚拟成员标记
         Container(
@@ -141,6 +188,7 @@ class _CreateVirtualFormState extends State<CreateVirtualForm> {
           decoration: BoxDecoration(
             color: const Color(0xFFFEF3C7).withOpacity(0.5),
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFFBD38D), width: 1),
           ),
           child: Row(
             children: [

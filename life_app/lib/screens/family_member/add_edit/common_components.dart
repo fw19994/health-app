@@ -109,7 +109,7 @@ class GenderDropdown extends StatelessWidget {
 }
 
 /// 家庭关系下拉菜单组件
-class RelationDropdown extends StatelessWidget {
+class RelationDropdown extends StatefulWidget {
   final String? selectedRelation;
   final Function(String?) onChanged;
   
@@ -120,39 +120,202 @@ class RelationDropdown extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: ButtonTheme(
-          alignedDropdown: true,
-          child: DropdownButton<String>(
-            isExpanded: true,
-            hint: const Text('选择家庭关系'),
-            value: selectedRelation?.isEmpty == true ? null : selectedRelation,
-            items: const [
-              DropdownMenuItem(value: '配偶', child: Text('配偶')),
-              DropdownMenuItem(value: '父亲', child: Text('父亲')),
-              DropdownMenuItem(value: '母亲', child: Text('母亲')),
-              DropdownMenuItem(value: '儿子', child: Text('儿子')),
-              DropdownMenuItem(value: '女儿', child: Text('女儿')),
-              DropdownMenuItem(value: '兄弟', child: Text('兄弟')),
-              DropdownMenuItem(value: '姐妹', child: Text('姐妹')),
-              DropdownMenuItem(value: '祖父', child: Text('祖父')),
-              DropdownMenuItem(value: '祖母', child: Text('祖母')),
-              DropdownMenuItem(value: '其他', child: Text('其他'))
+  State<RelationDropdown> createState() => _RelationDropdownState();
+}
+
+class _RelationDropdownState extends State<RelationDropdown> {
+  final List<Map<String, dynamic>> _relations = const [
+    {'value': '配偶', 'icon': Icons.favorite, 'color': Color(0xFFEC4899)},
+    {'value': '父亲', 'icon': Icons.person, 'color': Color(0xFF3B82F6)},
+    {'value': '母亲', 'icon': Icons.face, 'color': Color(0xFFEC4899)},
+    {'value': '儿子', 'icon': Icons.child_care, 'color': Color(0xFF3B82F6)},
+    {'value': '女儿', 'icon': Icons.child_care, 'color': Color(0xFFEC4899)},
+    {'value': '兄弟', 'icon': Icons.people, 'color': Color(0xFF3B82F6)},
+    {'value': '姐妹', 'icon': Icons.people, 'color': Color(0xFFEC4899)},
+    {'value': '祖父', 'icon': Icons.elderly, 'color': Color(0xFF3B82F6)},
+    {'value': '祖母', 'icon': Icons.elderly_woman, 'color': Color(0xFFEC4899)},
+    {'value': '其他', 'icon': Icons.person_outline, 'color': Color(0xFF6B7280)},
+  ];
+
+  void _showRelationPicker() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.6,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 顶部手柄
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              
+              // 标题
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(
+                  '选择家庭关系',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF1F2937),
+                  ),
+                ),
+              ),
+              
+              // 分隔线
+              Divider(height: 1, color: Colors.grey.shade200),
+              
+              // 关系选项列表
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Wrap(
+                      spacing: 12,
+                      runSpacing: 16,
+                      children: _relations.map((relation) {
+                        bool isSelected = widget.selectedRelation == relation['value'];
+                        return GestureDetector(
+                          onTap: () {
+                            widget.onChanged(relation['value']);
+                            Navigator.pop(context);
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 64,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  color: relation['color'].withOpacity(isSelected ? 1.0 : 0.1),
+                                  shape: BoxShape.circle,
+                                  border: isSelected
+                                      ? Border.all(color: relation['color'], width: 2)
+                                      : null,
+                                ),
+                                child: Icon(
+                                  relation['icon'],
+                                  color: isSelected ? Colors.white : relation['color'],
+                                  size: 28,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                relation['value'],
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: isSelected
+                                      ? relation['color']
+                                      : const Color(0xFF4B5563),
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ),
             ],
-            onChanged: onChanged,
-            icon: const Icon(
+          ),
+        );
+      },
+    );
+  }
+
+  // 获取当前选中的关系图标
+  IconData _getSelectedIcon() {
+    if (widget.selectedRelation == null || widget.selectedRelation!.isEmpty) {
+      return Icons.people_outline;
+    }
+    
+    for (var relation in _relations) {
+      if (relation['value'] == widget.selectedRelation) {
+        return relation['icon'];
+      }
+    }
+    
+    return Icons.people_outline;
+  }
+  
+  // 获取当前选中的关系颜色
+  Color _getSelectedColor() {
+    if (widget.selectedRelation == null || widget.selectedRelation!.isEmpty) {
+      return Colors.grey.shade400;
+    }
+    
+    for (var relation in _relations) {
+      if (relation['value'] == widget.selectedRelation) {
+        return relation['color'];
+      }
+    }
+    
+    return Colors.grey.shade400;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _showRelationPicker,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  _getSelectedIcon(),
+                  size: 20,
+                  color: _getSelectedColor(),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  widget.selectedRelation?.isNotEmpty == true
+                      ? widget.selectedRelation!
+                      : '选择家庭关系',
+                  style: TextStyle(
+                    color: widget.selectedRelation?.isNotEmpty == true
+                        ? const Color(0xFF1F2937)
+                        : Colors.grey.shade400,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            const Icon(
               Icons.keyboard_arrow_down,
               color: Color(0xFF6B7280),
+              size: 20,
             ),
-            iconSize: 20,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-          ),
+          ],
         ),
       ),
     );

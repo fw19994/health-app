@@ -51,48 +51,8 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
   bool _isLoadingCategories = true;
   
   // 近期支出数据
-  final List<FamilyExpense> _recentExpenses = [
-    FamilyExpense(
-      title: '房租',
-      category: '住房',
-      amount: 2800.0,
-      date: DateTime.now().subtract(const Duration(days: 4)),
-      payerName: '李明',
-      icon: FontAwesomeIcons.home,
-      iconBgColor: const Color(0xFFFEE2E2),
-      iconColor: const Color(0xFFEF4444),
-    ),
-    FamilyExpense(
-      title: '超市采购',
-      category: '日常购物',
-      amount: 486.30,
-      date: DateTime.now().subtract(const Duration(days: 3)),
-      payerName: '王丽',
-      icon: FontAwesomeIcons.basketShopping,
-      iconBgColor: const Color(0xFFDCFCE7),
-      iconColor: const Color(0xFF3B82F6),
-    ),
-    FamilyExpense(
-      title: '外出聚餐',
-      category: '餐饮',
-      amount: 358.0,
-      date: DateTime.now(),
-      payerName: '李明',
-      icon: FontAwesomeIcons.utensils,
-      iconBgColor: const Color(0xFFFEF3C7),
-      iconColor: const Color(0xFFF59E0B),
-    ),
-    FamilyExpense(
-      title: '牙医检查',
-      category: '医疗',
-      amount: 280.0,
-      date: DateTime.now(),
-      payerName: '王丽',
-      icon: FontAwesomeIcons.heartPulse,
-      iconBgColor: const Color(0xFFFCE7F3),
-      iconColor: const Color(0xFFEC4899),
-    ),
-  ];
+  List<FamilyExpense> _recentExpenses = [];
+  bool _isLoadingRecentExpenses = true;
   
   // 预算规划数据
   final List<BudgetItem> _budgetItems = [
@@ -175,6 +135,7 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
     _loadFamilyMembers();
     _loadMonthlyBudget();
     _loadExpenseCategories();
+    _loadRecentExpenses();
   }
   
   // 加载家庭成员数据
@@ -510,6 +471,157 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
     }
   }
   
+  // 加载近期支出数据
+  Future<void> _loadRecentExpenses() async {
+    setState(() {
+      _isLoadingRecentExpenses = true;
+    });
+    
+    try {
+      // 调用API获取近期交易
+      final response = await _financeService.getRecentTransactions(
+        context: context,
+        type: 'expense', // 只获取支出类型的交易
+      );
+      
+      if (_enableDebug) {
+        print('获取近期支出响应：${response.success ? "成功" : "失败"}');
+        if (response.success && response.data != null) {
+          print('近期支出数据: ${response.data}');
+        }
+      }
+      
+      if (response.success && response.data != null) {
+        final List<dynamic> transactionsData = response.data ?? [];
+        final List<FamilyExpense> expenses = [];
+        
+        // 预先加载所有图标数据
+        final iconService = IconService();
+        final allIcons = await iconService.getUserAvailableIcons(context: context);
+        
+        // 先确保成员信息已加载
+        if (_familyMembers.isEmpty) {
+          print('警告: 家庭成员列表为空，需要先加载成员数据');
+          await _loadFamilyMembers();
+        }
+        
+        // 调试日志 - 打印已加载的所有家庭成员
+        if (_enableDebug) {
+          print('当前已加载的家庭成员列表:');
+          for (var member in _familyMembers) {
+            print('成员ID=${member.id}, 名称=${member.name}, 角色=${member.role}');
+          }
+        }
+        
+        for (var item in transactionsData) {
+          try {
+            final String title = item['merchant'] ?? item['notes'] ?? '未命名支出';
+            final String category = item['category_name'] ?? '未分类';
+            final double amount = (item['amount'] ?? 0.0).toDouble();
+            final DateTime date = item['date'] != null
+                ? DateTime.parse(item['date'])
+                : DateTime.now();
+            
+            // 获取支付人信息
+            final int recorderId = item['recorder_id'] ?? 0;
+            
+            if (_enableDebug) {
+              print('处理交易项: title=$title, recorderId=$recorderId');
+            }
+            
+            String payerName = '未知';
+            String avatarUrl = '';
+            
+            // 直接使用id字段与recorder_id匹配
+            if (recorderId > 0) {
+              var memberMatch = _familyMembers.where((m) => m.id == recorderId).toList();
+              if (memberMatch.isNotEmpty) {
+                payerName = memberMatch.first.nickname.isNotEmpty 
+                    ? memberMatch.first.nickname 
+                    : memberMatch.first.name;
+                avatarUrl = memberMatch.first.avatarUrl;
+                if (_enableDebug) {
+                  print('找到匹配成员: ${memberMatch.first.name}, ID=${memberMatch.first.id}, 头像=${memberMatch.first.avatarUrl}');
+                }
+              } else {
+                if (_enableDebug) {
+                  print('未找到ID为 $recorderId 的成员');
+                }
+                // 保留API返回的原始名称
+                payerName = item['recorder_name'] ?? '未知';
+              }
+            } else {
+              if (_enableDebug) {
+                print('recorderId无效，使用API返回的名称');
+              }
+              payerName = item['recorder_name'] ?? '未知';
+            }
+            
+            final String notes = item['notes'] ?? '';
+            
+            // 获取图标信息
+            final int iconId = item['icon_id'] ?? 0;
+            var iconData = FontAwesomeIcons.receipt;
+            var iconColor = const Color(0xFF3B82F6);
+            var iconBgColor = const Color(0xFFDCFCE7);
+            var iconName = '';
+            
+            if (iconId > 0) {
+              var iconModel = allIcons.where((icon) => icon.id == iconId).toList();
+              var foundIcon = iconModel.isNotEmpty ? iconModel.first : null;
+              
+              if (foundIcon != null) {
+                iconData = foundIcon.icon;
+                iconColor = foundIcon.color;
+                iconBgColor = foundIcon.color.withOpacity(0.1);
+                iconName = foundIcon.name ?? '';
+              }
+            }
+            
+            // 创建支出数据
+            expenses.add(FamilyExpense(
+              title: title,
+              category: category,
+              amount: amount,
+              date: date,
+              payerName: payerName,
+              payerId: recorderId,
+              avatarUrl: avatarUrl,
+              icon: iconData,
+              iconColor: iconColor,
+              iconBgColor: iconBgColor,
+              iconName: iconName,
+              notes: notes,
+            ));
+          } catch (e) {
+            print('处理近期支出项时出错: $e');
+          }
+        }
+        
+        // 排序：按日期从新到旧
+        expenses.sort((a, b) => b.date.compareTo(a.date));
+        
+        // 限制显示数量为最近的4条
+        final recentExpenses = expenses.take(4).toList();
+        
+        setState(() {
+          _recentExpenses = recentExpenses;
+          _isLoadingRecentExpenses = false;
+        });
+      } else {
+        print('加载近期支出失败: ${response.message}');
+        setState(() {
+          _isLoadingRecentExpenses = false;
+        });
+      }
+    } catch (e) {
+      print('加载近期支出异常: $e');
+      setState(() {
+        _isLoadingRecentExpenses = false;
+      });
+    }
+  }
+  
   // 选择月份
   void _selectMonth(DateTime month) {
     setState(() {
@@ -591,6 +703,7 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
                     // 近期支出
                     RecentExpensesWidget(
                       expenses: _recentExpenses,
+                      isLoading: _isLoadingRecentExpenses,
                       onViewAll: () {
                         Navigator.push(
                           context,
