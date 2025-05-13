@@ -142,7 +142,8 @@ func UpdateUserProfile(c *gin.Context) {
 			utils.ParameterError(c, "姓名不能超过100个字符")
 			return
 		}
-		updateData["nickname"] = *req.Nickname
+		//updateData["nickname"] = *req.Nickname
+
 	}
 	// 更新用户基本信息
 	profileResp, err := service.UpdateUserProfile(uint(userID), updateData)
