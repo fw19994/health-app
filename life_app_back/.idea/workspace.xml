@@ -5,15 +5,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2e1b89c6-fa57-4e16-9de3-db71ea4265ae" name="更改" comment="init">
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/models/savings_goal.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/models/savings_goal.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/budget_settings_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/budget_settings_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/family_member/add_edit/add_family_member_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/family_member/add_edit/add_family_member_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/family_member/add_edit/common_components.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/family_member/add_edit/common_components.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/family_member/add_edit/create_virtual_form.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/family_member/add_edit/create_virtual_form.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/family_members_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/family_members_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/family_members_screen_backup.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/family_members_screen_backup.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/budget_planning_widget.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/budget_planning_widget.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/family_finance_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/family_finance_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/models.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/models.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/recent_expenses_widget.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/recent_expenses_widget.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/quick_actions_widget.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/quick_actions_widget.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/savings_goals_widget.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/savings_goals_widget.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/home_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/profile/edit_basic_info_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/profile/edit_basic_info_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/profile/widgets/profile_header.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/profile/widgets/profile_header.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/savings_goals_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/savings_goals_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/api_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/budget_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/budget_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/finance_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/finance_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/widgets/budget/budget_category_modal.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/widgets/budget/budget_category_modal.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/widgets/budget/savings_goal_modal.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/widgets/budget/savings_goal_modal.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/lib/widgets/family_member_card.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/widgets/family_member_card.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/handler/budget_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/handler/budget_handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/handler/savings_goal_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/handler/savings_goal_handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/repository/budget_category_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/repository/budget_category_repository.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -176,12 +194,12 @@
         </line-breakpoint>
         <line-breakpoint type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/internal/handler/budget_handler.go</url>
-          <line>293</line>
+          <line>301</line>
           <option name="timeStamp" value="25" />
         </line-breakpoint>
         <line-breakpoint type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/internal/handler/savings_goal_handler.go</url>
-          <line>156</line>
+          <line>164</line>
           <option name="timeStamp" value="26" />
         </line-breakpoint>
         <line-breakpoint type="DlvLineBreakpoint">
@@ -243,6 +261,36 @@
           <url>file://$PROJECT_DIR$/internal/repository/finance_repository.go</url>
           <line>463</line>
           <option name="timeStamp" value="50" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/handler/auth_handler.go</url>
+          <line>133</line>
+          <option name="timeStamp" value="60" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/handler/savings_goal_handler.go</url>
+          <line>16</line>
+          <option name="timeStamp" value="61" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/handler/budget_handler.go</url>
+          <line>17</line>
+          <option name="timeStamp" value="62" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/service/budget_service.go</url>
+          <line>66</line>
+          <option name="timeStamp" value="63" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/service/budget_service.go</url>
+          <line>67</line>
+          <option name="timeStamp" value="64" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/service/savings_goal_service.go</url>
+          <line>38</line>
+          <option name="timeStamp" value="65" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

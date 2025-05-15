@@ -23,18 +23,19 @@ func GetBudgetCategories(c *gin.Context) {
 	// 获取查询参数
 	year, _ := strconv.Atoi(c.DefaultQuery("year", strconv.Itoa(time.Now().Year())))
 	month, _ := strconv.Atoi(c.DefaultQuery("month", strconv.Itoa(int(time.Now().Month()))))
-	categoryType := c.DefaultQuery("type", "all") // all, personal 或 family
+	categoryType := c.DefaultQuery("is_family_budget", "false") // all, personal 或 family
 
 	// 调用服务
 	budgetService := &service.BudgetService{}
 	var categories []model.BudgetCategoryResponse
 	var err error
+	ss, _ := strconv.ParseBool(categoryType)
 
 	// 根据类型获取不同的预算列表
-	switch categoryType {
-	case "personal":
+	switch ss {
+	case false:
 		categories, err = budgetService.GetUserBudgetCategories(userID, year, month)
-	case "family":
+	case true:
 		categories, err = budgetService.GetFamilyBudgetCategories(userID, year, month)
 	default: // "all"
 		categories, err = budgetService.GetAllBudgetCategoriesForUser(userID, year, month)
@@ -88,7 +89,6 @@ func CreateBudgetCategory(c *gin.Context) {
 		Month             int     `json:"month" binding:"required,min=1,max=12"`
 		ReminderThreshold int     `json:"reminder_threshold" binding:"required,min=0,max=100"`
 		IsFamilyBudget    bool    `json:"is_family_budget"`
-		FamilyID          uint    `json:"family_id"`
 	}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -108,9 +108,17 @@ func CreateBudgetCategory(c *gin.Context) {
 		Month:             request.Month,
 		ReminderThreshold: request.ReminderThreshold,
 		IsFamilyBudget:    request.IsFamilyBudget,
-		FamilyID:          request.FamilyID,
 	}
-
+	if request.IsFamilyBudget {
+		userFamilyMembers, err := new(service.FamilyMemberService).GetUserFamilyMembers(userID)
+		if err != nil {
+			utils.ServerError(c, err)
+			return
+		}
+		if len(userFamilyMembers) > 0 {
+			category.FamilyID = userFamilyMembers[0].OwnerID
+		}
+	}
 	// 调用服务
 	budgetService := &service.BudgetService{}
 	if err := budgetService.CreateBudgetCategory(category); err != nil {

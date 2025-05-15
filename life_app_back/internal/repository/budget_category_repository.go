@@ -21,7 +21,7 @@ func (r *BudgetCategoryRepository) GetBudgetCategoriesByUserAndMonth(userID uint
 func (r *BudgetCategoryRepository) GetFamilyBudgetCategoriesByMonth(familyID uint, year, month int) ([]model.BudgetCategory, error) {
 	var categories []model.BudgetCategory
 	db := model.DB
-	if err := db.Where("family_id = ? AND year = ? AND month = ? AND is_family_budget = ?", familyID, year, month, true).Order("created_at desc").Find(&categories).Error; err != nil {
+	if err := db.Debug().Where("family_id = ? AND year = ? AND month = ? AND is_family_budget = ?", familyID, year, month, true).Order("created_at desc").Find(&categories).Error; err != nil {
 		return nil, err
 	}
 	return categories, nil

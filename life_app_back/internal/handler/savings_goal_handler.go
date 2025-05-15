@@ -20,8 +20,8 @@ func GetSavingsGoals(c *gin.Context) {
 	}
 
 	// 获取查询参数
-	goalType := c.DefaultQuery("type", "all") // all, personal 或 family
-	status := c.DefaultQuery("status", "")    // 可选: in_progress, completed, deleted
+	goalType := c.DefaultQuery("is_family_savings", "false") // all, personal 或 family
+	status := c.DefaultQuery("status", "")                   // 可选: in_progress, completed, deleted
 
 	// 调用服务
 	savingsService := &service.SavingsGoalService{}
@@ -29,10 +29,11 @@ func GetSavingsGoals(c *gin.Context) {
 	var err error
 
 	// 根据类型获取不同的储蓄目标列表
-	switch goalType {
-	case "personal":
+	ss, _ := strconv.ParseBool(goalType)
+	switch ss {
+	case false:
 		goals, err = savingsService.GetUserSavingsGoals(userID)
-	case "family":
+	case true:
 		goals, err = savingsService.GetFamilySavingsGoals(userID)
 	default: // "all"
 		goals, err = savingsService.GetAllSavingsGoalsForUser(userID)
@@ -99,10 +100,17 @@ func CreateSavingsGoal(c *gin.Context) {
 		MonthlyTarget: request.MonthlyTarget,
 		TargetDate:    request.TargetDate,
 		IsFamilyGoal:  request.IsFamilySavings,
-		FamilyID:      request.FamilyID,
 	}
-
-	// 调用服务
+	if request.IsFamilySavings {
+		userFamilyMembers, err := new(service.FamilyMemberService).GetUserFamilyMembers(userID)
+		if err != nil {
+			utils.ServerError(c, err)
+			return
+		}
+		if len(userFamilyMembers) > 0 {
+			goal.FamilyID = userFamilyMembers[0].OwnerID
+		}
+	} // 调用服务
 	savingsService := &service.SavingsGoalService{}
 	if err := savingsService.CreateSavingsGoal(goal); err != nil {
 		utils.ServerError(c, err)
