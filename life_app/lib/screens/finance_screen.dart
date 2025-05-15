@@ -585,11 +585,20 @@ class _FinanceScreenState extends State<FinanceScreen> {
               label: '记一笔',
               bgColor: const Color(0xFFF8FAFC),
               iconColor: AppTheme.primaryColor,
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                // 等待记一笔页面返回结果
+                final result = await Navigator.push<bool>(
                   context,
                   MaterialPageRoute(builder: (context) => const ExpenseTrackingScreen()),
                 );
+                
+                // 如果返回结果为true（表示记账成功），则刷新所有财务数据
+                if (result == true) {
+                  _loadCurrentBudget();
+                  _loadTransactionSummary();
+                  _loadExpenseAnalysis();
+                  _loadRecentTransactions();
+                }
               },
             ),
             const SizedBox(width: 10),

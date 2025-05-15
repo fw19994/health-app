@@ -13,7 +13,12 @@ import '../models/icon.dart';
 import 'package:intl/intl.dart';
 
 class SavingsGoalsScreen extends StatefulWidget {
-  const SavingsGoalsScreen({super.key});
+  final bool isFamilySavings; // 添加家庭储蓄标识
+  
+  const SavingsGoalsScreen({
+    super.key,
+    this.isFamilySavings = false, // 默认为个人储蓄目标
+  });
 
   @override
   State<SavingsGoalsScreen> createState() => _SavingsGoalsScreenState();
@@ -50,7 +55,11 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
     
     try {
       // 获取储蓄目标数据，只加载进行中的目标
-      final goals = await _budgetService.getSavingsGoals(status: 'in_progress', context: context);
+      final goals = await _budgetService.getSavingsGoals(
+        status: 'in_progress', 
+        context: context,
+        isFamilySavings: widget.isFamilySavings, // 添加家庭标识
+      );
       
       // 为每个目标加载真实图标
       for (var goal in goals) {
@@ -84,7 +93,11 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
     
     try {
       // 获取已完成的储蓄目标数据
-      final goals = await _budgetService.getSavingsGoals(status: 'completed', context: context);
+      final goals = await _budgetService.getSavingsGoals(
+        status: 'completed', 
+        context: context,
+        isFamilySavings: widget.isFamilySavings, // 添加家庭标识
+      );
       
       // 为每个已完成目标加载真实图标
       for (var goal in goals) {
@@ -882,7 +895,10 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => SavingsGoalModal(goal: goal),
+      builder: (context) => SavingsGoalModal(
+        goal: goal,
+        isFamilySavings: widget.isFamilySavings, // 传递家庭储蓄标识
+      ),
     );
     
     // 模态框关闭后重新加载数据

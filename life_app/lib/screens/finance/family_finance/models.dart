@@ -82,6 +82,8 @@ class BudgetItem {
   final double currentAmount;
   final double budgetAmount;
   final bool isOverBudget;
+  final bool isFamilyBudget;
+  final Color iconColor;
   
   BudgetItem({
     required this.category,
@@ -89,24 +91,7 @@ class BudgetItem {
     required this.currentAmount,
     required this.budgetAmount,
     required this.isOverBudget,
-  });
-}
-
-// 储蓄目标数据模型
-class SavingsGoal {
-  final String title;
-  final IconData icon;
-  final double currentAmount;
-  final double targetAmount;
-  final DateTime deadline;
-  final Color color;
-  
-  SavingsGoal({
-    required this.title,
-    required this.icon,
-    required this.currentAmount,
-    required this.targetAmount,
-    required this.deadline,
-    required this.color,
+    this.isFamilyBudget = false,
+    this.iconColor = const Color(0xFF6B7280), // 默认图标颜色
   });
 } 

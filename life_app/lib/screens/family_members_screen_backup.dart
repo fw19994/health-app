@@ -481,7 +481,7 @@ class _FamilyMembersScreenState extends State<FamilyMembersScreen> {
                     const SizedBox(height: 4),
                     _buildInfoRow('加入时间:', member.joinTime),
                     const SizedBox(height: 4),
-                    _buildInfoRow('权限:', _getPermissionText(member.permission)),
+                    // _buildInfoRow('权限:', _getPermissionText(member.permission)),
                     if (member.userId != null && member.userId! > 0)
                       ...[
                         const SizedBox(height: 4),

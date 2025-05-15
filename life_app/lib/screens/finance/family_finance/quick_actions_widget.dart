@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../../expense_tracking_screen.dart';
 
 class QuickActionsWidget extends StatelessWidget {
   final Function() onAddExpense;
@@ -22,7 +23,7 @@ class QuickActionsWidget extends StatelessWidget {
             icon: FontAwesomeIcons.plus,
             label: '添加支出',
             color: const Color(0xFF16A34A),
-            onTap: onAddExpense,
+            onTap: () => _handleAddExpense(context),
           ),
         ),
         const SizedBox(width: 12),
@@ -45,6 +46,21 @@ class QuickActionsWidget extends StatelessWidget {
         ),
       ],
     );
+  }
+  
+  // 处理添加支出的方法
+  Future<void> _handleAddExpense(BuildContext context) async {
+    // 使用await等待记一笔页面返回结果
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (context) => const ExpenseTrackingScreen()),
+    );
+    
+    // 如果返回结果为true（表示记账成功），则调用刷新方法
+    if (result == true) {
+      print('记账成功，触发刷新!');
+      onAddExpense();
+    }
   }
   
   Widget _buildQuickActionCard({

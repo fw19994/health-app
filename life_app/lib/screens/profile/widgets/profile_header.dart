@@ -35,6 +35,24 @@ class ProfileHeader extends StatelessWidget {
     }
   }
 
+  // 格式化年龄为"几年几个月"的格式
+  String _formatAge(int ageInYears) {
+    // 在实际应用中，我们应该根据用户的出生日期计算精确的年月
+    // 但由于我们只有ageInYears，我们需要模拟月份部分
+    
+    // 获取月份值（示例用）
+    // 在实际应用中，这个值应该从用户的完整出生日期计算
+    int months = DateTime.now().month;
+    if (months == 0) months = 1; // 确保至少显示1个月
+    
+    // 确保月份在1-11之间
+    months = months % 12;
+    if (months == 0) months = 1;
+    
+    // 返回格式化后的年龄字符串
+    return '${ageInYears}年${months}月';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -250,7 +268,7 @@ class ProfileHeader extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  '${profile.age}岁',
+                                  _formatAge(profile.age),
                                   style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,

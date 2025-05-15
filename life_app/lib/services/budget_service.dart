@@ -20,9 +20,12 @@ class BudgetService {
   }
 
   // 获取预算类别列表
-  Future<List<BudgetCategory>> getBudgetCategories({BuildContext? context}) async {
+  Future<List<BudgetCategory>> getBudgetCategories({BuildContext? context, bool isFamilyBudget = false}) async {
     final response = await _api.get(
       path: '/api/v1/budget/categories',
+      params: {
+        'is_family_budget': isFamilyBudget.toString()
+      },
       context: context
     );
     if (response['code'] != 0) {
@@ -33,7 +36,11 @@ class BudgetService {
   }
 
   // 获取储蓄目标列表
-  Future<List<SavingsGoal>> getSavingsGoals({String? status, BuildContext? context}) async {
+  Future<List<SavingsGoal>> getSavingsGoals({
+    String? status, 
+    BuildContext? context,
+    bool isFamilySavings = false, // 添加家庭储蓄标识参数
+  }) async {
     try {
       // 构建查询参数
       Map<String, String> queryParams = {};
@@ -41,8 +48,11 @@ class BudgetService {
         queryParams['status'] = status;
       }
       
+      // 添加家庭储蓄标识参数
+      queryParams['is_family_savings'] = isFamilySavings.toString();
+      
       // 打印查询信息，方便调试
-      print('开始获取储蓄目标: status=$status, 请求路径=/api/v1/savings/goals');
+      print('开始获取储蓄目标: status=$status, is_family_savings=$isFamilySavings, 请求路径=/api/v1/savings/goals');
       
       final response = await _api.get(
         path: '/api/v1/savings/goals',
@@ -100,7 +110,7 @@ class BudgetService {
   }
 
   // 更新预算类别
-  Future<void> updateBudgetCategory(BudgetCategory category, {BuildContext? context}) async {
+  Future<void> updateBudgetCategory(BudgetCategory category, {BuildContext? context, bool? isFamilyBudget}) async {
     final data = {
       'name': category.name,
       'description': category.description ?? '',
@@ -109,6 +119,12 @@ class BudgetService {
       'color': category.color.value.toRadixString(16),
       'reminder_threshold': category.reminderEnabled ? 80 : 0,
     };
+    
+    // 如果提供了isFamilyBudget参数，则添加到请求数据中
+    if (isFamilyBudget != null) {
+      data['is_family_budget'] = isFamilyBudget;
+    }
+    
     final response = await _api.put(
       path: '/api/v1/budget/category/${category.id}',
       data: data,
@@ -120,7 +136,7 @@ class BudgetService {
   }
 
   // 添加预算类别
-  Future<void> addBudgetCategory(BudgetCategory category, {BuildContext? context}) async {
+  Future<void> addBudgetCategory(BudgetCategory category, {BuildContext? context, bool isFamilyBudget = false}) async {
     final data = {
       'name': category.name,
       'description': category.description ?? '',
@@ -130,7 +146,7 @@ class BudgetService {
       'year': DateTime.now().year,
       'month': DateTime.now().month,
       'reminder_threshold': category.reminderEnabled ? 80 : 0,
-      'is_family_budget': false,
+      'is_family_budget': isFamilyBudget,
     };
     final response = await _api.post(
       path: '/api/v1/budget/category',
@@ -154,7 +170,10 @@ class BudgetService {
   }
 
   // 更新储蓄目标
-  Future<void> updateSavingsGoal(SavingsGoal goal, {BuildContext? context}) async {
+  Future<void> updateSavingsGoal(
+    SavingsGoal goal, 
+    {BuildContext? context, bool isFamilySavings = false} // 添加家庭储蓄标识参数
+  ) async {
     try {
       final data = {
         'name': goal.name,
@@ -165,7 +184,7 @@ class BudgetService {
         'current_amount': goal.currentAmount,
         'monthly_target': goal.monthlyTarget,
         'target_date': '${goal.targetDate.toIso8601String()}Z', // 添加Z表示UTC时区
-        'is_family_savings': false, // 默认为个人储蓄目标
+        'is_family_savings': isFamilySavings, // 使用传入的家庭储蓄标识
       };
       
       final response = await _api.put(
@@ -184,7 +203,10 @@ class BudgetService {
   }
 
   // 添加储蓄目标
-  Future<void> addSavingsGoal(SavingsGoal goal, {BuildContext? context}) async {
+  Future<void> addSavingsGoal(
+    SavingsGoal goal, 
+    {BuildContext? context, bool isFamilySavings = false} // 添加家庭储蓄标识参数
+  ) async {
     try {
       final data = {
         'name': goal.name,
@@ -195,7 +217,7 @@ class BudgetService {
         'current_amount': goal.currentAmount,
         'monthly_target': goal.monthlyTarget,
         'target_date': '${goal.targetDate.toIso8601String()}Z', // 添加Z表示UTC时区
-        'is_family_savings': false, // 默认为个人储蓄目标
+        'is_family_savings': isFamilySavings, // 使用传入的家庭储蓄标识
       };
       
       final response = await _api.post(
@@ -239,7 +261,7 @@ class BudgetService {
   }
 
   /// 获取月度预算和消费数据
-  Future<MonthlyBudget> getMonthlyBudget({int? year, int? month, BuildContext? context}) async {
+  Future<MonthlyBudget> getMonthlyBudget({int? year, int? month, BuildContext? context, bool isFamilyBudget = false}) async {
     try {
       // 构建查询参数
       Map<String, String> queryParams = {};
@@ -249,6 +271,7 @@ class BudgetService {
       if (month != null) {
         queryParams['month'] = month.toString();
       }
+      queryParams['is_family_budget'] = isFamilyBudget.toString();
       
       try {
         // 尝试调用monthly接口
@@ -283,7 +306,7 @@ class BudgetService {
         print('访问monthly接口失败，使用替代方案: $error');
         
         // 方案B: 如果monthly接口有问题，使用categories接口模拟数据
-        final categories = await getBudgetCategories(context: context);
+        final categories = await getBudgetCategories(context: context, isFamilyBudget: isFamilyBudget);
         
         double totalBudget = 0;
         double totalSpent = 0;

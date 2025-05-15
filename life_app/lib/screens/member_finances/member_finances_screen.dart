@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../../models/family_member_model.dart' as app_model;
 
 import 'widgets/header.dart';
 import 'widgets/family_overview.dart';
@@ -9,7 +10,13 @@ import 'widgets/member_card.dart';
 import 'models/family_member.dart';
 
 class MemberFinancesScreen extends StatefulWidget {
-  const MemberFinancesScreen({super.key});
+  // 可选参数：外部传入的选定成员
+  final app_model.FamilyMember? selectedMember;
+
+  const MemberFinancesScreen({
+    super.key,
+    this.selectedMember,
+  });
 
   @override
   State<MemberFinancesScreen> createState() => _MemberFinancesScreenState();
@@ -110,6 +117,39 @@ class _MemberFinancesScreenState extends State<MemberFinancesScreen> {
       mainConsumption: '娱乐 / 食品',
     ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // 如果外部传入了选定的成员，尝试找到对应的索引
+    if (widget.selectedMember != null) {
+      final memberName = widget.selectedMember!.nickname.isNotEmpty 
+          ? widget.selectedMember!.nickname 
+          : widget.selectedMember!.name;
+      
+      // 寻找匹配的成员索引
+      for (int i = 1; i < _familyMembers.length; i++) {
+        if (_familyMembers[i].name.toLowerCase() == memberName.toLowerCase()) {
+          _selectedMemberIndex = i;
+          break;
+        }
+      }
+      
+      // 如果没有找到精确匹配，则查找包含关系
+      if (_selectedMemberIndex == 0 && memberName.isNotEmpty) {
+        for (int i = 1; i < _familyMembers.length; i++) {
+          if (_familyMembers[i].name.toLowerCase().contains(memberName.toLowerCase()) ||
+              memberName.toLowerCase().contains(_familyMembers[i].name.toLowerCase())) {
+            _selectedMemberIndex = i;
+            break;
+          }
+        }
+      }
+      
+      // 确保选中了有效的成员
+      print('根据传入的成员 "${memberName}" 选择了索引 $_selectedMemberIndex');
+    }
+  }
 
   void _onSelectMember(int index) {
     setState(() {

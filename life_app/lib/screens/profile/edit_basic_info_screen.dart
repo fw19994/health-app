@@ -352,18 +352,18 @@ class _EditBasicInfoScreenState extends State<EditBasicInfoScreen> {
                           _buildSectionTitle('基本信息'),
                           _buildInfoCard([
                         // 姓名
-                        _buildTextField(
-                          controller: _nameController,
-                          label: '姓名',
-                          hintText: '请输入您的姓名',
-                              icon: Icons.person_outline,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return '请输入姓名';
-                            }
-                            return null;
-                          },
-                        ),
+                        // _buildTextField(
+                        //   controller: _nameController,
+                        //   label: '姓名',
+                        //   hintText: '请输入您的姓名',
+                        //       icon: Icons.person_outline,
+                        //   validator: (value) {
+                        //     if (value == null || value.isEmpty) {
+                        //       return '请输入姓名';
+                        //     }
+                        //     return null;
+                        //   },
+                        // ),
                         
                         // 性别选择
                         _buildLabel('性别'),

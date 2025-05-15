@@ -14,6 +14,7 @@ class SavingsGoal {
   final int iconId;
   final String colorCode;
   final DateTime? completedAt; // 完成时间，仅对已完成目标有效
+  final bool isFamilySavings; // 是否为家庭储蓄目标
   bool _iconLoaded = false; // 跟踪图标是否已加载
 
   SavingsGoal({
@@ -29,6 +30,7 @@ class SavingsGoal {
     required this.iconId,
     required this.colorCode,
     this.completedAt,
+    this.isFamilySavings = false, // 默认为个人储蓄目标
   });
 
   double get progress => targetAmount > 0 ? (currentAmount / targetAmount) : 0;
@@ -114,6 +116,14 @@ class SavingsGoal {
           : double.tryParse(json['monthly_target'].toString()) ?? 0;
     }
     
+    // 处理isFamilySavings，确保为布尔值
+    bool isFamilySavings = false;
+    if (json['is_family_savings'] != null) {
+      isFamilySavings = (json['is_family_savings'] is bool)
+          ? json['is_family_savings']
+          : (json['is_family_savings'].toString().toLowerCase() == 'true');
+    }
+    
     // 设置默认图标（临时），将在异步加载时替换
     Color color;
     try {
@@ -139,6 +149,7 @@ class SavingsGoal {
       iconId: iconId,
       colorCode: colorStr,
       completedAt: completedAt,
+      isFamilySavings: isFamilySavings,
     );
   }
   
@@ -154,6 +165,7 @@ class SavingsGoal {
       'target_date': targetDate.toIso8601String(),
       'note': note,
       'completed_at': completedAt?.toIso8601String(),
+      'is_family_savings': isFamilySavings,
     };
   }
 }

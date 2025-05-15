@@ -207,11 +207,11 @@ class FamilyMemberCard extends StatelessWidget {
                   member.joinTime,
                 ),
                 const SizedBox(height: 4),
-                _buildInfoRow(
-                  Icons.security_outlined,
-                  '权限',
-                  member.permission,
-                ),
+                // _buildInfoRow(
+                //   Icons.security_outlined,
+                //   '权限',
+                //   member.permission,
+                // ),
               ],
             ),
           ),

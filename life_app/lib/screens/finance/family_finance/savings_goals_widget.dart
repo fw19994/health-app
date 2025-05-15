@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'models.dart';
+import '../../../models/savings_goal.dart'; // 使用全局模型
 
 class SavingsGoalsWidget extends StatelessWidget {
   final List<SavingsGoal> goals;
   final VoidCallback onAddGoal;
+  final bool isLoading;
 
   const SavingsGoalsWidget({
     Key? key,
     required this.goals,
     required this.onAddGoal,
+    this.isLoading = false,
   }) : super(key: key);
 
   @override
@@ -35,7 +37,7 @@ class SavingsGoalsWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                '共同储蓄目标',
+                '家庭储蓄目标',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -74,8 +76,19 @@ class SavingsGoalsWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           
-          // 储蓄目标列表
-          if (goals.isEmpty)
+          // 加载状态显示
+          if (isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF16A34A)),
+                  strokeWidth: 3,
+                ),
+              ),
+            )
+          // 没有数据状态
+          else if (goals.isEmpty)
             const Center(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 20),
@@ -88,6 +101,7 @@ class SavingsGoalsWidget extends StatelessWidget {
                 ),
               ),
             )
+          // 显示数据列表
           else
             ...List.generate(
               goals.length,
@@ -104,16 +118,16 @@ class SavingsGoalsWidget extends StatelessWidget {
   // 储蓄目标项目
   Widget _buildSavingsGoalItem(SavingsGoal goal) {
     // 计算进度百分比
-    double percentage = (goal.currentAmount / goal.targetAmount) * 100;
+    double percentage = goal.progress * 100;
     String percentageStr = percentage.toStringAsFixed(0);
     
     // 计算距离截止日期的天数
     final now = DateTime.now();
-    final daysLeft = goal.deadline.difference(now).inDays;
+    final daysLeft = goal.targetDate.difference(now).inDays;
     
     // 格式化截止日期
     final dateFormat = DateFormat('yyyy年MM月dd日', 'zh_CN');
-    final deadlineStr = dateFormat.format(goal.deadline);
+    final deadlineStr = dateFormat.format(goal.targetDate);
     
     return Container(
       padding: const EdgeInsets.all(16),
@@ -151,7 +165,7 @@ class SavingsGoalsWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      goal.title,
+                      goal.name,
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,

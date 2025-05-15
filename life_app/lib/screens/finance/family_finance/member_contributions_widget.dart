@@ -5,7 +5,7 @@ import '../../../models/family_member_model.dart';
 class MemberContributionsWidget extends StatelessWidget {
   final List<FamilyMember> members;
   final bool isLoading;
-  final VoidCallback onViewDetails;
+  final Function(FamilyMember) onMemberDetails; // 成员详情点击回调
   final double totalIncome;
   final double totalExpense;
 
@@ -13,7 +13,7 @@ class MemberContributionsWidget extends StatelessWidget {
     Key? key,
     required this.members,
     required this.isLoading,
-    required this.onViewDetails,
+    required this.onMemberDetails, // 新参数：成员详情回调
     required this.totalIncome,
     required this.totalExpense,
   }) : super(key: key);
@@ -40,33 +40,14 @@ class MemberContributionsWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                '家庭成员财务',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF1F2937),
-                ),
-              ),
-              TextButton(
-                onPressed: onViewDetails,
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF16A34A),
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(0, 0),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text(
-                  '查看详细分析',
-                  style: TextStyle(
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ],
+          // 标题 - 移除"查看详细分析"按钮
+          const Text(
+            '家庭成员财务',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1F2937),
+            ),
           ),
           const SizedBox(height: 16),
           
@@ -98,7 +79,7 @@ class MemberContributionsWidget extends StatelessWidget {
               members.length,
               (index) => Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),
-                child: _buildMemberFinancialItem(members[index], index),
+                child: _buildMemberFinancialItem(context, members[index], index),
               ),
             ),
           
@@ -279,7 +260,7 @@ class MemberContributionsWidget extends StatelessWidget {
   }
   
   // 成员财务项
-  Widget _buildMemberFinancialItem(FamilyMember member, int index) {
+  Widget _buildMemberFinancialItem(BuildContext context, FamilyMember member, int index) {
     final color = _getMemberColor(index);
     
     // 使用成员模型中的真实财务数据
@@ -363,58 +344,72 @@ class MemberContributionsWidget extends StatelessWidget {
                 ],
               ),
             ),
+            // 添加详情按钮
+            IconButton(
+              icon: const Icon(Icons.chevron_right),
+              color: Colors.grey[600],
+              onPressed: () => onMemberDetails(member),
+              constraints: const BoxConstraints(),
+              padding: const EdgeInsets.all(8),
+              splashRadius: 24,
+              tooltip: '查看详情',
+            ),
           ],
         ),
         const SizedBox(height: 12),
         
-        // 财务数据卡片
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade50,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade100),
-          ),
-          child: Row(
-            children: [
-              // 收入
-              Expanded(
-                child: _buildFinancialDataItem(
-                  icon: FontAwesomeIcons.arrowDown,
-                  iconColor: Colors.green,
-                  label: '收入',
-                  value: '¥${income.toStringAsFixed(2)}',
+        // 财务数据卡片 - 添加点击事件
+        InkWell(
+          onTap: () => onMemberDetails(member),
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade100),
+            ),
+            child: Row(
+              children: [
+                // 收入
+                Expanded(
+                  child: _buildFinancialDataItem(
+                    icon: FontAwesomeIcons.arrowDown,
+                    iconColor: Colors.green,
+                    label: '收入',
+                    value: '¥${income.toStringAsFixed(2)}',
+                  ),
                 ),
-              ),
-              Container(
-                height: 36,
-                width: 1,
-                color: Colors.grey.shade200,
-              ),
-              // 支出
-              Expanded(
-                child: _buildFinancialDataItem(
-                  icon: FontAwesomeIcons.arrowUp,
-                  iconColor: Colors.red,
-                  label: '支出',
-                  value: '¥${expense.toStringAsFixed(2)}',
+                Container(
+                  height: 36,
+                  width: 1,
+                  color: Colors.grey.shade200,
                 ),
-              ),
-              Container(
-                height: 36,
-                width: 1,
-                color: Colors.grey.shade200,
-              ),
-              // 结余
-              Expanded(
-                child: _buildFinancialDataItem(
-                  icon: FontAwesomeIcons.scaleBalanced,
-                  iconColor: Colors.blue,
-                  label: '结余',
-                  value: '¥${balance.toStringAsFixed(2)}',
+                // 支出
+                Expanded(
+                  child: _buildFinancialDataItem(
+                    icon: FontAwesomeIcons.arrowUp,
+                    iconColor: Colors.red,
+                    label: '支出',
+                    value: '¥${expense.toStringAsFixed(2)}',
+                  ),
                 ),
-              ),
-            ],
+                Container(
+                  height: 36,
+                  width: 1,
+                  color: Colors.grey.shade200,
+                ),
+                // 结余
+                Expanded(
+                  child: _buildFinancialDataItem(
+                    icon: FontAwesomeIcons.scaleBalanced,
+                    iconColor: Colors.blue,
+                    label: '结余',
+                    value: '¥${balance.toStringAsFixed(2)}',
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         

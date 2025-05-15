@@ -120,7 +120,7 @@ class BudgetPlanningWidget extends StatelessWidget {
               children: [
                 FaIcon(
                   item.icon,
-                  color: const Color(0xFF6B7280),
+                  color: item.iconColor,
                   size: 14,
                 ),
                 const SizedBox(width: 8),

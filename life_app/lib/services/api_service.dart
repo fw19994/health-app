@@ -9,6 +9,7 @@ import '../constants/api_constants.dart';
 import '../models/user_model.dart';
 import '../models/auth_token_model.dart';
 import '../services/auth_service.dart';
+import '../widgets/login/error_dialog.dart';
 import 'dns_service.dart';
 
 class ApiResponse<T> {
@@ -37,9 +38,11 @@ class ApiService {
   }) async {
     try {
       // 创建 URI，包含查询参数
-      final uri = params != null && params.isNotEmpty
-          ? Uri.parse('${ApiConstants.baseUrl}$path').replace(queryParameters: params)
-          : Uri.parse('${ApiConstants.baseUrl}$path');
+      String finalPath = path;
+      if (params != null && params.isNotEmpty) {
+        final queryString = Uri(queryParameters: params).query;
+        finalPath = '$path?$queryString';
+      }
       
       // 获取访问令牌 (如果有context)
       String? token;
@@ -52,31 +55,13 @@ class ApiService {
         }
       }
       
-      // 设置请求头，如果有token则添加授权头
-      final headers = <String, String>{
-        'Content-Type': 'application/json',
-      };
-      
-      if (token != null) {
-        headers['Authorization'] = 'Bearer $token';
-      }
-      
-      // 打印请求信息
-      print('发送GET请求: $uri');
-      print('请求参数: $params');
-      
-      // 发送请求
-      final response = await http.get(uri, headers: headers);
-      
-      // 打印响应信息
-      print('响应状态码: ${response.statusCode}');
-      print('响应头: ${response.headers}');
-      
-      // 解析响应数据
-      final jsonData = json.decode(response.body);
-      print('响应数据: $jsonData');
-      
-      return jsonData;
+      // 使用通用的请求方法
+      return _request(
+        method: 'GET',
+        path: finalPath,
+        token: token,
+        context: context,
+      );
     } catch (e) {
       print('GET请求失败: $e');
       return {
@@ -107,15 +92,7 @@ class ApiService {
     dynamic data,
     BuildContext? context,
   }) async {
-    int retryCount = 0;
-    const maxRetries = 3;
-    const retryDelay = Duration(seconds: 1);
-
-    while (retryCount < maxRetries) {
       try {
-        final baseUrl = await _getHostIp(ApiConstants.baseUrl);
-        final uri = Uri.parse('$baseUrl$path');
-        
         // 获取访问令牌 (如果有context)
         String? token;
         if (context != null) {
@@ -127,80 +104,21 @@ class ApiService {
           }
         }
         
-        // 设置请求头，如果有token则添加授权头
-        final headers = <String, String>{
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Connection': 'keep-alive',
-          'Host': Uri.parse(ApiConstants.baseUrl).host, // 添加原始主机名
-        };
-        
-        if (token != null) {
-          headers['Authorization'] = 'Bearer $token';
-        }
-        
-        // 转换请求数据为JSON
-        final body = data != null ? json.encode(data) : null;
-        
-        // 打印详细的请求信息
-        print('=== 发送POST请求 [尝试 ${retryCount + 1}/$maxRetries] ===');
-        print('原始URL: ${ApiConstants.baseUrl}$path');
-        print('解析后URL: $uri');
-        print('Headers: $headers');
-        print('Body: $body');
-        
-        // 发送请求并设置超时
-        final response = await http.post(
-          uri, 
-          headers: headers, 
-          body: body
-        ).timeout(
-          const Duration(seconds: 15),
-          onTimeout: () {
-            print('请求超时');
-            throw TimeoutException('请求超时');
-          },
-        );
-        
-        // 打印详细的响应信息
-        print('=== 收到响应 ===');
-        print('状态码: ${response.statusCode}');
-        print('响应头: ${response.headers}');
-        print('响应体: ${response.body}');
-        
-        // 解析响应数据
-        final jsonData = json.decode(response.body);
-        return jsonData;
-      } catch (e, stackTrace) {
-        print('=== POST请求失败 [尝试 ${retryCount + 1}/$maxRetries] ===');
-        print('错误类型: ${e.runtimeType}');
-        print('错误信息: $e');
-        print('堆栈跟踪: $stackTrace');
-
-        if (e.toString().contains('Failed host lookup') || 
-            e.toString().contains('SocketException')) {
-          // DNS或网络连接错误，尝试重试
-          if (retryCount < maxRetries - 1) {
-            print('等待 ${retryDelay.inSeconds} 秒后重试...');
-            // 清除DNS缓存
-            _dnsService.clearCache();
-            await Future.delayed(retryDelay);
-            retryCount++;
-            continue;
-          }
-        }
-        
+      // 使用通用的请求方法
+      return _request(
+        method: 'POST',
+        path: path,
+        data: data,
+        token: token,
+        context: context,
+      );
+    } catch (e) {
+      print('POST请求失败: $e');
         return {
           'code': -1,
           'message': '网络请求失败: ${e.toString()}',
         };
       }
-    }
-
-    return {
-      'code': -1,
-      'message': '网络请求失败: 已达到最大重试次数',
-    };
   }
   
   // PUT请求
@@ -210,8 +128,6 @@ class ApiService {
     BuildContext? context,
   }) async {
     try {
-      final uri = Uri.parse('${ApiConstants.baseUrl}$path');
-      
       // 获取访问令牌 (如果有context)
       String? token;
       if (context != null) {
@@ -223,34 +139,14 @@ class ApiService {
         }
       }
       
-      // 设置请求头，如果有token则添加授权头
-      final headers = <String, String>{
-        'Content-Type': 'application/json',
-      };
-      
-      if (token != null) {
-        headers['Authorization'] = 'Bearer $token';
-      }
-      
-      // 转换请求数据为JSON
-      final body = data != null ? json.encode(data) : null;
-      
-      // 打印请求信息
-      print('发送PUT请求: $uri');
-      print('请求数据: $data');
-      
-      // 发送请求
-      final response = await http.put(uri, headers: headers, body: body);
-      
-      // 打印响应信息
-      print('响应状态码: ${response.statusCode}');
-      print('响应头: ${response.headers}');
-      
-      // 解析响应数据
-      final jsonData = json.decode(response.body);
-      print('响应数据: $jsonData');
-      
-      return jsonData;
+      // 使用通用的请求方法
+      return _request(
+        method: 'PUT',
+        path: path,
+        data: data,
+        token: token,
+        context: context,
+      );
     } catch (e) {
       print('PUT请求失败: $e');
       return {
@@ -268,9 +164,10 @@ class ApiService {
   }) async {
     try {
       // 构建URL，添加查询参数
-      var uri = Uri.parse('${ApiConstants.baseUrl}$path');
+      String finalPath = path;
       if (params != null && params.isNotEmpty) {
-        uri = uri.replace(queryParameters: params);
+        final queryString = Uri(queryParameters: params).query;
+        finalPath = '$path?$queryString';
       }
       
       // 获取访问令牌 (如果有context)
@@ -291,49 +188,53 @@ class ApiService {
         print('警告: DELETE请求无上下文，无法获取授权令牌');
       }
       
-      // 设置请求头，如果有token则添加授权头
-      final headers = <String, String>{
-        'Content-Type': 'application/json',
-      };
-      
-      if (token != null) {
-        headers['Authorization'] = 'Bearer $token';
-      }
-      
-      // 打印请求信息
-      print('发送DELETE请求: $uri');
-      print('请求头: $headers');
-      print('请求参数: $params');
-      
-      // 发送请求
-      print('即将发送DELETE请求到服务器...');
-      final response = await http.delete(uri, headers: headers);
-      
-      // 打印响应信息
-      print('DELETE响应状态码: ${response.statusCode}');
-      print('DELETE响应头: ${response.headers}');
-      print('DELETE响应体原始内容: ${response.body}');
-      
-      // 解析响应数据
-      Map<String, dynamic> jsonData;
-      try {
-        jsonData = json.decode(response.body);
-        print('DELETE响应数据: $jsonData');
-      } catch (jsonError) {
-        print('DELETE响应JSON解析错误: $jsonError');
-        jsonData = {
-          'code': -1,
-          'message': '服务器返回数据解析失败: $jsonError',
-        };
-      }
-      
-      return jsonData;
+      // 使用通用的请求方法
+      return _request(
+        method: 'DELETE',
+        path: finalPath,
+        token: token,
+        context: context,
+      );
     } catch (e) {
       print('DELETE请求失败: $e');
       return {
         'code': -1,
         'message': e.toString(),
       };
+    }
+  }
+  
+  // 处理未授权错误（401）
+  void _handleUnauthorizedError(BuildContext? context) {
+    if (context != null) {
+      // 显示错误对话框
+      try {
+        showErrorDialog(
+          context,
+          '登录已过期，请重新登录',
+          type: DialogType.warning,
+        );
+        
+        // 清除用户登录状态
+        final authService = Provider.of<AuthService>(context, listen: false);
+        authService.logout();
+        
+        // 延迟导航，给对话框显示的时间
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          // 确保导航回到登录页面
+          Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
+            '/login',
+            (route) => false, // 清除所有路由
+          );
+        });
+      } catch (e) {
+        print('处理401错误时出错: $e');
+        // 发生错误时尝试直接导航
+        Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
+          '/login',
+          (route) => false,
+        );
+      }
     }
   }
   
@@ -345,6 +246,7 @@ class ApiService {
     String? token,
     bool isRetry = false, // 是否为重试请求
     BuildContext? context,
+    Duration timeout = const Duration(seconds: 15),
   }) async {
     final url = Uri.parse(ApiConstants.baseUrl + path);
     
@@ -377,25 +279,37 @@ class ApiService {
         print('请求体: ${json.encode(data)}');
       }
       
+      // 使用超时处理所有请求
+      Future<http.Response> requestFuture;
+      
       if (method == 'GET') {
-        response = await _client.get(url, headers: headers);
+        requestFuture = _client.get(url, headers: headers);
       } else if (method == 'POST') {
-        response = await _client.post(
+        requestFuture = _client.post(
           url,
           headers: headers,
           body: data != null ? json.encode(data) : null,
         );
       } else if (method == 'PUT') {
-        response = await _client.put(
+        requestFuture = _client.put(
           url,
           headers: headers,
           body: data != null ? json.encode(data) : null,
         );
       } else if (method == 'DELETE') {
-        response = await _client.delete(url, headers: headers);
+        requestFuture = _client.delete(url, headers: headers);
       } else {
         throw Exception('不支持的HTTP方法: $method');
       }
+      
+      // 添加超时处理
+      response = await requestFuture.timeout(
+        timeout,
+        onTimeout: () {
+          print('请求超时: $method $url');
+          throw TimeoutException('请求超时，请检查网络连接');
+        },
+      );
       
       print('响应状态码: ${response.statusCode}');
       print('响应头: ${response.headers}');
@@ -415,6 +329,41 @@ class ApiService {
         // 捕获JSON解析错误
         print('响应体解析错误: ${e.toString()} - 状态码: ${response.statusCode}');
         print('原始响应体: ${response.body.length > 100 ? response.body.substring(0, 100) + "..." : response.body}');
+        
+        // 特殊处理401状态码，即使JSON解析失败
+        if (response.statusCode == 401) {
+          if (!isRetry && context != null) {
+            // 尝试刷新token
+            final authService = Provider.of<AuthService>(context, listen: false);
+            if (authService.tokens != null) {
+              final refreshSuccess = await authService.refreshTokens(context: context);
+              if (refreshSuccess) {
+                // 使用新token重试请求
+                final newToken = authService.tokens?.accessToken;
+                return _request(
+                  method: method,
+                  path: path,
+                  data: data,
+                  token: newToken,
+                  isRetry: true,
+                  context: context,
+                );
+              } else {
+                // 刷新失败，跳转到登录页
+                _handleUnauthorizedError(context);
+              }
+            } else {
+              // 没有token可用，跳转到登录页
+              _handleUnauthorizedError(context);
+            }
+          } else if (isRetry || context == null) {
+            // 重试请求仍返回401或无法获取context
+            _handleUnauthorizedError(context);
+          }
+          
+          throw Exception('登录已过期，请重新登录');
+        }
+        
         throw Exception('系统繁忙，请稍后再试');
       }
       
@@ -426,18 +375,19 @@ class ApiService {
         return responseData;
       } else {
         // 处理授权错误，包括多种可能的错误码形式
-        if (!isRetry && context != null && 
-            (response.statusCode == 401 || 
+        if (response.statusCode == 401 ||
              responseData['code'] == 401 || 
              responseData['code'] == -401 || 
-             (responseData['message'] != null && responseData['message'].toString().contains('登录')))) {
+            (responseData['message'] != null && responseData['message'].toString().contains('登录'))) {
              
           print('检测到授权错误，尝试刷新令牌');
           
+          if (!isRetry && context != null) {
           try {
             final authService = Provider.of<AuthService>(context, listen: false);
             if (authService.tokens == null || authService.tokens!.refreshToken.isEmpty) {
               print('刷新令牌不存在或为空，无法刷新');
+                _handleUnauthorizedError(context);
               throw Exception('登录已过期，请重新登录');
             }
             
@@ -460,11 +410,17 @@ class ApiService {
               );
             } else {
               print('令牌刷新失败，需要重新登录');
-              authService.logout(); // 清除登录状态
+                _handleUnauthorizedError(context);
               throw Exception('登录已过期，请重新登录');
             }
           } catch (refreshError) {
             print('刷新令牌过程发生错误: $refreshError');
+              _handleUnauthorizedError(context);
+              throw Exception('登录已过期，请重新登录');
+            }
+          } else {
+            // 重试请求仍返回401或无context
+            _handleUnauthorizedError(context);
             throw Exception('登录已过期，请重新登录');
           }
         }

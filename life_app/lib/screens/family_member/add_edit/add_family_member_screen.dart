@@ -187,14 +187,14 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
                 size: 22,
               ),
               const SizedBox(width: 10),
-              Text(
-                widget.isEditing ? '编辑家庭成员' : '添加家庭成员',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+          Text(
+            widget.isEditing ? '编辑家庭成员' : '添加家庭成员',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
-              ),
+            ),
             ],
           ),
           IconButton(
@@ -241,69 +241,69 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
         color: Color(0xFFF9FAFB),
       ),
       child: Container(
-        decoration: BoxDecoration(
+      decoration: BoxDecoration(
           color: const Color(0xFFEEEEEE),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: () => setState(() => _currentTab = 0),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _currentTab = 0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: _currentTab == 0 
+                    ? const Color(0xFF059669) 
+                    : Colors.transparent,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    bottomLeft: Radius.circular(12),
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '查找已有用户',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                     color: _currentTab == 0 
-                      ? const Color(0xFF059669) 
-                      : Colors.transparent,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      bottomLeft: Radius.circular(12),
-                    ),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '查找已有用户',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: _currentTab == 0 
-                        ? Colors.white 
-                        : const Color(0xFF4B5563),
-                    ),
+                      ? Colors.white 
+                      : const Color(0xFF4B5563),
                   ),
                 ),
               ),
             ),
-            Expanded(
-              child: GestureDetector(
-                onTap: () => setState(() => _currentTab = 1),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _currentTab = 1),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: _currentTab == 1 
+                    ? const Color(0xFF059669) 
+                    : Colors.transparent,
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(12),
+                    bottomRight: Radius.circular(12),
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '创建虚拟成员',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                     color: _currentTab == 1 
-                      ? const Color(0xFF059669) 
-                      : Colors.transparent,
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(12),
-                      bottomRight: Radius.circular(12),
-                    ),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '创建虚拟成员',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: _currentTab == 1 
-                        ? Colors.white 
-                        : const Color(0xFF4B5563),
-                    ),
+                      ? Colors.white 
+                      : const Color(0xFF4B5563),
                   ),
                 ),
               ),
             ),
-          ],
+          ),
+        ],
         ),
       ),
     );
@@ -351,6 +351,7 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
       avatarUrl: _avatarUrl,
       isUploading: _isUploadingAvatar,
       isEditing: widget.isEditing,
+      memberToEdit: widget.memberToEdit,
       onRelationChanged: (value) {
         setState(() {
           _selectedRelation = value ?? '';

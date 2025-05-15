@@ -65,7 +65,7 @@ class FormField extends StatelessWidget {
 }
 
 /// 性别下拉菜单组件
-class GenderDropdown extends StatelessWidget {
+class GenderDropdown extends StatefulWidget {
   final String? selectedGender;
   final Function(String?) onChanged;
   
@@ -76,32 +76,204 @@ class GenderDropdown extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: ButtonTheme(
-          alignedDropdown: true,
-          child: DropdownButton<String>(
-            isExpanded: true,
-            hint: const Text('选择性别'),
-            value: selectedGender?.isEmpty == true ? null : selectedGender,
-            items: const [
-              DropdownMenuItem(value: '男', child: Text('男')),
-              DropdownMenuItem(value: '女', child: Text('女')),
-              DropdownMenuItem(value: '其他', child: Text('其他'))
+  State<GenderDropdown> createState() => _GenderDropdownState();
+}
+
+class _GenderDropdownState extends State<GenderDropdown> {
+  final List<Map<String, dynamic>> _genders = const [
+    {'value': '男', 'icon': Icons.male, 'color': Color(0xFF3B82F6)},
+    {'value': '女', 'icon': Icons.female, 'color': Color(0xFFEC4899)},
+    {'value': '其他', 'icon': Icons.people, 'color': Color(0xFF6B7280)},
+  ];
+
+  void _showGenderPicker() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: false,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: Offset(0, -5),
+              ),
             ],
-            onChanged: onChanged,
-            icon: const Icon(
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 顶部手柄
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              
+              // 标题
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(
+                  '性别',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF1F2937),
+                  ),
+                ),
+              ),
+              
+              // 分隔线
+              Divider(height: 1, color: Colors.grey.shade200),
+              
+              // 性别选项列表
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: _genders.map((gender) {
+                    bool isSelected = widget.selectedGender == gender['value'];
+                    return GestureDetector(
+                      onTap: () {
+                        widget.onChanged(gender['value']);
+                        Navigator.pop(context);
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: gender['color'].withOpacity(isSelected ? 1.0 : 0.1),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: gender['color'],
+                                width: isSelected ? 2 : 1,
+                              ),
+                              boxShadow: isSelected ? [
+                                BoxShadow(
+                                  color: gender['color'].withOpacity(0.4),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 4),
+                                ),
+                              ] : null,
+                            ),
+                            child: Icon(
+                              gender['icon'],
+                              color: isSelected ? Colors.white : gender['color'],
+                              size: 36,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            gender['value'],
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                              color: isSelected 
+                                  ? gender['color']
+                                  : const Color(0xFF4B5563),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              
+              // 底部安全区域
+              SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // 获取当前选中的性别图标
+  IconData _getSelectedIcon() {
+    if (widget.selectedGender == null || widget.selectedGender!.isEmpty) {
+      return Icons.people_outline;
+    }
+    
+    for (var gender in _genders) {
+      if (gender['value'] == widget.selectedGender) {
+        return gender['icon'];
+      }
+    }
+    
+    return Icons.people_outline;
+  }
+  
+  // 获取当前选中的性别颜色
+  Color _getSelectedColor() {
+    if (widget.selectedGender == null || widget.selectedGender!.isEmpty) {
+      return Colors.grey.shade400;
+    }
+    
+    for (var gender in _genders) {
+      if (gender['value'] == widget.selectedGender) {
+        return gender['color'];
+      }
+    }
+    
+    return Colors.grey.shade400;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _showGenderPicker,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
+          color: Colors.white,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  _getSelectedIcon(),
+                  size: 20,
+                  color: _getSelectedColor(),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  widget.selectedGender?.isNotEmpty == true
+                      ? widget.selectedGender!
+                      : '性别',
+                  style: TextStyle(
+                    color: widget.selectedGender?.isNotEmpty == true
+                        ? const Color(0xFF1F2937)
+                        : Colors.grey.shade400,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            const Icon(
               Icons.keyboard_arrow_down,
               color: Color(0xFF6B7280),
+              size: 20,
             ),
-            iconSize: 20,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-          ),
+          ],
         ),
       ),
     );
@@ -282,10 +454,10 @@ class _RelationDropdownState extends State<RelationDropdown> {
       onTap: _showRelationPicker,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
-        ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

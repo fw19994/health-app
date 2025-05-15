@@ -13,7 +13,12 @@ import 'package:intl/intl.dart';
 import '../widgets/budget/budget_header.dart';
 
 class BudgetSettingsScreen extends StatefulWidget {
-  const BudgetSettingsScreen({super.key});
+  final bool isFamilyBudget;
+  
+  const BudgetSettingsScreen({
+    super.key,
+    this.isFamilyBudget = false,
+  });
 
   @override
   State<BudgetSettingsScreen> createState() => _BudgetSettingsScreenState();
@@ -77,9 +82,10 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
     });
     
     try {
-      // 获取指定月份的预算数据
+      // 获取指定月份的预算数据，根据isFamilyBudget设置决定获取个人或家庭预算
       final categories = await _budgetService.getBudgetCategories(
         context: context,
+        isFamilyBudget: widget.isFamilyBudget, // 使用widget属性
       );
       
       setState(() {
@@ -509,7 +515,10 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-    builder: (context) => BudgetCategoryModal(category: category),
+              builder: (context) => BudgetCategoryModal(
+            category: category,
+            isFamilyBudget: widget.isFamilyBudget,
+          ),
     );
     
     // 模态框关闭后重新加载预算数据

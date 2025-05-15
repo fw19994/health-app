@@ -457,4 +457,51 @@ class FinanceService {
       );
     }
   }
+  
+  /// 获取储蓄目标数据
+  Future<ApiResponse> getSavingsGoals({
+    required BuildContext context,
+    bool isFamilyGoal = false, // 是否为家庭目标
+    int? memberId, // 成员ID，用于获取个人目标
+  }) async {
+    try {
+      // 构建查询参数
+      Map<String, String> params = {
+        'is_family_goal': isFamilyGoal.toString(),
+      };
+      
+      // 如果是个人目标且指定了成员ID
+      if (!isFamilyGoal && memberId != null) {
+        params['member_id'] = memberId.toString();
+      }
+      
+      print('获取储蓄目标数据，参数: $params');
+      
+      // 调用API
+      final responseData = await _apiService.get(
+        path: '/api/v1/finance/savings-goals',
+        params: params,
+        context: context,
+      );
+      
+      bool success = responseData['code'] == 0 || responseData['code'] == 200;
+      
+      print('获取储蓄目标响应: ${success ? "成功" : "失败"}');
+      if (success && responseData['data'] != null) {
+        print('获取到${(responseData['data'] as List?)?.length ?? 0}个储蓄目标');
+      }
+      
+      return ApiResponse(
+        success: success,
+        data: success ? responseData['data'] : null,
+        message: responseData['message'] ?? (success ? '获取成功' : '获取失败'),
+      );
+    } catch (e) {
+      print("Error in FinanceService.getSavingsGoals: $e");
+      return ApiResponse(
+        success: false,
+        message: '获取储蓄目标数据失败: $e',
+      );
+    }
+  }
 } 

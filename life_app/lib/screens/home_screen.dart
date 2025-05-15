@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../themes/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
+import '../services/budget_service.dart';
+import '../models/monthly_budget.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'finance/family_finance/family_finance_screen.dart';
 import 'expense_tracking_screen.dart';
@@ -23,11 +25,17 @@ class _HomeScreenState extends State<HomeScreen> {
   String _avatarUrl = '';
   bool _isLoading = true;
   
+  // 新增预算服务和预算数据
+  final BudgetService _budgetService = BudgetService();
+  MonthlyBudget? _monthlyBudget;
+  bool _isLoadingBudget = true;
+  
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _userService = UserService(context: context);
     _loadUserData();
+    _loadMonthlyBudget(); // 加载预算数据
   }
   
   // 加载用户数据
@@ -59,6 +67,39 @@ class _HomeScreenState extends State<HomeScreen> {
       if (kDebugMode) {
         print('加载用户资料失败: $e');
       }
+    }
+  }
+  
+  // 新增加载月度预算数据的方法
+  Future<void> _loadMonthlyBudget() async {
+    setState(() {
+      _isLoadingBudget = true;
+    });
+    
+    try {
+      // 获取当前月份
+      final now = DateTime.now();
+      final monthlyBudget = await _budgetService.getMonthlyBudget(
+        year: now.year,
+        month: now.month,
+        context: context,
+      );
+      
+      setState(() {
+        _monthlyBudget = monthlyBudget;
+        _isLoadingBudget = false;
+      });
+      
+      if (kDebugMode) {
+        print('成功加载月度预算: 总预算 ¥${_monthlyBudget?.totalBudget}, 已用 ¥${_monthlyBudget?.totalSpent}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('加载月度预算失败: $e');
+      }
+      setState(() {
+        _isLoadingBudget = false;
+      });
     }
   }
 
@@ -491,6 +532,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 财务概览模块
   Widget _buildFinancialSummary(BuildContext context) {
+    // 格式化金额显示
+    final formatCurrency = NumberFormat.currency(
+      locale: 'zh_CN',
+      symbol: '¥',
+      decimalDigits: 0,
+    );
+    
+    // 获取预算数据
+    final double totalSpent = _monthlyBudget?.totalSpent ?? 0.0;
+    final double totalBudget = _monthlyBudget?.totalBudget ?? 0.0;
+    final double remainingAmount = _monthlyBudget?.remainingAmount ?? 0.0;
+    final double usagePercent = _monthlyBudget?.usagePercent ?? 0.0;
+    
+    // 格式化后的显示文本
+    final String formattedSpent = formatCurrency.format(totalSpent);
+    final String formattedRemaining = formatCurrency.format(remainingAmount);
+    final String formattedUsagePercent = '${usagePercent.toStringAsFixed(0)}%';
+    
     return Card(
       margin: EdgeInsets.zero,
       color: Colors.white,
@@ -518,6 +577,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 GestureDetector(
                   onTap: () {
                     // 跳转到财务详情页面
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const FamilyFinanceScreen()),
+                    ).then((_) => _loadMonthlyBudget()); // 返回时刷新数据
                   },
                   child: const Text(
                     '查看详情',
@@ -538,25 +601,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: const Color(0xFFF9FAFB),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Column(
+              child: _isLoadingBudget
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                : Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
+                          children: [
+                            const Text(
                             '本月花销',
                             style: TextStyle(
                               fontSize: 12,
                               color: Color(0xFF6B7280),
                             ),
                           ),
-                          SizedBox(height: 4),
+                            const SizedBox(height: 4),
                           Text(
-                            '¥3,245',
-                            style: TextStyle(
+                              formattedSpent,
+                              style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.textPrimary,
@@ -566,18 +636,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
-                        children: const [
-                          Text(
+                          children: [
+                            const Text(
                             '剩余预算',
                             style: TextStyle(
                               fontSize: 12,
                               color: Color(0xFF6B7280),
                             ),
                           ),
-                          SizedBox(height: 4),
+                            const SizedBox(height: 4),
                           Text(
-                            '¥1,755',
-                            style: TextStyle(
+                              formattedRemaining,
+                              style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF16A34A),
@@ -590,8 +660,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text(
+                      children: [
+                        const Text(
                         '已使用预算',
                         style: TextStyle(
                           fontSize: 12,
@@ -599,8 +669,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       Text(
-                        '65%',
-                        style: TextStyle(
+                          formattedUsagePercent,
+                          style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: AppTheme.textPrimary,
@@ -611,11 +681,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 8),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(4),
-                    child: const LinearProgressIndicator(
-                      value: 0.65,
+                      child: LinearProgressIndicator(
+                        value: usagePercent / 100,
                       minHeight: 8,
                       backgroundColor: Colors.white,
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF97316)),
+                        valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFF97316)),
                     ),
                   ),
                 ],
@@ -631,11 +701,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: '记一笔',
                     bgColor: const Color(0xFFEEF2FF),
                     textColor: const Color(0xFF6366F1),
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      // 等待记一笔页面返回结果
+                      final result = await Navigator.push<bool>(
                         context,
                         MaterialPageRoute(builder: (context) => const ExpenseTrackingScreen()),
                       );
+                      
+                      // 如果返回true表示记账成功，刷新数据
+                      if (result == true) {
+                        _loadMonthlyBudget();
+                      }
                     },
                   ),
                 ),
@@ -650,7 +726,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const FamilyFinanceScreen()),
-                      );
+                      ).then((_) => _loadMonthlyBudget()); // 返回时刷新数据
                     },
                   ),
                 ),

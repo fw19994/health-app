@@ -12,10 +12,12 @@ import '../../services/icon_service.dart';
 
 class BudgetCategoryModal extends StatefulWidget {
   final BudgetCategory? category;
+  final bool isFamilyBudget;
 
   const BudgetCategoryModal({
     super.key,
     this.category,
+    this.isFamilyBudget = false,
   });
 
   @override
@@ -447,6 +449,7 @@ class _BudgetCategoryModalState extends State<BudgetCategoryModal> {
                                       await budgetService.addBudgetCategory(
                                         budgetCategory,
                                         context: context, // 传递context以获取认证令牌
+                                        isFamilyBudget: widget.isFamilyBudget, // 传递是否为家庭预算
                                       );
                                       
                                       // 显示成功消息

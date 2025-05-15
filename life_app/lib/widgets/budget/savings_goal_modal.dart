@@ -14,10 +14,12 @@ import '../../services/budget_service.dart';
 
 class SavingsGoalModal extends StatefulWidget {
   final SavingsGoal? goal;
+  final bool isFamilySavings; // 添加家庭储蓄标识
 
   const SavingsGoalModal({
     super.key,
     this.goal,
+    this.isFamilySavings = false, // 默认为个人储蓄目标
   });
 
   @override
@@ -289,6 +291,7 @@ class _SavingsGoalModalState extends State<SavingsGoalModal> {
         iconId: iconId,
         colorCode: colorCode,
         completedAt: widget.goal?.completedAt, // 保留原始完成时间
+        isFamilySavings: widget.isFamilySavings, // 使用构造函数的家庭储蓄标识
       );
       
       // 调用服务保存目标
@@ -297,7 +300,11 @@ class _SavingsGoalModalState extends State<SavingsGoalModal> {
       // 判断是新增还是编辑
       if (widget.goal == null) {
         // 新增目标
-        await budgetService.addSavingsGoal(goal, context: context);
+        await budgetService.addSavingsGoal(
+          goal, 
+          context: context,
+          isFamilySavings: widget.isFamilySavings, // 传递家庭标识
+        );
         
         // 显示成功消息
         if (mounted) {
@@ -310,7 +317,11 @@ class _SavingsGoalModalState extends State<SavingsGoalModal> {
         }
       } else {
         // 编辑现有目标
-        await budgetService.updateSavingsGoal(goal, context: context);
+        await budgetService.updateSavingsGoal(
+          goal, 
+          context: context,
+          isFamilySavings: widget.isFamilySavings, // 传递家庭标识
+        );
         
         // 显示成功消息
         if (mounted) {

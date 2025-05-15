@@ -7,6 +7,7 @@ import '../../../services/budget_service.dart';
 import '../../../models/monthly_budget.dart';
 import '../../../services/finance_service.dart';
 import '../../../services/icon_service.dart';
+import '../../../services/api_service.dart';
 
 import '../../expense_tracking_screen.dart';
 import '../../finance_report_screen.dart';
@@ -14,6 +15,8 @@ import '../../member_finances/member_finances_screen.dart';
 import '../../transaction_history/transaction_history_screen.dart';
 import '../../budget_settings_screen.dart';
 import '../../savings_goals_screen.dart';
+import '../../member_detail/member_detail_screen.dart';
+import '../../member_finances/models/family_member.dart' as detail_model;
 
 import 'header_widget.dart';
 import 'quick_actions_widget.dart';
@@ -23,6 +26,7 @@ import 'recent_expenses_widget.dart';
 import 'budget_planning_widget.dart';
 import 'savings_goals_widget.dart';
 import 'models.dart';
+import '../../../models/savings_goal.dart';
 
 class FamilyFinanceScreen extends StatefulWidget {
   const FamilyFinanceScreen({super.key});
@@ -31,7 +35,7 @@ class FamilyFinanceScreen extends StatefulWidget {
   State<FamilyFinanceScreen> createState() => _FamilyFinanceScreenState();
 }
 
-class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
+class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsBindingObserver {
   // 调试开关
   final bool _enableDebug = true;
   
@@ -55,75 +59,17 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
   bool _isLoadingRecentExpenses = true;
   
   // 预算规划数据
-  final List<BudgetItem> _budgetItems = [
-    BudgetItem(
-      category: '住房',
-      icon: FontAwesomeIcons.home,
-      currentAmount: 3800.0,
-      budgetAmount: 4000.0,
-      isOverBudget: false,
-    ),
-    BudgetItem(
-      category: '日常购物',
-      icon: FontAwesomeIcons.cartShopping,
-      currentAmount: 1720.0,
-      budgetAmount: 1500.0,
-      isOverBudget: true,
-    ),
-    BudgetItem(
-      category: '餐饮',
-      icon: FontAwesomeIcons.utensils,
-      currentAmount: 1250.0,
-      budgetAmount: 1500.0,
-      isOverBudget: false,
-    ),
-    BudgetItem(
-      category: '交通',
-      icon: FontAwesomeIcons.car,
-      currentAmount: 850.0,
-      budgetAmount: 1000.0,
-      isOverBudget: false,
-    ),
-    BudgetItem(
-      category: '医疗',
-      icon: FontAwesomeIcons.heartPulse,
-      currentAmount: 520.0,
-      budgetAmount: 600.0,
-      isOverBudget: false,
-    ),
-  ];
+  List<BudgetItem> _budgetItems = [];
   
-  // 共同储蓄目标数据
-  final List<SavingsGoal> _savingsGoals = [
-    SavingsGoal(
-      title: '家庭旅行',
-      icon: FontAwesomeIcons.plane,
-      currentAmount: 6450.0,
-      targetAmount: 15000.0,
-      deadline: DateTime(2025, 8, 1),
-      color: const Color(0xFF3B82F6), // 蓝色
-    ),
-    SavingsGoal(
-      title: '新电脑',
-      icon: FontAwesomeIcons.laptop,
-      currentAmount: 2240.0,
-      targetAmount: 8000.0,
-      deadline: DateTime(2025, 6, 30),
-      color: const Color(0xFF8B5CF6), // 紫色
-    ),
-    SavingsGoal(
-      title: '教育基金',
-      icon: FontAwesomeIcons.graduationCap,
-      currentAmount: 12500.0,
-      targetAmount: 50000.0,
-      deadline: DateTime(2028, 12, 31),
-      color: const Color(0xFF10B981), // 绿色
-    ),
-  ];
+  // 储蓄目标数据
+  List<SavingsGoal> _savingsGoals = []; // 初始为空列表，从后端加载
+  bool _isLoadingSavingsGoals = true;
   
   // 创建服务实例
   final FinanceService _financeService = FinanceService();
   final IconService _iconService = IconService();
+  final BudgetService _budgetService = BudgetService(); // 添加BudgetService实例
+  final ApiService _api = ApiService(); // 添加ApiService实例
   
   // 类变量定义部分添加总收入和总支出字段
   double _totalFamilyIncome = 0.0;
@@ -132,10 +78,54 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
   @override
   void initState() {
     super.initState();
+    // 注册生命周期监听器
+    WidgetsBinding.instance.addObserver(this);
+    // 加载数据
     _loadFamilyMembers();
     _loadMonthlyBudget();
     _loadExpenseCategories();
     _loadRecentExpenses();
+    _loadBudgetPlanningData();
+    _loadFamilySavingsGoals(); // 添加加载家庭储蓄目标
+  }
+  
+  @override
+  void dispose() {
+    // 注销生命周期监听器
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  
+  // 实现生命周期回调
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      print('页面恢复，刷新数据');
+      _refreshAllData();
+    }
+  }
+  
+  // 页面依赖变化时的回调
+  bool _firstLoad = true;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 避免首次加载时重复刷新
+    if (!_firstLoad) {
+      print('页面依赖变化，刷新数据');
+      _refreshAllData();
+    }
+    _firstLoad = false;
+  }
+  
+  // 封装刷新所有数据的方法
+  void _refreshAllData() {
+    _loadMonthlyBudget();
+    _loadExpenseCategories();
+    _loadRecentExpenses();
+    _loadFamilyContributions();
+    _loadBudgetPlanningData();
+    _loadFamilySavingsGoals(); // 添加刷新家庭储蓄目标
   }
   
   // 加载家庭成员数据
@@ -255,36 +245,132 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
         // 更新成员数据
         final List<dynamic> membersData = data['members'] ?? [];
         
-        // 创建用户ID到财务数据的映射
-        final Map<int, Map<String, dynamic>> memberFinanceMap = {};
+        print('API返回的成员数据数量: ${membersData.length}');
+        
+        // 创建ID到财务数据的多种映射
+        final Map<int, Map<String, dynamic>> memberIdMap = {}; // 成员ID映射
+        final Map<int, Map<String, dynamic>> userIdMap = {}; // 用户ID映射
+        final Map<String, Map<String, dynamic>> nameMap = {}; // 名称映射
+        
+        // 打印每个成员的数据以进行调试
+        if (_enableDebug) {
+          print('--- API返回的成员财务数据 ---');
+          for (int i = 0; i < membersData.length; i++) {
+            print('成员 #${i+1}: ${membersData[i]}');
+          }
+          print('---------------------------');
+        }
         
         for (var memberData in membersData) {
-          final int userId = memberData['user_id'];
-          memberFinanceMap[userId] = {
-            'income': memberData['income'] ?? 0.0,
-            'expense': memberData['expense'] ?? 0.0,
-            'balance': memberData['balance'] ?? 0.0,
-            'income_percentage': memberData['income_percentage'] ?? 0.0,
-            'expense_percentage': memberData['expense_percentage'] ?? 0.0,
+          // 获取各种可能的标识符
+          final int userId = memberData['user_id'] is int 
+              ? memberData['user_id'] 
+              : int.tryParse(memberData['user_id']?.toString() ?? '0') ?? 0;
+          
+          final int memberId = memberData['id'] is int 
+              ? memberData['id'] 
+              : int.tryParse(memberData['id']?.toString() ?? '0') ?? 0;
+          
+          final String memberName = memberData['name']?.toString() ?? '';
+          
+          // 创建财务数据对象
+          final financeData = {
+            'income': (memberData['income'] ?? 0.0).toDouble(),
+            'expense': (memberData['expense'] ?? 0.0).toDouble(),
+            'balance': (memberData['balance'] ?? 0.0).toDouble(),
+            'income_percentage': (memberData['income_percentage'] ?? 0.0).toDouble(),
+            'expense_percentage': (memberData['expense_percentage'] ?? 0.0).toDouble(),
           };
+          
+          // 将数据添加到所有映射表中
+          if (userId > 0) {
+            userIdMap[userId] = financeData;
+          }
+          
+          if (memberId > 0) {
+            memberIdMap[memberId] = financeData;
+          }
+          
+          if (memberName.isNotEmpty) {
+            nameMap[memberName.toLowerCase()] = financeData;
+          }
+          
+          print('处理成员财务数据: 用户ID=$userId, 成员ID=$memberId, 姓名=$memberName');
+        }
+        
+        print('当前家庭成员列表:');
+        for (var member in _familyMembers) {
+          print('成员: ID=${member.id}, 用户ID=${member.userId}, 姓名=${member.name}, 角色=${member.role}');
         }
         
         // 更新成员对象的财务数据
+        bool anyMemberUpdated = false;
         for (var member in _familyMembers) {
-          if (memberFinanceMap.containsKey(member.userId)) {
-            member.financeData = memberFinanceMap[member.userId];
+          // 尝试多种方式匹配成员
+          Map<String, dynamic>? financeData;
+          
+          // 1. 尝试通过用户ID匹配
+          if (member.userId != null && userIdMap.containsKey(member.userId)) {
+            financeData = userIdMap[member.userId];
+            print('通过用户ID=${member.userId}匹配到财务数据: $financeData');
+          }
+          // 2. 尝试通过成员ID匹配
+          else if (memberIdMap.containsKey(member.id)) {
+            financeData = memberIdMap[member.id];
+            print('通过成员ID=${member.id}匹配到财务数据: $financeData');
+          }
+          // 3. 尝试通过姓名匹配
+          else if (nameMap.containsKey(member.name.toLowerCase())) {
+            financeData = nameMap[member.name.toLowerCase()];
+            print('通过姓名=${member.name}匹配到财务数据: $financeData');
+          }
+          // 4. 尝试通过昵称匹配
+          else if (member.nickname.isNotEmpty && nameMap.containsKey(member.nickname.toLowerCase())) {
+            financeData = nameMap[member.nickname.toLowerCase()];
+            print('通过昵称=${member.nickname}匹配到财务数据: $financeData');
+          }
+          
+          // 更新成员财务数据
+          if (financeData != null) {
+            member.financeData = financeData;
+            anyMemberUpdated = true;
+            print('成功更新成员 ${member.name} 的财务数据');
+          } else {
+            print('警告: 未找到成员 ${member.name} 的财务数据');
+            // 设置默认财务数据以防止UI错误
+            member.financeData = {
+              'income': 0.0,
+              'expense': 0.0,
+              'balance': 0.0,
+              'income_percentage': 0.0,
+              'expense_percentage': 0.0,
+            };
           }
         }
         
-        // 更新UI
-        setState(() {
-          _totalFamilyIncome = totalIncome;
-          _totalFamilyExpense = totalExpense;
-        });
+        // 只有当有成员数据更新时才刷新UI
+        if (anyMemberUpdated || totalIncome != _totalFamilyIncome || totalExpense != _totalFamilyExpense) {
+          setState(() {
+            _totalFamilyIncome = totalIncome;
+            _totalFamilyExpense = totalExpense;
+          });
+          print('已更新家庭财务数据, 总收入: $totalIncome, 总支出: $totalExpense');
+        }
       }
     } catch (e) {
       print('加载家庭成员财务贡献数据失败: $e');
-      // 发生错误时不更新UI，保持现有数据
+      // 发生错误时为所有成员设置默认财务数据
+      for (var member in _familyMembers) {
+        if (member.financeData == null) {
+          member.financeData = {
+            'income': 0.0,
+            'expense': 0.0,
+            'balance': 0.0,
+            'income_percentage': 0.0,
+            'expense_percentage': 0.0,
+          };
+        }
+      }
     }
   }
   
@@ -622,6 +708,229 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
     }
   }
   
+  // 加载家庭预算规划数据
+  Future<void> _loadBudgetPlanningData() async {
+    try {
+      if (_enableDebug) {
+        print('正在加载家庭预算规划数据...');
+      }
+      
+      // 使用BudgetService获取预算类别
+      final budgetService = BudgetService();
+      final budgetCategories = await budgetService.getBudgetCategories(
+        context: context,
+        isFamilyBudget: true, // 重要：指定获取家庭预算
+      );
+      
+      if (_enableDebug) {
+        print('成功获取家庭预算数据，共 ${budgetCategories.length} 项');
+      }
+      
+      // 创建预算项列表
+      List<BudgetItem> budgetItems = [];
+      
+      // 使用IconService获取所有图标，用于查找对应的图标
+      final iconService = IconService();
+      final allIcons = await iconService.getUserAvailableIcons(context: context);
+      
+      for (var category in budgetCategories) {
+        // 查找对应的图标
+        IconData icon = FontAwesomeIcons.moneyBill; // 默认图标
+        Color iconColor = const Color(0xFF6B7280); // 默认颜色
+        
+        final iconList = allIcons.where((i) => i.id == category.iconId).toList();
+        if (iconList.isNotEmpty) {
+          icon = iconList.first.icon;
+          iconColor = iconList.first.color;
+        }
+        
+        // 判断是否超出预算
+        bool isOverBudget = category.spent > category.budget;
+        
+        // 创建预算项
+        budgetItems.add(BudgetItem(
+          category: category.name,
+          icon: icon,
+          currentAmount: category.spent,
+          budgetAmount: category.budget,
+          isOverBudget: isOverBudget,
+          isFamilyBudget: true,
+          iconColor: iconColor,
+        ));
+      }
+      
+      // 更新UI
+      setState(() {
+        _budgetItems = budgetItems;
+      });
+    } catch (e) {
+      print('加载家庭预算规划数据失败: $e');
+      
+      // 如果加载失败，使用默认数据
+      if (_budgetItems.isEmpty) {
+        setState(() {
+          _budgetItems = [
+            BudgetItem(
+              category: '住房',
+              icon: FontAwesomeIcons.home,
+              currentAmount: 3800.0,
+              budgetAmount: 4000.0,
+              isOverBudget: false,
+              isFamilyBudget: true,
+              iconColor: const Color(0xFF2563EB), // 蓝色
+            ),
+            BudgetItem(
+              category: '日常购物',
+              icon: FontAwesomeIcons.cartShopping,
+              currentAmount: 1720.0,
+              budgetAmount: 1500.0,
+              isOverBudget: true,
+              isFamilyBudget: true,
+              iconColor: const Color(0xFF16A34A), // 绿色
+            ),
+            BudgetItem(
+              category: '餐饮',
+              icon: FontAwesomeIcons.utensils,
+              currentAmount: 1250.0,
+              budgetAmount: 1500.0,
+              isOverBudget: false,
+              isFamilyBudget: true,
+              iconColor: const Color(0xFFEF4444), // 红色
+            ),
+          ];
+        });
+      }
+    }
+  }
+  
+  // 加载家庭储蓄目标数据
+  Future<void> _loadFamilySavingsGoals() async {
+    setState(() {
+      _isLoadingSavingsGoals = true;
+    });
+    
+    try {
+      if (_enableDebug) {
+        print('正在加载家庭储蓄目标数据...');
+      }
+      
+      // 我们需要使用ApiService直接获取家庭储蓄目标数据
+      // 构建查询参数字典
+      Map<String, String> queryParams = {
+        'is_family_savings': 'true', // 添加家庭标识
+      };
+      
+      // 请求API获取家庭储蓄目标
+      final response = await _api.get(
+        path: '/api/v1/savings/goals',
+        params: queryParams,
+        context: context,
+      );
+      
+      if (_enableDebug) {
+        print('储蓄目标API响应: ${response['code']}, message=${response['message']}');
+      }
+      
+      if (response['code'] != 0) {
+        throw Exception(response['message'] ?? '获取家庭储蓄目标失败');
+      }
+      
+      // 解析返回的数据
+      final List<dynamic> data = response['data'] ?? [];
+      
+      // 处理data为空的情况
+      if (data.isEmpty) {
+        if (_enableDebug) {
+          print('API返回的家庭储蓄目标列表为空');
+        }
+        setState(() {
+          _savingsGoals = [];
+          _isLoadingSavingsGoals = false;
+        });
+        return;
+      }
+      
+      // 解析每个储蓄目标
+      final familyGoals = <SavingsGoal>[];
+      for (var item in data) {
+        try {
+          final goal = SavingsGoal.fromJson(item);
+          await goal.loadRealIcon(context: context);
+          familyGoals.add(goal);
+        } catch (e) {
+          print('解析家庭储蓄目标失败: $e, 数据: $item');
+          // 继续处理下一个，不中断
+        }
+      }
+      
+      if (_enableDebug) {
+        print('成功加载家庭储蓄目标: ${familyGoals.length}个');
+      }
+      
+      if (mounted) {
+        setState(() {
+          _savingsGoals = familyGoals;
+          _isLoadingSavingsGoals = false;
+        });
+      }
+    } catch (e) {
+      print('加载家庭储蓄目标异常: $e');
+      
+      // 使用默认数据
+      if (_savingsGoals.isEmpty) {
+        setState(() {
+          _savingsGoals = _getDefaultSavingsGoals();
+          _isLoadingSavingsGoals = false;
+        });
+      }
+    }
+  }
+  
+  // 获取默认的储蓄目标数据
+  List<SavingsGoal> _getDefaultSavingsGoals() {
+    return [
+      SavingsGoal(
+        id: '1',
+        name: '家庭旅行',
+        icon: FontAwesomeIcons.plane,
+        color: const Color(0xFF3B82F6), // 蓝色
+        targetAmount: 15000.0,
+        currentAmount: 6450.0,
+        monthlyTarget: 2000.0,
+        targetDate: DateTime(2025, 8, 1),
+        iconId: 1,
+        colorCode: '#3B82F6',
+        isFamilySavings: true, // 设置为家庭储蓄目标
+      ),
+      SavingsGoal(
+        id: '2',
+        name: '新电脑',
+        icon: FontAwesomeIcons.laptop,
+        color: const Color(0xFF8B5CF6), // 紫色
+        targetAmount: 8000.0,
+        currentAmount: 2240.0,
+        monthlyTarget: 1000.0,
+        targetDate: DateTime(2025, 6, 30),
+        iconId: 2,
+        colorCode: '#8B5CF6',
+        isFamilySavings: true, // 设置为家庭储蓄目标
+      ),
+      SavingsGoal(
+        id: '3',
+        name: '教育基金',
+        icon: FontAwesomeIcons.graduationCap,
+        color: const Color(0xFF10B981), // 绿色
+        targetAmount: 50000.0,
+        currentAmount: 12500.0,
+        monthlyTarget: 3000.0,
+        targetDate: DateTime(2028, 12, 31),
+        iconId: 3,
+        colorCode: '#10B981',
+        isFamilySavings: true, // 设置为家庭储蓄目标
+      ),
+    ];
+  }
+  
   // 选择月份
   void _selectMonth(DateTime month) {
     setState(() {
@@ -629,6 +938,7 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
     });
     _loadMonthlyBudget();
     _loadExpenseCategories(); // 同时刷新支出分类数据
+    _loadBudgetPlanningData(); // 刷新家庭预算规划数据
   }
   
   @override
@@ -644,7 +954,10 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
             isLoadingMembers: _isLoadingMembers,
             monthlyBudget: _monthlyBudget,
             onMonthSelected: _selectMonth,
-            onBack: () => Navigator.pop(context),
+            onBack: () {
+              // 注意：从本页面返回时不需要刷新，因为回到首页了
+              Navigator.pop(context);
+            },
           ),
           
           // 主要内容区域
@@ -657,10 +970,9 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
                     // 快捷操作
                     QuickActionsWidget(
                       onAddExpense: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ExpenseTrackingScreen()),
-                        );
+                        // 仅刷新数据，不再负责导航
+                        print('收到记账成功通知，立即刷新数据');
+                        _refreshAllData();
                       },
                       onViewReport: () {
                         Navigator.push(
@@ -691,10 +1003,34 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
                       isLoading: _isLoadingMembers,
                       totalIncome: _totalFamilyIncome,
                       totalExpense: _totalFamilyExpense,
-                      onViewDetails: () {
+                      onMemberDetails: (member) {
+                        // 导航到成员财务详情页面
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const MemberFinancesScreen()),
+                          MaterialPageRoute(
+                            builder: (context) {
+                              // 创建MemberDetailScreen需要的FamilyMember模型
+                              final detailMember = detail_model.FamilyMember(
+                                name: member.nickname.isNotEmpty ? member.nickname : member.name,
+                                role: member.role,
+                                income: member.income,
+                                expenses: member.expense,
+                                budget: member.income > 0 ? member.income * 0.8 : 5000, // 预算为收入的80%或默认值
+                                savingsRate: member.income > 0 ? ((member.income - member.expense) / member.income * 100) : 0,
+                                budgetUsage: member.income > 0 ? (member.expense / (member.income * 0.8) * 100) : 0,
+                                incomeChange: 5.0, // 默认值
+                                expensesChange: 3.0, // 默认值
+                                color: const Color(0xFF3B82F6), // 默认蓝色
+                                icon: FontAwesomeIcons.user,
+                                avatarBgColor: const Color(0xFFDBEAFE),
+                                incomeContribution: member.incomePercentage,
+                                expenseContribution: member.expensePercentage,
+                                mainConsumption: '主要消费',
+                              );
+                              
+                              return MemberDetailScreen(member: detailMember);
+                            },
+                          ),
                         );
                       },
                     ),
@@ -719,8 +1055,10 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
                       onEdit: () {
                         Navigator.push(
                           context, 
-                          MaterialPageRoute(builder: (context) => const BudgetSettingsScreen()),
-                        );
+                          MaterialPageRoute(
+                            builder: (context) => const BudgetSettingsScreen(isFamilyBudget: true),
+                          ),
+                        ).then((_) => _loadBudgetPlanningData()); // 返回时刷新数据
                       },
                     ),
                     const SizedBox(height: 16),
@@ -728,11 +1066,16 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> {
                     // 储蓄目标
                     SavingsGoalsWidget(
                       goals: _savingsGoals,
+                      isLoading: _isLoadingSavingsGoals,
                       onAddGoal: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const SavingsGoalsScreen()),
-                        );
+                          MaterialPageRoute(
+                            builder: (context) => const SavingsGoalsScreen(
+                              isFamilySavings: true, // 设置为家庭储蓄目标
+                            ),
+                          ),
+                        ).then((_) => _loadFamilySavingsGoals()); // 返回时刷新数据
                       },
                     ),
                     const SizedBox(height: 24),
