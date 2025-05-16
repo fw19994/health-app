@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:io' if (dart.library.html) 'package:life_app/utils/web_stub.dart' as io;
+import 'dart:io' if (dart.library.html) 'package:yue_butler/utils/web_stub.dart' as io;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
