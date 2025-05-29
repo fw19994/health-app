@@ -18,6 +18,9 @@ class Transaction {
   // 交易描述
   final String? description;
   
+  // 商户信息
+  final String? merchant;
+  
   // 交易日期
   final DateTime date;
   
@@ -58,6 +61,7 @@ class Transaction {
     required this.id,
     required this.title,
     this.description,
+    this.merchant,
     required this.date,
     required this.time,
     required this.amount,

@@ -32,6 +32,8 @@ func (s *FinanceService) AddTransaction(userID uint, req model.AddTransactionReq
 		RecorderID:      req.RecorderID,
 		IsFamilyExpense: req.IsFamilyExpense,
 		ImageURL:        req.ImageURL,
+		FamilyId:        req.FamilyId,
+		GoalId:          req.GoalId,
 	}
 
 	// 调用 Repository 保存交易记录
@@ -39,9 +41,19 @@ func (s *FinanceService) AddTransaction(userID uint, req model.AddTransactionReq
 }
 
 // GetRecentTransactions 获取近期交易记录
-func (s *FinanceService) GetRecentTransactions(userID uint, transactionType string, limit int) ([]model.Transaction, error) {
+func (s *FinanceService) GetRecentTransactions(userID uint, transactionType string, limit, memberId int, isFamilyBudget bool) ([]model.Transaction, error) {
+	familyId := 0
+	if isFamilyBudget {
+		memberRepository := new(repository.FamilyMemberRepository)
+		familyMember, err := memberRepository.GetFamilyMemberByUserIDDirect(userID)
+		if err != nil {
+			return nil, err
+		}
+		familyId = int(familyMember.OwnerID)
+	}
+
 	// 调用 Repository 获取近期交易记录
-	return s.repo.GetRecentTransactions(userID, transactionType, limit)
+	return s.repo.GetRecentTransactions(userID, transactionType, limit, memberId, familyId)
 }
 
 // GetTransactions 获取交易记录列表，支持分页和筛选
@@ -56,27 +68,10 @@ func (s *FinanceService) GetTransactions(userID uint, params model.TransactionQu
 	if params.PageSize <= 0 {
 		params.PageSize = 20
 	}
-	memberIDs := make([]uint, 0)
-	if params.MemberID == 0 {
-		familyMemberRepository := &repository.FamilyMemberRepository{}
-		familyMember, err := familyMemberRepository.GetFamilyMemberByUserIDDirect(userID)
-		if err != nil {
-			return nil, err
-		}
-		familyMembers, err := familyMemberRepository.GetFamilyMembers(familyMember.OwnerID)
-		if err != nil {
-			return nil, err
-		}
-		for _, tmp := range familyMembers {
-			memberIDs = append(memberIDs, tmp.ID)
-		}
-	} else {
-		memberIDs = append(memberIDs, params.MemberID)
-	}
 
 	// 获取统计数据
 	totalRecords, totalIncome, totalExpense, err := s.repo.GetTransactionStats(
-		memberIDs,
+		params.MemberID,
 		params.StartDate,
 		params.EndDate,
 		params.Type,
@@ -120,49 +115,16 @@ func (s *FinanceService) GetTransactionGroups(userID uint, startDate, endDate ti
 	if limit <= 0 {
 		limit = 10
 	}
-	memberIDs := make([]uint, 0)
-	if memberID == 0 {
-		familyMemberRepository := &repository.FamilyMemberRepository{}
-		familyMember, err := familyMemberRepository.GetFamilyMemberByUserIDDirect(userID)
-		if err != nil {
-			return nil, err
-		}
-		familyMembers, err := familyMemberRepository.GetFamilyMembers(familyMember.OwnerID)
-		if err != nil {
-			return nil, err
-		}
-		for _, tmp := range familyMembers {
-			memberIDs = append(memberIDs, tmp.ID)
-		}
-	} else {
-		memberIDs = append(memberIDs, memberID)
-	}
 
 	// 调用Repository方法
-	return s.repo.GetTransactionsByDate(userID, startDate, endDate, limit, page, types, memberIDs, categoryID)
+	return s.repo.GetTransactionsByDate(userID, startDate, endDate, limit, page, types, memberID, categoryID)
 }
 
 // GetTransactionTrend 获取交易趋势数据
 func (s *FinanceService) GetTransactionTrend(userID uint, startDate, endDate time.Time, interval string, memberID uint, CategoryID []int) ([]model.TrendDataPoint, error) {
-	memberIDs := make([]uint, 0)
-	if memberID == 0 {
-		familyMemberRepository := &repository.FamilyMemberRepository{}
-		familyMember, err := familyMemberRepository.GetFamilyMemberByUserIDDirect(userID)
-		if err != nil {
-			return nil, err
-		}
-		familyMembers, err := familyMemberRepository.GetFamilyMembers(familyMember.OwnerID)
-		if err != nil {
-			return nil, err
-		}
-		for _, tmp := range familyMembers {
-			memberIDs = append(memberIDs, tmp.ID)
-		}
-	} else {
-		memberIDs = append(memberIDs, memberID)
-	}
+
 	// 调用Repository方法
-	return s.repo.GetTransactionTrend(userID, startDate, endDate, interval, memberIDs, CategoryID)
+	return s.repo.GetTransactionTrend(userID, startDate, endDate, interval, memberID, CategoryID)
 }
 
 // GetMemberExpenseStats 获取成员支出统计
@@ -194,7 +156,7 @@ func (s *FinanceService) GetFinanceSummary(userID uint, startDate, endDate time.
 	}
 
 	// 获取统计数据
-	totalCount, totalIncome, totalExpense, err := s.repo.GetTransactionStats([]uint{}, startDate, endDate, "", []int{}, userID)
+	totalCount, totalIncome, totalExpense, err := s.repo.GetTransactionStats(0, startDate, endDate, "", []int{}, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +168,7 @@ func (s *FinanceService) GetFinanceSummary(userID uint, startDate, endDate time.
 	}
 
 	// 获取每周趋势
-	trendData, err := s.repo.GetTransactionTrend(userID, startDate, endDate, "week", []uint{}, []int{})
+	trendData, err := s.repo.GetTransactionTrend(userID, startDate, endDate, "week", 0, []int{})
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +189,7 @@ func (s *FinanceService) GetFinanceSummary(userID uint, startDate, endDate time.
 }
 
 // GetExpenseAnalysis 获取按类别统计的支出分析数据
-func (s *FinanceService) GetExpenseAnalysis(userID uint, startDate, endDate time.Time, memberID uint) ([]model.CategoryExpenseStats, error) {
+func (s *FinanceService) GetExpenseAnalysis(userID uint, startDate, endDate time.Time, memberID uint, types string, isFamilyBudget bool) ([]model.CategoryExpenseStats, error) {
 	// 使用当前时间作为默认结束日期
 	if endDate.IsZero() {
 		endDate = time.Now()
@@ -241,7 +203,7 @@ func (s *FinanceService) GetExpenseAnalysis(userID uint, startDate, endDate time
 
 	// 处理成员ID，如果未指定则获取所有家庭成员
 	memberIDs := make([]uint, 0)
-	if memberID == 0 {
+	if memberID == 0 && isFamilyBudget {
 		familyMemberRepository := &repository.FamilyMemberRepository{}
 		familyMember, err := familyMemberRepository.GetFamilyMemberByUserIDDirect(userID)
 		if err != nil {
@@ -254,12 +216,13 @@ func (s *FinanceService) GetExpenseAnalysis(userID uint, startDate, endDate time
 		for _, tmp := range familyMembers {
 			memberIDs = append(memberIDs, tmp.ID)
 		}
-	} else {
+	}
+	if memberID > 0 {
 		memberIDs = append(memberIDs, memberID)
 	}
 
 	// 调用Repository方法获取按类别统计的支出数据
-	return s.repo.GetCategoryExpenseStats(userID, startDate, endDate, memberIDs)
+	return s.repo.GetCategoryExpenseStats(userID, startDate, endDate, memberIDs, types)
 }
 
 // GetMemberIncome 获取成员在指定时间段内的收入总额

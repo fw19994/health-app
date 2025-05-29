@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"life_app_back/internal/repository"
 	"math"
 	"strconv"
 	"time"
@@ -264,12 +265,22 @@ func GetMonthlyBudget(c *gin.Context) {
 	// 计算日期范围
 	startDate := time.Date(req.Year, time.Month(req.Month), 1, 0, 0, 0, 0, time.Local)
 	endDate := time.Date(req.Year, time.Month(req.Month+1), 0, 23, 59, 59, 0, time.Local)
-
 	// 查询预算
 	var categories []model.BudgetCategory
-	err := model.DB.Where("user_id = ? AND year = ? AND month = ?", userID, req.Year, req.Month).
-		Find(&categories).Error
-
+	querys := model.DB.Where(" year = ? AND month = ? and is_family_budget = ?", req.Year, req.Month, req.IsFamilyBudget)
+	ownerID := 0
+	if req.IsFamilyBudget {
+		familyMemberRepository := &repository.FamilyMemberRepository{}
+		familyMember, err := familyMemberRepository.GetFamilyMemberByUserIDDirect(userID)
+		if err != nil {
+			utils.ServerError(c, err)
+		}
+		querys = querys.Where("family_id=?", familyMember.OwnerID)
+		ownerID = int(familyMember.OwnerID)
+	} else {
+		querys = querys.Where("user_id = ?", userID)
+	}
+	err := querys.Find(&categories).Error
 	if err != nil {
 		utils.ServerError(c, err)
 		return
@@ -278,20 +289,19 @@ func GetMonthlyBudget(c *gin.Context) {
 	for _, category := range categories {
 		totalBudget += category.Budget
 	}
-
+	querys1 := model.DB.Model(&model.Transaction{}).
+		Where("  type = ? AND date BETWEEN ? AND ?",
+			"expense", startDate, endDate).
+		Select("COALESCE(SUM(amount), 0)")
 	// 查询当月总消费
 	var totalSpent float64
-	err = model.DB.Model(&model.Transaction{}).
-		Where("user_id = ? AND type = ? AND date BETWEEN ? AND ?",
-			userID, "expense", startDate, endDate).
-		Select("COALESCE(SUM(amount), 0)").
-		Scan(&totalSpent).Error
+	if req.IsFamilyBudget {
+		querys1 = querys1.Where("family_id=?", ownerID)
 
-	if err != nil {
-		utils.ServerError(c, err)
-		return
+	} else {
+		querys1 = querys1.Where("user_id=?", userID)
 	}
-
+	err = querys1.Scan(&totalSpent).Error
 	// 准备响应数据
 	var response model.MonthlyBudgetResponse
 	response.TotalBudget = totalBudget
@@ -305,41 +315,41 @@ func GetMonthlyBudget(c *gin.Context) {
 		response.UsagePercent = 0
 	}
 
-	// 查询各分类的消费数据并组装
-	categoriesWithUsage := make([]model.BudgetCategoryWithUsage, 0, len(categories))
-
-	for _, category := range categories {
-		// 查询该分类的消费
-		var categorySpent float64
-		err = model.DB.Model(&model.Transaction{}).
-			Where("user_id = ? AND type = ? AND icon_id = ? AND date BETWEEN ? AND ?",
-				userID, "expense", category.IconID, startDate, endDate).
-			Select("COALESCE(SUM(amount), 0)").
-			Scan(&categorySpent).Error
-
-		if err != nil {
-			utils.ServerError(c, err)
-			return
-		}
-
-		// 计算分类使用百分比
-		var usagePercent float64
-		if category.Budget > 0 {
-			usagePercent = math.Round((categorySpent/category.Budget)*10000) / 100 // 保留两位小数
-		}
-
-		// 添加到结果集
-		categoryWithUsage := model.BudgetCategoryWithUsage{
-			ID:           int(category.ID),
-			Name:         category.Name,
-			Amount:       category.Budget,
-			SpentAmount:  categorySpent,
-			UsagePercent: usagePercent,
-		}
-
-		categoriesWithUsage = append(categoriesWithUsage, categoryWithUsage)
-	}
-
-	response.Categories = categoriesWithUsage
+	//// 查询各分类的消费数据并组装
+	//categoriesWithUsage := make([]model.BudgetCategoryWithUsage, 0, len(categories))
+	//
+	//for _, category := range categories {
+	//	// 查询该分类的消费
+	//	var categorySpent float64
+	//	err = model.DB.Model(&model.Transaction{}).
+	//		Where("user_id = ? AND type = ? AND icon_id = ? AND date BETWEEN ? AND ?",
+	//			userID, "expense", category.IconID, startDate, endDate).
+	//		Select("COALESCE(SUM(amount), 0)").
+	//		Scan(&categorySpent).Error
+	//
+	//	if err != nil {
+	//		utils.ServerError(c, err)
+	//		return
+	//	}
+	//
+	//	// 计算分类使用百分比
+	//	var usagePercent float64
+	//	if category.Budget > 0 {
+	//		usagePercent = math.Round((categorySpent/category.Budget)*10000) / 100 // 保留两位小数
+	//	}
+	//
+	//	// 添加到结果集
+	//	categoryWithUsage := model.BudgetCategoryWithUsage{
+	//		ID:           int(category.ID),
+	//		Name:         category.Name,
+	//		Amount:       category.Budget,
+	//		SpentAmount:  categorySpent,
+	//		UsagePercent: usagePercent,
+	//	}
+	//
+	//	categoriesWithUsage = append(categoriesWithUsage, categoryWithUsage)
+	//}
+	//
+	//response.Categories = categoriesWithUsage
 	utils.Success(c, response, "获取预算数据成功")
 }

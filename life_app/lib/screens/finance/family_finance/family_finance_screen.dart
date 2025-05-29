@@ -386,6 +386,7 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
         year: _selectedMonth.year,
         month: _selectedMonth.month,
         context: context,
+        isFamilyBudget: true, // 确保使用家庭预算标识
       );
       
       setState(() {
@@ -422,6 +423,7 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
         context: context,
         startDate: startDate,
         endDate: endDate,
+        isFamilyBudget: true, // 添加家庭预算标识
       );
       
       print('获取支出分析数据响应：${response.success ? "成功" : "失败"}');
@@ -568,6 +570,7 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
       final response = await _financeService.getRecentTransactions(
         context: context,
         type: 'expense', // 只获取支出类型的交易
+        isFamilyBudget: true, // 添加家庭预算标识
       );
       
       if (_enableDebug) {
@@ -1028,7 +1031,10 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
                                 mainConsumption: '主要消费',
                               );
                               
-                              return MemberDetailScreen(member: detailMember);
+                              return MemberDetailScreen(
+                                member: detailMember,
+                                backendMember: member,
+                              );
                             },
                           ),
                         );

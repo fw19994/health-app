@@ -76,7 +76,11 @@ class MemberCard extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MemberDetailScreen(member: member),
+                        builder: (context) => MemberDetailScreen(
+                          member: member,
+                          // 这里如果有后端数据模型可以传递
+                          // backendMember: backendMember,
+                        ),
                       ),
                     );
                   },
@@ -132,9 +136,9 @@ class MemberCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _buildMetricItem(
-                        label: "储蓄率",
-                        value: "${member.savingsRate.toStringAsFixed(1)}%",
-                        valueColor: _getSavingsRateColor(member.savingsRate),
+                        label: "结余",
+                        value: "¥${(member.income - member.expenses).toStringAsFixed(0)}",
+                        valueColor: _getBalanceColor(member.income - member.expenses),
                       ),
                     ),
                     Expanded(
@@ -160,11 +164,11 @@ class MemberCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      _getFinancialHealthLabel(member.savingsRate),
+                      _getFinancialHealthLabel(member.income, member.expenses),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: _getFinancialHealthColor(member.savingsRate),
+                        color: _getFinancialHealthColor(member.income, member.expenses),
                       ),
                     ),
                   ],
@@ -180,10 +184,10 @@ class MemberCard extends StatelessWidget {
                   ),
                   child: FractionallySizedBox(
                     alignment: Alignment.centerLeft,
-                    widthFactor: _getFinancialHealthPercentage(member.savingsRate),
+                    widthFactor: _getFinancialHealthPercentage(member.income, member.expenses),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: _getFinancialHealthColor(member.savingsRate),
+                        color: _getFinancialHealthColor(member.income, member.expenses),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -242,13 +246,13 @@ class MemberCard extends StatelessWidget {
     }
   }
   
-  // 获取储蓄率颜色
-  Color _getSavingsRateColor(double rate) {
-    if (rate >= 50) {
+  // 获取结余颜色
+  Color _getBalanceColor(double balance) {
+    if (balance >= 5000) {
       return const Color(0xFF10B981);  // 绿色 (优秀)
-    } else if (rate >= 20) {
+    } else if (balance >= 2000) {
       return const Color(0xFF059669);  // 浅绿色 (良好)
-    } else if (rate >= 0) {
+    } else if (balance >= 0) {
       return const Color(0xFFF59E0B);  // 黄色 (一般)
     } else {
       return const Color(0xFFEF4444);  // 红色 (不足)
@@ -256,14 +260,18 @@ class MemberCard extends StatelessWidget {
   }
   
   // 获取财务健康标签
-  String _getFinancialHealthLabel(double savingsRate) {
-    if (savingsRate >= 50) {
+  String _getFinancialHealthLabel(double income, double expenses) {
+    if (income <= 0) return '无收入';
+    
+    double savingsRatio = (income - expenses) / income;
+    
+    if (savingsRatio >= 0.5) {
       return '优秀';
-    } else if (savingsRate >= 30) {
+    } else if (savingsRatio >= 0.3) {
       return '良好';
-    } else if (savingsRate >= 10) {
+    } else if (savingsRatio >= 0.1) {
       return '一般';
-    } else if (savingsRate >= 0) {
+    } else if (savingsRatio >= 0) {
       return '不足';
     } else {
       return '危险';
@@ -271,14 +279,18 @@ class MemberCard extends StatelessWidget {
   }
   
   // 获取财务健康颜色
-  Color _getFinancialHealthColor(double savingsRate) {
-    if (savingsRate >= 50) {
+  Color _getFinancialHealthColor(double income, double expenses) {
+    if (income <= 0) return const Color(0xFF6B7280); // 灰色
+    
+    double savingsRatio = (income - expenses) / income;
+    
+    if (savingsRatio >= 0.5) {
       return const Color(0xFF10B981);  // 绿色 (优秀)
-    } else if (savingsRate >= 30) {
+    } else if (savingsRatio >= 0.3) {
       return const Color(0xFF059669);  // 浅绿色 (良好)
-    } else if (savingsRate >= 10) {
+    } else if (savingsRatio >= 0.1) {
       return const Color(0xFFF59E0B);  // 黄色 (一般)
-    } else if (savingsRate >= 0) {
+    } else if (savingsRatio >= 0) {
       return const Color(0xFFF97316);  // 橙色 (不足)
     } else {
       return const Color(0xFFEF4444);  // 红色 (危险)
@@ -286,18 +298,22 @@ class MemberCard extends StatelessWidget {
   }
   
   // 获取财务健康百分比显示
-  double _getFinancialHealthPercentage(double savingsRate) {
-    if (savingsRate < 0) {
-      // 负储蓄率，财务健康度低
+  double _getFinancialHealthPercentage(double income, double expenses) {
+    if (income <= 0) return 0.3; // 基础健康度
+    
+    double savingsRatio = (income - expenses) / income;
+    
+    if (savingsRatio < 0) {
+      // 负结余，财务健康度低
       return 0.25;
-    } else if (savingsRate > 100) {
-      // 储蓄率超高，财务健康度满
+    } else if (savingsRatio > 1) {
+      // 结余超过收入，财务健康度满
       return 1.0;
     } else {
-      // 根据储蓄率的百分比映射到0.3-1.0之间的值
-      // 0%储蓄率 -> 0.3健康度
-      // 100%储蓄率 -> 1.0健康度
-      return 0.3 + (savingsRate / 100) * 0.7;
+      // 根据结余比例映射到0.3-1.0之间的值
+      // 0%结余比例 -> 0.3健康度
+      // 100%结余比例 -> 1.0健康度
+      return 0.3 + savingsRatio * 0.7;
     }
   }
 }

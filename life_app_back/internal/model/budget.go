@@ -2,8 +2,9 @@
 package model
 
 type MonthlyBudgetRequest struct {
-	Year  int `form:"year" json:"year"`
-	Month int `form:"month" json:"month"`
+	Year           int  `form:"year" json:"year"`
+	Month          int  `form:"month" json:"month"`
+	IsFamilyBudget bool `form:"is_family_budget" json:"is_family_budget"`
 }
 
 // MonthlyBudgetResponse 月度预算响应

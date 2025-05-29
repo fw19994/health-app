@@ -14,6 +14,7 @@ class Transaction {
   final IconData icon;
   final Color iconBgColor;
   final Color iconColor;
+  final String iconName; // 添加图标名称属性
   
   const Transaction({
     required this.title,
@@ -23,6 +24,7 @@ class Transaction {
     required this.icon,
     required this.iconBgColor,
     required this.iconColor,
+    this.iconName = '', // 设置默认值，避免兼容性问题
   });
   
   // 格式化金额显示，收入前加+，支出前加-

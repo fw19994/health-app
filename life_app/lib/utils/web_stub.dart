@@ -1,4 +1,17 @@
-// Web平台存根文件，用于模拟dart:io中的类
+// 用于在Web和非Web环境中提供统一接口的存根文件
+import 'dart:io' as io;
+
+// 重新导出标准io库中的部分类，以便在导入此文件时可用
+export 'dart:io' show HttpClient, SecurityContext, X509Certificate, Platform;
+
+// 自定义HttpOverrides类
+class HttpOverrides {
+  static HttpOverrides? global;
+  
+  HttpClient createHttpClient(SecurityContext? context) {
+    return HttpClient();
+  }
+}
 
 enum InternetAddressType {
   IPv4,
@@ -61,15 +74,7 @@ class ProcessResult {
   ProcessResult(this.pid, this.exitCode, this.stdout, this.stderr);
 }
 
-// HTTP相关的模拟类
-class HttpOverrides {
-  static HttpOverrides? global;
-  
-  HttpClient createHttpClient(SecurityContext? context) {
-    return HttpClient();
-  }
-}
-
+// HTTP相关类
 class HttpClient {
   Duration? connectionTimeout;
   int? maxConnectionsPerHost;

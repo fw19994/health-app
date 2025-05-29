@@ -25,7 +25,20 @@ class _TransactionHeaderState extends State<TransactionHeader> {
   void initState() {
     super.initState();
     _selectedMember = widget.selectedMember;
+    print('【TransactionHeader】初始化 - 接收到的selectedMember: ${widget.selectedMember?.name}, ID: ${widget.selectedMember?.id}');
     _loadFamilyMembers();
+  }
+  
+  @override
+  void didUpdateWidget(TransactionHeader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 当selectedMember属性变化时更新内部状态
+    if (widget.selectedMember != oldWidget.selectedMember) {
+      print('【TransactionHeader】属性更新 - 新的selectedMember: ${widget.selectedMember?.name}, ID: ${widget.selectedMember?.id}');
+      setState(() {
+        _selectedMember = widget.selectedMember;
+      });
+    }
   }
   
   // 加载家庭成员
@@ -41,26 +54,44 @@ class _TransactionHeaderState extends State<TransactionHeader> {
       final response = await familyMemberService.getFamilyMembers();
       
       if (response.success && mounted) {
+        // 获取预选成员ID
+        final String? preSelectedMemberId = widget.selectedMember?.id.toString();
+        print('【TransactionHeader】家庭成员加载成功 - 预选成员ID: $preSelectedMemberId');
+        
         setState(() {
           // 确保response.data不为空，否则使用空列表
           _familyMembers = response.data ?? [];
           
-          if (_selectedMember == null && _familyMembers.isNotEmpty) {
+          // 如果有预选成员ID，尝试在加载的成员列表中找到匹配成员
+          if (preSelectedMemberId != null && preSelectedMemberId.isNotEmpty) {
+            final matchingMembers = _familyMembers.where(
+              (m) => m.id.toString() == preSelectedMemberId
+            ).toList();
+            
+            if (matchingMembers.isNotEmpty) {
+              _selectedMember = matchingMembers.first;
+              print('【TransactionHeader】找到匹配的预选成员: ${_selectedMember?.name}, ID: ${_selectedMember?.id}');
+            } else {
+              print('【TransactionHeader】未找到匹配的预选成员，ID: $preSelectedMemberId');
+            }
+          } else if (_selectedMember == null && _familyMembers.isNotEmpty) {
             // 如果没有预选成员，则选择全部（显示为null）
             _selectedMember = null;
+            print('【TransactionHeader】没有预选成员，使用"全部成员"');
             if (widget.onMemberSelected != null) {
               widget.onMemberSelected!(null);
             }
           }
         });
         
-        debugPrint('成功加载 ${_familyMembers.length} 个家庭成员');
+        print('【TransactionHeader】成功加载 ${_familyMembers.length} 个家庭成员');
+        print('【TransactionHeader】当前选中成员: ${_selectedMember?.name ?? "全部成员"}, ID: ${_selectedMember?.id}');
         for (var member in _familyMembers) {
-          debugPrint('成员: ${member.name}, 角色: ${member.role}, 头像: ${member.avatarUrl}');
+          print('【TransactionHeader】成员列表项: ${member.name}, ID: ${member.id}, 角色: ${member.role}');
         }
       }
     } catch (e) {
-      debugPrint('加载家庭成员失败: $e');
+      print('【TransactionHeader】加载家庭成员失败: $e');
     } finally {
       if (mounted) {
         setState(() {

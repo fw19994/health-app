@@ -24,6 +24,13 @@ func (s *SavingsGoalService) GetUserSavingsGoals(userID uint) ([]model.SavingsGo
 	// 转换为响应结构
 	var responses []model.SavingsGoalResponse
 	for _, goal := range goals {
+		// 查询与该储蓄目标相关的收入交易总额
+		var totalIncome float64
+		query := model.DB.Model(&model.Transaction{}).Where("user_id = ? AND type = ? AND goal_id = ?", userID, model.Income, goal.ID)
+		query.Select("COALESCE(SUM(amount), 0)").Scan(&totalIncome)
+
+		// 更新当前金额为收入交易总额
+		goal.CurrentAmount = totalIncome
 		responses = append(responses, goal.ToResponse())
 	}
 
@@ -52,6 +59,13 @@ func (s *SavingsGoalService) GetFamilySavingsGoals(userID uint) ([]model.Savings
 	// 转换为响应结构
 	var responses []model.SavingsGoalResponse
 	for _, goal := range goals {
+		// 查询与该储蓄目标相关的家庭收入交易总额
+		var totalIncome float64
+		query := model.DB.Model(&model.Transaction{}).Where("family_id = ? AND type = ? AND goal_id = ?", familyID, model.Income, goal.ID)
+		query.Select("COALESCE(SUM(amount), 0)").Scan(&totalIncome)
+
+		// 更新当前金额为收入交易总额
+		goal.CurrentAmount = totalIncome
 		responses = append(responses, goal.ToResponse())
 	}
 

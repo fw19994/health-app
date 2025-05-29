@@ -17,6 +17,8 @@ import '../services/family_member_service.dart';
 import '../services/finance_service.dart'; // 导入 FinanceService
 import '../models/api_response.dart'; // 导入 ApiResponse
 import '../widgets/common/category_selector.dart';
+import '../services/budget_service.dart';
+import '../models/savings_goal.dart';
 
 class ExpenseTrackingScreen extends StatefulWidget {
   const ExpenseTrackingScreen({super.key});
@@ -81,6 +83,15 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
   List<Map<String, dynamic>> _recentTransactions = [];
   bool _isLoadingTransactions = false;
 
+  // 添加储蓄目标相关变量
+  // 添加储蓄目标列表
+  List<SavingsGoal> _savingsGoals = [];
+  bool _isLoadingSavingsGoals = false;
+  SavingsGoal? _selectedSavingsGoal;
+  
+  // 预加载储蓄目标服务
+  final BudgetService _budgetService = BudgetService();
+
   @override
   void initState() {
     super.initState();
@@ -99,6 +110,8 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
     _loadFamilyMembers();
     // 加载近期交易 (不传入类型参数)
     _loadRecentTransactions();
+    // 加载储蓄目标
+    _loadSavingsGoals();
   }
 
   // 加载图标数据
@@ -1259,6 +1272,9 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
               ),
             ],
           ),
+          
+          // 储蓄目标选择器
+          _buildSavingsGoalSelector(),
         ],
       ),
     );
@@ -1351,6 +1367,44 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
               const Divider(height: 32),
             ],
           ),
+          
+          // 来源输入
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '来源',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(FontAwesomeIcons.building, color: Colors.grey, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _sourceController,
+                      style: const TextStyle(
+                        fontSize: 16,
+                      ),
+                      decoration: const InputDecoration(
+                        hintText: '输入收入来源',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(height: 32),
+            ],
+          ),
+          
+          // 储蓄目标选择器
+          _buildSavingsGoalSelector(),
           
           // 备注输入
           Column(
@@ -1858,6 +1912,13 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
     final String merchant = _merchantController.text;
     final String notes = _noteController.text;
     final int recorderId = _selectedRecorder!.id;
+    
+    // 获取储蓄目标ID (仅当交易类型为收入且已选择储蓄目标时)
+    int? goalId;
+    if (transactionType == 'income' && _selectedSavingsGoal != null) {
+      // 将String类型的id转换为int
+      goalId = int.tryParse(_selectedSavingsGoal!.id);
+    }
 
     // 4. 调用 Service
     try {
@@ -1872,6 +1933,7 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
         recorderId: recorderId,
         isFamilyExpense: _isFamilyExpense,
         imageUrl: _uploadedImagePath, // 传递图片路径，如果需要的话
+        goalId: goalId, // 传递储蓄目标ID
       );
 
       // 5. 处理结果
@@ -2394,6 +2456,252 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
               color: _selectedTypeIndex == 0 
                   ? Colors.red.shade400 
                   : Colors.green.shade400,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 加载储蓄目标数据
+  Future<void> _loadSavingsGoals() async {
+    setState(() {
+      _isLoadingSavingsGoals = true;
+    });
+    
+    try {
+      // 获取进行中的储蓄目标
+      final goals = await _budgetService.getSavingsGoals(
+        status: 'in_progress',
+        context: context,
+      );
+      
+      // 为每个目标加载真实图标
+      for (var goal in goals) {
+        await goal.loadRealIcon(context: context);
+      }
+      
+      if (mounted) {
+        setState(() {
+          _savingsGoals = goals;
+          _isLoadingSavingsGoals = false;
+        });
+      }
+    } catch (e) {
+      print('加载储蓄目标失败: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingSavingsGoals = false;
+        });
+      }
+    }
+  }
+
+  // 构建储蓄目标选择器
+  Widget _buildSavingsGoalSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '储蓄目标',
+          style: TextStyle(
+            fontSize: 13,
+            color: Colors.grey,
+          ),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: _showSavingsGoalPicker,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: _selectedSavingsGoal != null
+                    ? Row(
+                        children: [
+                          Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: _selectedSavingsGoal!.color.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              _selectedSavingsGoal!.icon,
+                              size: 14,
+                              color: _selectedSavingsGoal!.color,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _selectedSavingsGoal!.name,
+                              style: const TextStyle(fontSize: 16),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Text(
+                        _isLoadingSavingsGoals 
+                            ? '加载中...' 
+                            : '选择储蓄目标（可选）',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                ),
+                Icon(
+                  Icons.arrow_drop_down,
+                  size: 24,
+                  color: Colors.grey[600],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const Divider(height: 32),
+      ],
+    );
+  }
+
+  // 显示储蓄目标选择器
+  void _showSavingsGoalPicker() {
+    if (_savingsGoals.isEmpty && !_isLoadingSavingsGoals) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('没有可用的储蓄目标'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Text(
+              '选择储蓄目标',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (_isLoadingSavingsGoals)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (_savingsGoals.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: Text('没有可用的储蓄目标'),
+                ),
+              )
+            else
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.4,
+                child: ListView(
+                  children: [
+                    // 添加"不选择"选项
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      tileColor: _selectedSavingsGoal == null 
+                          ? Colors.green.shade50 
+                          : null,
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.grey.shade200,
+                        child: const Icon(Icons.close, color: Colors.grey),
+                      ),
+                      title: const Text('不选择储蓄目标'),
+                      trailing: _selectedSavingsGoal == null
+                          ? Icon(Icons.check_circle, color: Colors.green.shade600)
+                          : null,
+                      onTap: () {
+                        setState(() {
+                          _selectedSavingsGoal = null;
+                        });
+                        Navigator.pop(context);
+                      },
+                    ),
+                    const Divider(),
+                    ..._savingsGoals.map((goal) {
+                      final bool isSelected = _selectedSavingsGoal?.id == goal.id;
+                      final double progress = goal.progress;
+                      
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        tileColor: isSelected ? Colors.green.shade50 : null,
+                        leading: CircleAvatar(
+                          backgroundColor: goal.color.withOpacity(0.2),
+                          child: Icon(goal.icon, color: goal.color, size: 18),
+                        ),
+                        title: Text(goal.name),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4),
+                            LinearProgressIndicator(
+                              value: progress,
+                              backgroundColor: Colors.grey.shade200,
+                              color: goal.color,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '已存 ¥${goal.currentAmount.toStringAsFixed(2)} / ¥${goal.targetAmount.toStringAsFixed(2)}',
+                              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                            ),
+                          ],
+                        ),
+                        trailing: isSelected
+                            ? Icon(Icons.check_circle, color: Colors.green.shade600)
+                            : null,
+                        onTap: () {
+                          setState(() {
+                            _selectedSavingsGoal = goal;
+                          });
+                          Navigator.pop(context);
+                        },
+                      );
+                    }).toList(),
+                  ],
+                ),
             ),
           ],
         ),

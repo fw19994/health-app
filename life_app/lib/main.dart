@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:io' if (dart.library.html) 'package:yue_butler/utils/web_stub.dart' as io;
+import 'dart:io' if (dart.library.html) 'utils/web_stub.dart' as io;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'utils/stagewise_integration.dart';
 import 'screens/home_screen.dart';
 import 'screens/finance_screen.dart';
+import 'screens/finance/family_finance/family_finance_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/login/login_screen.dart';
 import 'screens/transaction_history/transaction_history_screen.dart';
@@ -21,6 +23,11 @@ import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize stagewise in web debug mode
+  if (kIsWeb) {
+    StagewiseIntegration.initialize();
+  }
   
   // 添加网络调试 - 仅在Android平台
   if (!kIsWeb && io.Platform.isAndroid) {
@@ -127,7 +134,7 @@ class _MainScreenState extends State<MainScreen> {
   // 主要页面
   final List<Widget> _pages = [
     const HomeScreen(),
-    const Placeholder(child: Center(child: Text('健康'))), // 健康页面
+    const FamilyFinanceScreen(), // 家庭财务页面
     const FinanceScreen(),
     const ProfileScreen(), // 个人资料页面
   ];
@@ -177,7 +184,7 @@ class _MainScreenState extends State<MainScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItem(0, FontAwesomeIcons.house, FontAwesomeIcons.house, '首页'),
-              _buildNavItem(1, FontAwesomeIcons.heartPulse, FontAwesomeIcons.heartPulse, '健康'),
+              _buildNavItem(1, FontAwesomeIcons.moneyBillWave, FontAwesomeIcons.moneyBillWave, '家庭财务'),
               _buildNavItem(2, FontAwesomeIcons.wallet, FontAwesomeIcons.wallet, '财务'),
               _buildNavItem(3, FontAwesomeIcons.user, FontAwesomeIcons.user, '我的'),
             ],
@@ -219,21 +226,22 @@ class _MainScreenState extends State<MainScreen> {
 class MyHttpOverrides extends io.HttpOverrides {
   @override
   io.HttpClient createHttpClient(io.SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback = (io.X509Certificate cert, String host, int port) {
-        print('=== SSL证书验证 ===');
-        print('主机: $host');
-        print('端口: $port');
-        print('证书: ${cert.subject}');
-        return true; // 允许所有证书，仅用于调试
-      }
-      ..connectionTimeout = const Duration(seconds: 15)
-      ..maxConnectionsPerHost = 5
-      ..findProxy = (uri) {
-        // 添加DNS配置
-        print('=== DNS解析 ===');
-        print('正在解析域名: ${uri.host}');
-        return 'DIRECT';
-      };
+    final client = io.HttpClient();
+    client.badCertificateCallback = (cert, host, port) {
+      print('=== SSL证书验证 ===');
+      print('主机: $host');
+      print('端口: $port');
+      print('证书: ${cert.subject}');
+      return true; // 允许所有证书，仅用于调试
+    };
+    client.connectionTimeout = const Duration(seconds: 15);
+    client.maxConnectionsPerHost = 5;
+    client.findProxy = (uri) {
+      // 添加DNS配置
+      print('=== DNS解析 ===');
+      print('正在解析域名: ${uri.host}');
+      return 'DIRECT';
+    };
+    return client;
   }
 }

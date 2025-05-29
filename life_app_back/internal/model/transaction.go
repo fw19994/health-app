@@ -26,8 +26,10 @@ type Transaction struct {
 	RecorderID      uint      `json:"recorder_id" gorm:"index;comment:记账人(家庭成员)ID"` // 添加索引
 	IsFamilyExpense bool      `json:"is_family_expense" gorm:"default:false;comment:是否记为家庭支出"`
 	ImageURL        string    `json:"image_url" gorm:"type:varchar(255);comment:关联图片URL"` // 用于存储上传图片的路径
+	FamilyId        int       `json:"family_id" gorm:"index;comment:家庭ID"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
+	GoalId          int       `json:"goal_id" gorm:"index;comment:<UNK>ID"`
 
 	// 关联关系 (可选，如果需要预加载)
 	// User         User         `gorm:"foreignKey:UserID"`
@@ -46,6 +48,8 @@ type AddTransactionRequest struct {
 	RecorderID      uint      `json:"recorder_id" binding:"required"`
 	IsFamilyExpense bool      `json:"is_family_expense"`
 	ImageURL        string    `json:"image_url"`
+	FamilyId        int       `json:"family_id" gorm:"index;comment:家庭ID"`
+	GoalId          int       `json:"goal_id" gorm:"index;comment:<UNK>ID"`
 }
 
 // TableName 指定Transaction模型对应的数据库表名

@@ -28,29 +28,17 @@ class IncomeSources extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // 标题和"查看详情"按钮
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "收入来源",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF1F2937),
-                ),
+          // 标题（移除了"查看详情"按钮）
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              "收入来源",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1F2937),
               ),
-              GestureDetector(
-                onTap: onViewDetails,
-                child: const Text(
-                  "查看详情",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF4F46E5),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
           const SizedBox(height: 16),
           

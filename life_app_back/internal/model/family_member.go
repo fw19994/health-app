@@ -14,13 +14,14 @@ type FamilyMember struct {
 	Description   string    `json:"description"`
 	Phone         string    `json:"phone"`
 	Role          string    `json:"role"`
-	Gender        string    `json:"gender"`   // 性别
+	Gender        string    `json:"gender"` // 性别
 	AvatarURL     string    `json:"avatar_url"`
 	JoinTime      time.Time `json:"join_time"`
 	Permission    string    `json:"permission"`
 	IsCurrentUser bool      `json:"is_current_user" gorm:"-"` // 不存储到数据库
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
+	Status        int       `json:"status" gorm:"status"`
 }
 
 // TableName 指定表名
@@ -43,6 +44,7 @@ type FamilyMemberResponse struct {
 	JoinTime      string `json:"joinTime"`
 	Permission    string `json:"permission"`
 	IsCurrentUser bool   `json:"isCurrentUser"`
+	Status        int    `json:"status" gorm:"status"`
 }
 
 // ToResponse 将模型转换为响应

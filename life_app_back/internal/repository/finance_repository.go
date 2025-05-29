@@ -18,17 +18,25 @@ func (r FinanceRepository) AddTransaction(transaction *model.Transaction) error 
 }
 
 // GetRecentTransactions 获取近期交易记录
-func (r FinanceRepository) GetRecentTransactions(userID uint, transactionType string, limit int) ([]model.Transaction, error) {
+func (r FinanceRepository) GetRecentTransactions(userID uint, transactionType string, limit, memberId, familyId int) ([]model.Transaction, error) {
 	var transactions []model.Transaction
 
 	// 构建查询
-	query := model.DB.Where("user_id = ?", userID)
+	query := model.DB.Where("1 = 1")
 
 	// 如果指定了交易类型，添加交易类型过滤条件
 	if transactionType == "expense" || transactionType == "income" {
 		query = query.Where("type = ?", transactionType)
 	}
-
+	if memberId > 0 {
+		query = query.Where("recorder_id = ?", memberId)
+	}
+	if familyId > 0 {
+		query = query.Where("family_id = ?", familyId)
+	}
+	if memberId == 0 && familyId == 0 {
+		query = query.Where("user_id = ?", userID)
+	}
 	// 按时间倒序排序并限制结果数量
 	result := query.Order("date DESC").Limit(limit).Find(&transactions)
 
@@ -80,14 +88,14 @@ func (r FinanceRepository) GetTransactionsByFilters(params model.TransactionQuer
 }
 
 // GetTransactionStats 获取交易统计数据
-func (r FinanceRepository) GetTransactionStats(recorder_id []uint, startDate, endDate time.Time, types string, iconIds []int, userId uint) (int, float64, float64, error) {
+func (r FinanceRepository) GetTransactionStats(memberID uint, startDate, endDate time.Time, types string, iconIds []int, userId uint) (int, float64, float64, error) {
 	var totalCount int64
 	var totalIncome, totalExpense float64
 	baseQuery := model.DB.Debug().Model(&model.Transaction{}).Where(" 1=1")
 
-	if len(recorder_id) > 0 {
+	if memberID > 0 {
 		// 构建基础查询
-		baseQuery = baseQuery.Where("recorder_id in (?)", recorder_id)
+		baseQuery = baseQuery.Where("recorder_id = ?", memberID)
 
 	} else {
 		baseQuery = baseQuery.Where("user_id = ?", userId)
@@ -131,7 +139,7 @@ func (r FinanceRepository) GetTransactionStats(recorder_id []uint, startDate, en
 	if err != nil {
 		return 0, 0, 0, err
 	}
-	totalExpense, err = r.getTotalExpense(recorder_id, startDate, endDate, types, iconIds, userId)
+	totalExpense, err = r.getTotalExpense(memberID, startDate, endDate, types, iconIds, userId)
 	if err != nil {
 		return 0, 0, 0, err
 	}
@@ -139,13 +147,13 @@ func (r FinanceRepository) GetTransactionStats(recorder_id []uint, startDate, en
 }
 
 // GetTransactionStats 获取交易统计数据
-func (r FinanceRepository) getTotalExpense(recorder_id []uint, startDate, endDate time.Time, types string, iconIds []int, userId uint) (float64, error) {
+func (r FinanceRepository) getTotalExpense(memberID uint, startDate, endDate time.Time, types string, iconIds []int, userId uint) (float64, error) {
 	totalExpense := 0.0
 	baseQuery := model.DB.Debug().Model(&model.Transaction{}).Where(" 1=1")
 
-	if len(recorder_id) > 0 {
+	if memberID > 0 {
 		// 构建基础查询
-		baseQuery = baseQuery.Where("recorder_id in (?)", recorder_id)
+		baseQuery = baseQuery.Where("recorder_id = ? ", memberID)
 
 	} else {
 		baseQuery = baseQuery.Where("user_id = ?", userId)
@@ -180,7 +188,7 @@ func (r FinanceRepository) getTotalExpense(recorder_id []uint, startDate, endDat
 }
 
 // GetTransactionsByDate 按日期分组获取交易记录
-func (r FinanceRepository) GetTransactionsByDate(userID uint, startDate, endDate time.Time, limit int, page int, types string, memberID []uint, categoryID []int) ([]model.TransactionDateGroup, error) {
+func (r FinanceRepository) GetTransactionsByDate(userID uint, startDate, endDate time.Time, limit int, page int, types string, memberID uint, categoryID []int) ([]model.TransactionDateGroup, error) {
 	var result []model.TransactionDateGroup
 
 	// 获取日期列表
@@ -197,8 +205,8 @@ func (r FinanceRepository) GetTransactionsByDate(userID uint, startDate, endDate
 		queryArgs = append(queryArgs, categoryID)
 	}
 
-	if len(memberID) > 0 {
-		querySql += " and recorder_id IN (?) "
+	if memberID > 0 {
+		querySql += " and recorder_id = ? "
 		queryArgs = append(queryArgs, memberID)
 	} else {
 		querySql += " and user_id = ? "
@@ -258,7 +266,7 @@ func (r FinanceRepository) GetTransactionsByDate(userID uint, startDate, endDate
 }
 
 // GetTransactionTrend 获取交易趋势数据
-func (r FinanceRepository) GetTransactionTrend(userID uint, startDate, endDate time.Time, interval string, memberID []uint, CategoryID []int) ([]model.TrendDataPoint, error) {
+func (r FinanceRepository) GetTransactionTrend(userID uint, startDate, endDate time.Time, interval string, memberID uint, CategoryID []int) ([]model.TrendDataPoint, error) {
 	var result []model.TrendDataPoint
 
 	// 根据不同的时间间隔构建不同的SQL
@@ -288,7 +296,7 @@ func (r FinanceRepository) GetTransactionTrend(userID uint, startDate, endDate t
 	sql = fmt.Sprintf(sql, groupBy)
 
 	baseQuery := model.DB.Debug().Model(&model.Transaction{}).Where(" date BETWEEN ? AND ?", startDate, endDate)
-	if len(memberID) > 0 {
+	if memberID > 0 {
 		baseQuery = baseQuery.Where("recorder_id IN (?)", memberID)
 	} else {
 		baseQuery = baseQuery.Where("user_id = ? ", userID)
@@ -357,13 +365,13 @@ func (r FinanceRepository) GetMemberExpenseStats(userID uint, startDate, endDate
 }
 
 // GetCategoryExpenseStats 获取按图标/类别统计的支出数据
-func (r FinanceRepository) GetCategoryExpenseStats(userID uint, startDate, endDate time.Time, memberIDs []uint) ([]model.CategoryExpenseStats, error) {
+func (r FinanceRepository) GetCategoryExpenseStats(userID uint, startDate, endDate time.Time, memberIDs []uint, types string) ([]model.CategoryExpenseStats, error) {
 	db := model.DB
 
 	// 查询总支出金额
 	var totalExpense float64
-	totalQuery := db.Model(&model.Transaction{}).
-		Where("user_id = ? AND type = ? AND date BETWEEN ? AND ?", userID, model.Expense, startDate, endDate)
+	totalQuery := db.Debug().Model(&model.Transaction{}).
+		Where("user_id = ? AND type = ? AND date BETWEEN ? AND ?", userID, types, startDate, endDate)
 
 	if len(memberIDs) > 0 {
 		totalQuery = totalQuery.Where("recorder_id IN ?", memberIDs)
@@ -387,7 +395,7 @@ func (r FinanceRepository) GetCategoryExpenseStats(userID uint, startDate, endDa
 	var results []Result
 	query := db.Debug().Model(&model.Transaction{}).
 		Select("icon_id, SUM(amount) as total_amount").
-		Where("type = ? AND date BETWEEN ? AND ?", model.Expense, startDate, endDate).
+		Where("type = ? AND date BETWEEN ? AND ?", types, startDate, endDate).
 		Group("icon_id").
 		Order("total_amount DESC")
 

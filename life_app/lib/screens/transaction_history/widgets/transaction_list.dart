@@ -7,6 +7,7 @@ class TransactionList extends StatelessWidget {
   final VoidCallback onLoadMore;
   final bool isLoadingMore;
   final bool hasMoreData;
+  final Function? onDeleteTransaction;
 
   const TransactionList({
     super.key,
@@ -14,10 +15,14 @@ class TransactionList extends StatelessWidget {
     required this.onLoadMore,
     required this.isLoadingMore,
     required this.hasMoreData,
+    this.onDeleteTransaction,
   });
 
   @override
   Widget build(BuildContext context) {
+    // 保存BuildContext以便在其他方法中使用
+    final BuildContext buildContext = context;
+    
     return Column(
       children: [
         // 日期分组的交易列表
@@ -150,7 +155,7 @@ class TransactionList extends StatelessWidget {
               color: Color(0xFFE5E7EB),
             ),
             itemBuilder: (context, index) {
-              return _buildTransactionItem(group.transactions[index]);
+              return _buildTransactionItem(group.transactions[index], context);
             },
           ),
         ),
@@ -203,10 +208,75 @@ class TransactionList extends StatelessWidget {
   }
 
   // 构建交易项
-  Widget _buildTransactionItem(Transaction transaction) {
+  Widget _buildTransactionItem(Transaction transaction, BuildContext context) {
     final timeFormat = DateFormat('HH:mm');
     
-    return Padding(
+    return Dismissible(
+      key: Key('transaction-${transaction.id}'),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20.0),
+        color: Colors.red,
+        child: const Icon(
+          Icons.delete,
+          color: Colors.white,
+        ),
+      ),
+      confirmDismiss: (direction) async {
+        // 显示确认对话框
+        return await showDialog(
+          context: context,
+          barrierColor: Colors.black54, // 添加半透明遮罩
+          builder: (BuildContext context) {
+            return Theme(
+              data: Theme.of(context).copyWith(
+                dialogBackgroundColor: Colors.white, // 确保对话框背景是白色
+              ),
+              child: AlertDialog(
+                backgroundColor: Colors.white, // 明确设置为白色
+                surfaceTintColor: Colors.transparent, // 移除可能的表面色调
+                elevation: 8.0, // 添加阴影效果，增强视觉区分
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: Color(0xFFE5E7EB), width: 1),
+                ),
+                title: const Text('确认删除', style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF333333),
+                )),
+                content: const Text('确定要删除这条交易记录吗？此操作不可恢复。', style: TextStyle(
+                  fontSize: 15,
+                  color: Color(0xFF6B7280),
+                )),
+                actions: <Widget>[
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF6B7280),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('取消'),
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.red,
+                    ),
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('删除'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+      onDismissed: (direction) {
+        if (onDeleteTransaction != null) {
+          onDeleteTransaction!(transaction.id);
+        }
+      },
+      child: Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
@@ -265,26 +335,6 @@ class TransactionList extends StatelessWidget {
                           color: transaction.type == TransactionType.expense 
                               ? Colors.red.shade700 
                               : Colors.green.shade700,
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(width: 6),
-                    
-                    // 类别名称 - 添加类别标签
-                    if (transaction.category.isNotEmpty && transaction.category != '未分类')
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: transaction.categoryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          transaction.category,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            color: transaction.categoryColor,
                           ),
                         ),
                       ),
@@ -303,6 +353,32 @@ class TransactionList extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[600],
+                      ),
+                    ),
+                      
+                      // 商户信息 - 添加在时间后面
+                      if (transaction.merchant != null && transaction.merchant!.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Text(
+                            '•',
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        
+                      if (transaction.merchant != null && transaction.merchant!.isNotEmpty)
+                        Flexible(
+                          child: Text(
+                            transaction.merchant!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                       ),
                     ),
                     
@@ -372,6 +448,7 @@ class TransactionList extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

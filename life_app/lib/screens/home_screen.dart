@@ -692,7 +692,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            // 快捷操作按钮
+            // 操作按钮行
             Row(
               children: [
                 Expanded(
@@ -712,21 +712,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (result == true) {
                         _loadMonthlyBudget();
                       }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildFinanceActionButton(
-                    icon: FontAwesomeIcons.users,
-                    label: '家庭账本',
-                    bgColor: const Color(0xFFFEF3C7),
-                    textColor: const Color(0xFFD97706),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const FamilyFinanceScreen()),
-                      ).then((_) => _loadMonthlyBudget()); // 返回时刷新数据
                     },
                   ),
                 ),

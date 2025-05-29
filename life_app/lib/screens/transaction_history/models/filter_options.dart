@@ -46,7 +46,7 @@ class FilterOptions {
     this.transactionType = TransactionFilter.all,
     this.categoryId,
     this.categoryIds = const [],
-    this.period = FilterPeriod.last7Days,
+    this.period = FilterPeriod.thisMonth,
     this.customDateRange,
   });
   
@@ -76,7 +76,7 @@ class FilterOptions {
       transactionType: TransactionFilter.all,
       categoryId: null,
       categoryIds: [],
-      period: FilterPeriod.last7Days,
+      period: FilterPeriod.thisMonth,
       customDateRange: null,
     );
   }

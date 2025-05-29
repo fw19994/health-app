@@ -75,6 +75,7 @@ func SetupRouter(router *gin.Engine) *gin.Engine {
 				finance.GET("/categories", handler.GetExpenseCategories)           // 获取支出类别
 				finance.GET("/report", handler.GenerateFinancialReport)            // 生成财务报告
 				finance.GET("/recent-transactions", handler.GetRecentTransactions) // 获取近期交易记录
+				finance.DELETE("/transaction/:id", handler.DeleteTransaction)      // 删除交易记录
 				
 				// 新增API路由
 				finance.GET("/transactions", handler.GetTransactions)              // 获取交易记录，支持筛选和分页

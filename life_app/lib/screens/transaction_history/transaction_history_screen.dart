@@ -18,8 +18,13 @@ import 'package:intl/intl.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
   final String? initialMemberId;
+  final FilterOptions? initialFilters;
   
-  const TransactionHistoryScreen({super.key, this.initialMemberId});
+  const TransactionHistoryScreen({
+    super.key, 
+    this.initialMemberId,
+    this.initialFilters,
+  });
 
   @override
   State<TransactionHistoryScreen> createState() => _TransactionHistoryScreenState();
@@ -68,11 +73,28 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   @override
   void initState() {
     super.initState();
+    
+    debugPrint('【交易记录页面】初始化开始');
+    debugPrint('【交易记录页面】接收到的initialMemberId: ${widget.initialMemberId}');
+    if (widget.initialFilters != null) {
+      debugPrint('【交易记录页面】接收到的initialFilters: ${widget.initialFilters!.memberId}, period: ${widget.initialFilters!.period}');
+    } else {
+      debugPrint('【交易记录页面】没有接收到initialFilters');
+    }
+    
+    // 如果提供了初始筛选条件，应用它
+    if (widget.initialFilters != null) {
+      _filterOptions = widget.initialFilters!;
+      debugPrint('应用初始筛选条件: ${_filterOptions.toJson()}');
+    }
+    
     // 如果提供了初始成员ID，就加载该成员
     if (widget.initialMemberId != null) {
+      debugPrint('【交易记录页面】有initialMemberId，准备加载初始成员');
       _loadInitialMember(); // 在_loadInitialMember方法内会调用_loadTransactionData
     } else {
       // 只有当没有初始成员ID时才直接加载交易数据
+      debugPrint('【交易记录页面】无initialMemberId，直接加载交易数据');
       _loadTransactionData();
     }
     
@@ -84,7 +106,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   
   // 加载初始成员数据
   Future<void> _loadInitialMember() async {
-    debugPrint('开始加载初始成员，ID: ${widget.initialMemberId}');
+    debugPrint('【交易记录页面】开始加载初始成员，ID: ${widget.initialMemberId}');
     setState(() {
       _isLoadingInitialMember = true;
     });
@@ -93,15 +115,62 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       final familyMemberService = FamilyMemberService(context: context);
       final response = await familyMemberService.getFamilyMembers();
       
-      debugPrint('加载家庭成员结果，成功: ${response.success}, 成员数量: ${response.data?.length ?? 0}');
+      debugPrint('【交易记录页面】加载家庭成员结果，成功: ${response.success}, 成员数量: ${response.data?.length ?? 0}');
       
       if (response.success && mounted) {
         final members = response.data ?? [];
         if (members.isNotEmpty) {
-          // 查找匹配initialMemberId的成员
+          debugPrint('【交易记录页面】开始查找匹配成员，初始ID: ${widget.initialMemberId}');
+          debugPrint('【交易记录页面】所有成员ID列表: ${members.map((m) => m.id.toString()).toList()}');
+          debugPrint('【交易记录页面】所有成员角色列表: ${members.map((m) => m.role.toLowerCase()).toList()}');
+          
+          // 如果已经在筛选条件中指定了成员ID，直接使用该ID查找成员
+          if (_filterOptions.memberId != null && _filterOptions.memberId!.isNotEmpty) {
+            debugPrint('【交易记录页面】从筛选条件找到memberId: ${_filterOptions.memberId}');
+            
+            // 在成员列表中查找匹配的成员
+            final matchingMembers = members.where((m) => m.id.toString() == _filterOptions.memberId).toList();
+            if (matchingMembers.isNotEmpty) {
+              setState(() {
+                _selectedMember = matchingMembers.first;
+              });
+              debugPrint('【交易记录页面】通过筛选条件ID找到成员: ${_selectedMember?.name}, ID: ${_selectedMember?.id}');
+            } else {
+              debugPrint('【交易记录页面】通过筛选条件ID未找到匹配成员: ${_filterOptions.memberId}');
+            }
+          } 
+          // 如果筛选条件中没有成员ID，则使用initialMemberId查找
+          else {
+            // 首先尝试通过ID匹配成员
+            bool foundById = false;
           for (var member in members) {
-            debugPrint('检查成员: ${member.name}, 角色: ${member.role}');
+              debugPrint('【交易记录页面】检查成员: ${member.name}, ID: ${member.id}, 角色: ${member.role}');
+              debugPrint('【交易记录页面】比较: "${member.id.toString()}" == "${widget.initialMemberId}"');
+              
+              if (member.id.toString() == widget.initialMemberId) {
+                debugPrint('【交易记录页面】ID匹配成功');
+                setState(() {
+                  _selectedMember = member;
+                  // 更新筛选条件
+                  _filterOptions = _filterOptions.copyWith(
+                    memberId: member.id.toString(),
+                  );
+                });
+                debugPrint('【交易记录页面】找到匹配的成员(通过ID): ${member.name}, ID: ${member.id}');
+                foundById = true;
+                break;
+              } else {
+                debugPrint('【交易记录页面】ID不匹配');
+              }
+            }
+            
+            // 如果没有通过ID找到，尝试通过角色名称匹配（兼容旧代码）
+            if (!foundById) {
+              debugPrint('【交易记录页面】通过ID未找到匹配成员，尝试通过角色匹配');
+              for (var member in members) {
+                debugPrint('【交易记录页面】比较角色: "${member.role.toLowerCase()}" == "${widget.initialMemberId?.toLowerCase()}"');
             if (member.role.toLowerCase() == widget.initialMemberId?.toLowerCase()) {
+                  debugPrint('【交易记录页面】角色匹配成功');
               setState(() {
                 _selectedMember = member;
                 // 更新筛选条件
@@ -109,18 +178,25 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                   memberId: member.id.toString(),
                 );
               });
-              debugPrint('找到匹配的成员: ${member.name}');
+                  debugPrint('【交易记录页面】找到匹配的成员(通过角色): ${member.name}, ID: ${member.id}, 角色: ${member.role}');
               break;
+                } else {
+                  debugPrint('【交易记录页面】角色不匹配');
+                }
+              }
             }
           }
           
           if (_selectedMember == null) {
-            debugPrint('未找到匹配的成员，使用默认值');
+            debugPrint('【交易记录页面】通过ID和角色均未找到匹配的成员');
+          } else {
+            debugPrint('【交易记录页面】最终选中成员: ${_selectedMember?.name}, ID: ${_selectedMember?.id}, 角色: ${_selectedMember?.role}');
+            debugPrint('【交易记录页面】最终筛选条件: memberId=${_filterOptions.memberId}');
           }
         }
       }
     } catch (e) {
-      debugPrint('加载初始成员失败: $e');
+      debugPrint('【交易记录页面】加载初始成员失败: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -128,6 +204,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         });
         
         // 在加载成员完成后，无论成功与否，都加载一次交易数据
+        debugPrint('【交易记录页面】加载成员完成，准备加载交易数据');
         _loadTransactionData();
       }
     }
@@ -695,17 +772,18 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     }
                   }
                   
-                  final timeStr = transaction['time'] ?? '12:00';
-                  final timeParts = timeStr.split(':');
-                  final hour = int.tryParse(timeParts[0]) ?? 12;
-                  final minute = int.tryParse(timeParts[1]) ?? 0;
-                  final time = TimeOfDay(hour: hour, minute: minute);
+                  // 从实际日期中提取时间，而不是使用默认值
+                  TimeOfDay time = TimeOfDay(
+                    hour: transDate.hour,
+                    minute: transDate.minute
+                  );
                   
                   // 创建交易对象并添加到列表
                   transactions.add(Transaction(
                     id: transId,
                     title: displayTitle,
                     description: transactionDesc,
+                    merchant: merchant,
                     date: transDate,
                     time: time,
                     amount: amount,
@@ -1227,6 +1305,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 id: transaction.id,
                 title: transaction.title.isNotEmpty ? transaction.title : iconModel.name, // 如果标题为空，使用图标名称
                 description: transaction.description,
+                merchant: transaction.merchant,
                 date: transaction.date,
                 time: transaction.time,
                 amount: transaction.amount,
@@ -1253,6 +1332,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 id: transaction.id,
                 title: transaction.title.isNotEmpty ? transaction.title : categoryName,
                 description: transaction.description,
+                merchant: transaction.merchant,
                 date: transaction.date,
                 time: transaction.time,
                 amount: transaction.amount,
@@ -1292,6 +1372,63 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       debugPrint('✅ 交易记录图标数据更新完成');
     } else if (!hasUpdatedIcons) {
       debugPrint('⚠️ 没有成功加载任何图标，交易记录将保持原样');
+    }
+  }
+
+  // 删除交易记录
+  Future<void> _handleDeleteTransaction(String transactionId) async {
+    try {
+      // 显示加载指示器
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      );
+      
+      // 调用服务删除交易记录
+      final response = await _financeService.deleteTransaction(
+        context: context,
+        transactionId: transactionId,
+      );
+      
+      // 关闭加载指示器
+      if (mounted) Navigator.of(context).pop();
+      
+      if (mounted) {
+        // 显示操作结果
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.success ? '删除成功' : '删除失败: ${response.message}'),
+            backgroundColor: response.success ? Colors.green : Colors.red,
+          ),
+        );
+        
+        // 如果删除成功，重新加载数据
+        if (response.success) {
+          setState(() {
+            _currentPage = 1;
+            _transactionGroups.clear();
+          });
+          await _loadTransactionData();
+        }
+      }
+    } catch (e) {
+      // 关闭加载指示器
+      if (mounted) Navigator.of(context).pop();
+      
+      // 显示错误信息
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('删除失败: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -1370,15 +1507,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                             
                     const SizedBox(height: 16),
                     
-                            // 成员支出贡献
-                            if (_chartMembers.isNotEmpty)
-                    MemberExpenseContribution(
-                                members: _chartMembers,
-                                periodText: '本月',
-                    ),
-                            
-                    const SizedBox(height: 16),
-                    
                             // 交易列表
                             if (_isLoadingTransactions)
                               const Center(
@@ -1415,6 +1543,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                       onLoadMore: _loadMoreTransactions,
                       isLoadingMore: _isLoadingMoreTransactions,
                       hasMoreData: _hasMoreData,
+                      onDeleteTransaction: _handleDeleteTransaction,
                     ),
                   ],
                         ),

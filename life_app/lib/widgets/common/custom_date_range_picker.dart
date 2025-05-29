@@ -45,8 +45,19 @@ class CustomDateRangePicker extends StatefulWidget {
     String? title,
   }) async {
     // 当前选择的日期范围
-    final startDate = initialStartDate ?? DateTime.now().subtract(const Duration(days: 30));
-    final endDate = initialEndDate ?? DateTime.now();
+    final now = DateTime.now();
+    final startDate = initialStartDate ?? now.subtract(const Duration(days: 30));
+    final endDate = initialEndDate ?? now;
+    
+    // 确保日期在有效范围内
+    final validFirstDate = firstDate ?? DateTime(now.year - 5);
+    final validLastDate = lastDate ?? now;
+    
+    // 确保开始日期和结束日期在有效范围内
+    final validStartDate = startDate.isBefore(validFirstDate) ? validFirstDate : 
+                          (startDate.isAfter(validLastDate) ? validLastDate : startDate);
+    final validEndDate = endDate.isBefore(validFirstDate) ? validFirstDate : 
+                        (endDate.isAfter(validLastDate) ? validLastDate : endDate);
     
     final result = await showModalBottomSheet<DateTimeRange?>(
       context: context,
@@ -56,10 +67,10 @@ class CustomDateRangePicker extends StatefulWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => CustomDateRangePicker(
-        initialStartDate: startDate,
-        initialEndDate: endDate,
-        firstDate: firstDate,
-        lastDate: lastDate,
+        initialStartDate: validStartDate,
+        initialEndDate: validEndDate,
+        firstDate: validFirstDate,
+        lastDate: validLastDate,
         dateFormat: dateFormat,
         title: title,
       ),

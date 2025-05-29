@@ -12,16 +12,50 @@ class MonthlyTrends extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 计算平均月支出
+    // 防止空数据或列表为空的情况
+    if (monthlyData.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0A000000),
+              blurRadius: 2,
+              offset: Offset(0, 1),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: Text(
+            "暂无消费趋势数据",
+            style: TextStyle(
+              fontSize: 14,
+              color: Color(0xFF6B7280),
+            ),
+          ),
+        ),
+      );
+    }
+    
+    // 计算平均月支出 - 防止除以零错误
     final double averageExpense = monthlyData.fold(0.0, (sum, month) => sum + month.expense) / monthlyData.length;
     
     // 找出最高支出月
     final MonthData highestMonth = monthlyData.reduce((curr, next) => curr.expense > next.expense ? curr : next);
     
-    // 计算本月趋势（与上月相比）
-    final double currentMonthTrend = monthlyData.isNotEmpty && monthlyData.length > 1
-        ? (monthlyData.last.expense - monthlyData[monthlyData.length - 2].expense) / monthlyData[monthlyData.length - 2].expense * 100
-        : 0.0;
+    // 计算本月趋势（与上月相比）- 防止除以零错误
+    double currentMonthTrend = 0.0;
+    if (monthlyData.length > 1) {
+      final double previousMonthExpense = monthlyData[monthlyData.length - 2].expense;
+      if (previousMonthExpense > 0) {
+        currentMonthTrend = (monthlyData.last.expense - previousMonthExpense) / previousMonthExpense * 100;
+      } else if (monthlyData.last.expense > 0) {
+        // 如果上月支出为0，当前月有支出，显示100%增长
+        currentMonthTrend = 100.0;
+      }
+    }
     
     return Container(
       padding: const EdgeInsets.all(16),
@@ -105,7 +139,12 @@ class MonthlyTrends extends StatelessWidget {
 
   // 构建单个柱状图条
   Widget _buildBar(MonthData month, double maxExpense) {
-    final double height = 120 * (month.expense / maxExpense);
+    // 防止除以零错误
+    final double ratio = maxExpense > 0 ? (month.expense / maxExpense) : 0;
+    final double height = 120 * ratio;
+    
+    // 确保高度至少为1，即使支出为0也显示一个小柱子
+    final double safeHeight = height > 0 ? height : 1;
     
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -113,7 +152,7 @@ class MonthlyTrends extends StatelessWidget {
         // 柱子
         Container(
           width: 30,
-          height: height,
+          height: safeHeight,
           decoration: BoxDecoration(
             color: const Color(0xFF4F46E5),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),

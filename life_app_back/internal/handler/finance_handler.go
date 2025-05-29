@@ -138,14 +138,18 @@ func GetRecentTransactions(c *gin.Context) {
 		utils.ParameterError(c, "无效的交易类型，必须是'expense'或'income'")
 		return
 	}
+	memberId := c.Query("member_id")              // expense 或 income
+	isFamilyBudget := c.Query("is_family_budget") // expense 或 income
+	isFamilyBudgetBool, _ := strconv.ParseBool(isFamilyBudget)
+
 	limit := 5
 	// 获取限制数量参数
 	if limitParam := c.Query("limit"); limitParam != "" {
 		limit, _ = strconv.Atoi(limitParam)
 	}
-
+	memberIdInt, _ := strconv.Atoi(memberId)
 	// 调用服务获取近期交易
-	transactions, err := financeService.GetRecentTransactions(userID, transactionType, limit)
+	transactions, err := financeService.GetRecentTransactions(userID, transactionType, limit, memberIdInt, isFamilyBudgetBool)
 	if err != nil {
 		utils.ServerError(c, err)
 		return
@@ -399,9 +403,11 @@ func GetExpenseAnalysis(c *gin.Context) {
 
 	// 定义请求参数结构体
 	type AnalysisRequest struct {
-		StartDate string `form:"start_date"` // 开始日期
-		EndDate   string `form:"end_date"`   // 结束日期
-		MemberID  int    `form:"member_id"`  // 成员ID，可选
+		StartDate       string `form:"start_date"` // 开始日期
+		EndDate         string `form:"end_date"`   // 结束日期
+		TransactionType string `form:"transaction_type" default:"expense"`
+		MemberId        int    `form:"member_id"`
+		IsFamilyBudget  bool   `form:"is_family_budget"`
 	}
 
 	// 绑定请求参数
@@ -437,9 +443,11 @@ func GetExpenseAnalysis(c *gin.Context) {
 		// 默认为当前时间
 		endDate = time.Now()
 	}
-
+	if req.TransactionType == "" {
+		req.TransactionType = "expense"
+	}
 	// 调用服务获取支出分析数据
-	analysisData, err := financeService.GetExpenseAnalysis(userID, startDate, endDate, uint(req.MemberID))
+	analysisData, err := financeService.GetExpenseAnalysis(userID, startDate, endDate, uint(req.MemberId), req.TransactionType, req.IsFamilyBudget)
 	if err != nil {
 		utils.ServerError(c, err)
 		return
@@ -448,4 +456,40 @@ func GetExpenseAnalysis(c *gin.Context) {
 	utils.Success(c, gin.H{
 		"data": analysisData,
 	}, "获取成功")
+}
+
+// DeleteTransaction 删除交易记录
+func DeleteTransaction(c *gin.Context) {
+	// 获取交易记录ID
+	transactionID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		utils.ParameterError(c, "无效的交易记录ID")
+		return
+	}
+
+	// 从上下文中获取用户ID
+	userID, ok := utils.MustGetUserID(c)
+	if !ok {
+		return // MustGetUserID 内部已处理错误响应
+	}
+
+	// 验证交易记录是否存在，以及是否属于当前用户
+	transaction := model.Transaction{}
+	result := model.DB.Where("id = ? AND user_id = ?", transactionID, userID).First(&transaction)
+	if result.Error != nil {
+		if result.Error.Error() == "record not found" {
+			utils.NotFound(c, "交易记录不存在或您无权删除")
+			return
+		}
+		utils.ServerError(c, result.Error)
+		return
+	}
+
+	// 删除交易记录
+	if err := model.DB.Delete(&transaction).Error; err != nil {
+		utils.ServerError(c, err)
+		return
+	}
+
+	utils.Success(c, nil, "删除成功")
 }

@@ -27,7 +27,6 @@ func (s *BudgetService) GetUserBudgetCategories(userID uint, year, month int) ([
 		// 如果获取环比数据失败，不影响主流程，继续执行
 		prevStats = make(map[string]float64)
 	}
-
 	// 转换为响应结构并计算环比数据
 	var responses []model.BudgetCategoryResponse
 	for _, category := range categories {
@@ -43,7 +42,19 @@ func (s *BudgetService) GetUserBudgetCategories(userID uint, year, month int) ([
 				response.MonthOverMonth = currentUsage - prevUsage
 			}
 		}
-
+		
+		// 计算实际支出金额
+		spent, err := s.CalculateCategorySpent(uint(category.IconID), userID, year, month, false, 0)
+		if err == nil {
+			response.Spent = spent
+			// 重新计算使用百分比
+			if category.Budget > 0 {
+				response.UsagePercentage = (spent / category.Budget) * 100
+			}
+			// 重新计算是否超出预算
+			response.IsOverBudget = spent > category.Budget
+		}
+		
 		responses = append(responses, response)
 	}
 
@@ -90,6 +101,18 @@ func (s *BudgetService) GetFamilyBudgetCategories(userID uint, year, month int) 
 				}
 				response.MonthOverMonth = currentUsage - prevUsage
 			}
+		}
+		
+		// 计算实际支出金额
+		spent, err := s.CalculateCategorySpent(uint(category.IconID), userID, year, month, true, familyID)
+		if err == nil {
+			response.Spent = spent
+			// 重新计算使用百分比
+			if category.Budget > 0 {
+				response.UsagePercentage = (spent / category.Budget) * 100
+			}
+			// 重新计算是否超出预算
+			response.IsOverBudget = spent > category.Budget
 		}
 
 		responses = append(responses, response)
@@ -226,4 +249,29 @@ func (s *BudgetService) GetAllBudgetCategoriesForUser(userID uint, year, month i
 
 	// 合并预算列表
 	return append(userBudgets, familyBudgets...), nil
+}
+
+// CalculateCategorySpent 计算预算类别的实际支出金额
+func (s *BudgetService) CalculateCategorySpent(categoryID uint, userID uint, year int, month int, isFamilyBudget bool, familyID uint) (float64, error) {
+	// 计算日期范围
+	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.Local)
+	endDate := time.Date(year, time.Month(month+1), 0, 23, 59, 59, 0, time.Local)
+	
+	// 构建查询
+	query := model.DB.Model(&model.Transaction{}).
+		Where("type = ? AND date BETWEEN ? AND ? AND icon_id = ?",
+			"expense", startDate, endDate, categoryID)
+	
+	// 根据是否为家庭预算添加不同的条件
+	if isFamilyBudget {
+		query = query.Where("family_id = ?", familyID)
+	} else {
+		query = query.Where("user_id = ?", userID)
+	}
+	
+	// 计算总支出
+	var totalSpent float64
+	err := query.Select("COALESCE(SUM(amount), 0)").Scan(&totalSpent).Error
+	
+	return totalSpent, err
 }

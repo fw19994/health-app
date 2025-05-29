@@ -44,7 +44,7 @@ func (r *FamilyMemberRepository) GetFamilyMemberByUserID(ownerID, userID uint) (
 func (r *FamilyMemberRepository) GetFamilyMemberByUserIDDirect(userID uint) (*model.FamilyMember, error) {
 	var member model.FamilyMember
 	db := model.DB
-	if err := db.Where("user_id = ?", userID).First(&member).Error; err != nil {
+	if err := db.Where("user_id = ? and status=1", userID).First(&member).Error; err != nil {
 		return nil, err
 	}
 	return &member, nil

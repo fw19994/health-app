@@ -101,10 +101,10 @@ class _FinanceScreenState extends State<FinanceScreen> {
     });
 
     try {
-      // 调用API获取近期交易数据，获取支出类型交易
+      // 调用API获取近期交易数据，获取所有类型交易（不指定type）
       final response = await _financeService.getRecentTransactions(
         context: context,
-        type: 'expense',
+        type: '', // 不指定交易类型，获取所有类型交易
       );
       
       if (mounted && response.success && response.data != null) {
@@ -618,34 +618,6 @@ class _FinanceScreenState extends State<FinanceScreen> {
             const SizedBox(width: 10),
             _buildQuickActionCard(
               context,
-              icon: Icons.savings_outlined,
-              label: '储蓄目标设置',
-              bgColor: const Color(0xFFDEECFF),
-              iconColor: const Color(0xFF3B82F6),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SavingsGoalsScreen()),
-                );
-              },
-            ),
-            const SizedBox(width: 10),
-            _buildQuickActionCard(
-              context,
-              icon: Icons.people_outline,
-              label: '家庭账本',
-              bgColor: AppTheme.familyButtonBg,
-              iconColor: AppTheme.familyButtonIcon,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const FamilyFinanceScreen()),
-                );
-              },
-            ),
-            const SizedBox(width: 10),
-            _buildQuickActionCard(
-              context,
               icon: FontAwesomeIcons.chartLine,
               label: '分析报告',
               bgColor: Colors.purple.shade50,
@@ -654,6 +626,20 @@ class _FinanceScreenState extends State<FinanceScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const FinanceReportScreen()),
+                );
+              },
+            ),
+            const SizedBox(width: 10),
+            _buildQuickActionCard(
+              context,
+              icon: Icons.savings_outlined,
+              label: '储蓄目标设置',
+              bgColor: const Color(0xFFDEECFF),
+              iconColor: const Color(0xFF3B82F6),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SavingsGoalsScreen()),
                 );
               },
             ),
@@ -1178,40 +1164,22 @@ class _FinanceScreenState extends State<FinanceScreen> {
                 ),
               )
             else
-              // 有数据状态 - 显示柱状图
+              // 有数据状态 - 显示增强版柱状图
             SizedBox(
-              height: 180,
+                height: 220, // 增加高度以容纳更多信息
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
-                  children: _buildSpendingColumns(),
+                  children: _buildEnhancedSpendingColumns(),
                 ),
               ),
-            
-            if (!_isLoadingExpenseAnalysis && _expenseAnalysisData.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            
-            // 主要支出类别
-            const Text(
-              '主要支出类别',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF4B5563),
-              ),
-            ),
-            const SizedBox(height: 12),
-            
-              // 主要支出类别列表
-              ..._buildCategoryProgressBars(),
-            ],
           ],
         ),
       ),
     );
   }
   
-  // 构建支出柱状图列
-  List<Widget> _buildSpendingColumns() {
+  // 构建增强版支出柱状图列
+  List<Widget> _buildEnhancedSpendingColumns() {
     // 防御性检查：确保有数据
     if (_expenseAnalysisData.isEmpty) {
       return [
@@ -1238,8 +1206,13 @@ class _FinanceScreenState extends State<FinanceScreen> {
       
       // 找出金额最高的类别
       double maxAmount = 0;
+      double totalAmount = 0;
       if (displayData.isNotEmpty) {
         maxAmount = (displayData.first['amount'] as num).toDouble();
+        // 计算总支出
+        for (var item in displayData) {
+          totalAmount += (item['amount'] as num).toDouble();
+        }
       }
       
       // 构建柱状图列
@@ -1249,11 +1222,24 @@ class _FinanceScreenState extends State<FinanceScreen> {
         final double heightRatio = maxAmount > 0 ? (amount / maxAmount).clamp(0.0, 1.0) : 0;
         // 是否是最高的柱子
         final bool isHighlighted = amount == maxAmount;
+        // 计算占总支出百分比
+        final int percentage = totalAmount > 0 ? ((amount / totalAmount) * 100).round() : 0;
+        // 获取图标ID
+        final int iconId = item['icon_id'] ?? 0;
+        final String category = item['category_name'] ?? "未知";
         
-        return _buildSpendingColumn(
-          item['category_name'] ?? "未知", 
-          heightRatio, 
-          isHighlighted
+        // 使用与近期交易相同的方式获取图标
+        final IconData iconData = _getIconDataById(iconId);
+        final Color iconColor = _getIconColorById(iconId);
+        
+        return _buildEnhancedSpendingColumn(
+          category: category,
+          amount: amount,
+          percentage: percentage,
+          heightRatio: heightRatio,
+          isHighlighted: isHighlighted,
+          icon: iconData,
+          iconColor: iconColor
         );
       }).toList();
     } catch (e) {
@@ -1274,181 +1260,86 @@ class _FinanceScreenState extends State<FinanceScreen> {
     }
   }
   
-  // 构建类别进度条列表
-  List<Widget> _buildCategoryProgressBars() {
-    // 排序支出数据并限制最多显示4条
-    final sortedData = List<Map<String, dynamic>>.from(_expenseAnalysisData)
-      ..sort((a, b) {
-        num amountA = a['amount'];
-        num amountB = b['amount'];
-        return amountB.compareTo(amountA);
-      });
-    final displayData = sortedData.take(4).toList();
-    
-    // 构建类别进度条列表
-    List<Widget> progressBars = [];
-    
-    for (int i = 0; i < displayData.length; i++) {
-      final item = displayData[i];
-      final iconId = item['icon_id'];
-      final category = item['category_name'];
-      final amount = item['amount'];
-      final percentage = item['percentage'];
-      
-      // 根据类别名称选择对应的图标
-      IconData iconData;
-      Color iconColor;
-      
-      switch (category) {
-        case '餐饮':
-          iconData = FontAwesomeIcons.utensils;
-          iconColor = const Color(0xFFA855F7); // 紫色
-          break;
-        case '购物':
-          iconData = FontAwesomeIcons.shoppingCart;
-          iconColor = const Color(0xFF3B82F6); // 蓝色
-          break;
-        case '住房':
-          iconData = FontAwesomeIcons.home;
-          iconColor = const Color(0xFFEF4444); // 红色
-          break;
-        case '交通':
-          iconData = FontAwesomeIcons.car;
-          iconColor = const Color(0xFF10B981); // 绿色
-          break;
-        case '医疗':
-          iconData = FontAwesomeIcons.hospitalUser;
-          iconColor = const Color(0xFFF59E0B); // 黄色
-          break;
-        case '教育':
-          iconData = FontAwesomeIcons.graduationCap;
-          iconColor = const Color(0xFF6366F1); // 靛蓝色
-          break;
-        default:
-          iconData = FontAwesomeIcons.tags;
-          iconColor = Colors.grey;
-      }
-      
-      // 添加进度条，每个进度条下方添加间距
-      progressBars.add(
-            _buildCategoryProgressBar(
-              context,
-          icon: iconData,
-          color: iconColor,
-          category: category,
-          amount: '¥${amount.toStringAsFixed(0)}',
-          percentage: percentage.round(),
-      ),
-    );
-      
-      // 除了最后一个，其他都添加间距
-      if (i < displayData.length - 1) {
-        progressBars.add(const SizedBox(height: 12));
-      }
-    }
-    
-    return progressBars;
-  }
-  
-  // 支出柱状图的单个柱子
-  Widget _buildSpendingColumn(String category, double height, bool isHighlighted) {
+  // 增强版支出柱状图的单个柱子
+  Widget _buildEnhancedSpendingColumn({
+    required String category,
+    required double amount,
+    required int percentage,
+    required double heightRatio,
+    required bool isHighlighted,
+    required IconData icon,
+    required Color iconColor,
+  }) {
     return Expanded(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
+          // 添加金额标签
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(
+              '¥${amount.toStringAsFixed(0)}',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isHighlighted ? FontWeight.w600 : FontWeight.w500,
+                color: isHighlighted ? AppTheme.primaryColor : Colors.grey[600],
+              ),
+            ),
+          ),
+          // 添加百分比标签
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(
+              '$percentage%',
+            style: TextStyle(
+                fontSize: 10,
+              fontWeight: isHighlighted ? FontWeight.w600 : FontWeight.normal,
+                color: isHighlighted ? AppTheme.primaryColor : Colors.grey[600],
+            ),
+          ),
+          ),
+          // 柱状图条
           Container(
-            height: 120 * height,
+            height: 100 * heightRatio,
             decoration: BoxDecoration(
               color: isHighlighted 
-                ? AppTheme.primaryColor 
-                : AppTheme.primaryColor.withOpacity(0.2),
+                ? iconColor
+                : iconColor.withOpacity(0.3),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(4),
                 topRight: Radius.circular(4),
+            ),
+        ),
+          ),
+          // 添加图标
+            Container(
+            margin: const EdgeInsets.only(top: 4),
+            padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+              color: iconColor.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              size: 12,
+              color: iconColor,
               ),
             ),
-          ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
+          // 类别名称
           Text(
             category,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 10,
               fontWeight: isHighlighted ? FontWeight.w600 : FontWeight.normal,
               color: isHighlighted ? AppTheme.textPrimary : Colors.grey[600],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  // 类别进度条
-  Widget _buildCategoryProgressBar(
-    BuildContext context, {
-    required IconData icon,
-    required Color color,
-    required String category,
-    required String amount,
-    required int percentage,
-  }) {
-    // 安全计算进度条宽度，确保不会超出屏幕宽度
-    final double progressWidth = (MediaQuery.of(context).size.width - 64) * (percentage.clamp(0, 100) / 100);
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                FaIcon(
-                  icon,
-                  color: color,
-                  size: 14,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  category,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-            Text(
-              '$amount ($percentage%)',
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.textPrimary,
-              ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        Stack(
-          children: [
-            Container(
-              height: 6,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-            Container(
-              height: 6,
-              width: progressWidth.clamp(0, MediaQuery.of(context).size.width - 64),
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 
