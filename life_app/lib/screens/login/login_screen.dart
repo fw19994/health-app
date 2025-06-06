@@ -49,14 +49,55 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       curve: Curves.easeInOut,
     );
     
+    // 添加焦点监听器，在获取焦点时清除错误状态
+    phoneFocusNode.addListener(() {
+      if (phoneFocusNode.hasFocus) {
+        setState(() {
+          phoneError = null;
+        });
+      }
+    });
+    
+    codeFocusNode.addListener(() {
+      if (codeFocusNode.hasFocus) {
+        setState(() {
+          codeError = null;
+        });
+      }
+    });
+    
+    // 添加文本变化监听器，在用户输入时清除错误状态
+    phoneController.addListener(_clearPhoneError);
+    codeController.addListener(_clearCodeError);
+    
     // 延迟聚焦到手机号输入框
     Future.delayed(const Duration(milliseconds: 800), () {
       phoneFocusNode.requestFocus();
     });
   }
 
+  void _clearPhoneError() {
+    if (phoneError != null) {
+      setState(() {
+        phoneError = null;
+      });
+    }
+  }
+
+  void _clearCodeError() {
+    if (codeError != null) {
+      setState(() {
+        codeError = null;
+      });
+    }
+  }
+
   @override
   void dispose() {
+    // 移除监听器
+    phoneController.removeListener(_clearPhoneError);
+    codeController.removeListener(_clearCodeError);
+    
     phoneController.dispose();
     codeController.dispose();
     phoneFocusNode.dispose();
@@ -71,13 +112,22 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       isLoginMode = !isLoginMode;
       _animationController.reset();
       _animationController.forward();
-      // 清除错误信息
+      
+      // 清除错误信息和输入内容
       phoneError = null;
       codeError = null;
+      // 可选：如果需要在模式切换时清空输入框
+      // phoneController.clear();
+      // codeController.clear();
     });
   }
 
   Future<void> startCountdown() async {
+    // 清除验证码错误提示
+    setState(() {
+      codeError = null;
+    });
+    
     // 验证手机号
     final errorMsg = Validators.getPhoneNumberErrorMessage(phoneController.text);
     
@@ -264,16 +314,15 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             // 使用Positioned.fill而非SafeArea来确保内容尺寸正确
             Positioned.fill(
               child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(), // 添加物理效果，使滚动更自然
                 child: Container(
                   padding: EdgeInsets.fromLTRB(
                     24.0, 
-                    MediaQuery.of(context).padding.top + 20.0, // 顶部添加状态栏高度加padding
+                    MediaQuery.of(context).padding.top + 10.0, // 增加顶部间距
                     24.0, 
-                    24.0
+                    16.0 // 调整底部间距
                   ),
-                  constraints: BoxConstraints(
-                    minHeight: MediaQuery.of(context).size.height,
-                  ),
+                  height: MediaQuery.of(context).size.height, // 设置固定高度为屏幕高度，确保内容能在一屏内显示
                   child: Column(
                     children: [
                       
@@ -308,15 +357,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         },
                       ),
                       
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 20), // 保持间距
                       
-                      // 功能预览模块 - 添加水平内边距，增加视觉空间
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      // 功能预览模块
+                      Expanded(
                         child: FeaturePreview(),
                       ),
-                      
-                      const SizedBox(height: 30),
                     ],
                   ),
                 ),

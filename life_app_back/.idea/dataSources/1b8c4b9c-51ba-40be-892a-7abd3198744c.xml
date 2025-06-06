@@ -2215,7 +2215,7 @@ video|schema||video||UPDATE|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="508" parent="314" name="id">
-      <AutoIncrement>66</AutoIncrement>
+      <AutoIncrement>67</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint unsigned|0s</StoredType>

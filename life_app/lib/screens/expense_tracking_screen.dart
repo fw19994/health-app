@@ -21,13 +21,25 @@ import '../services/budget_service.dart';
 import '../models/savings_goal.dart';
 
 class ExpenseTrackingScreen extends StatefulWidget {
-  const ExpenseTrackingScreen({super.key});
+  // 添加家庭ID参数
+  final int? familyId;
+  final bool isFamilyExpense;
+  
+  const ExpenseTrackingScreen({
+    super.key, 
+    this.familyId,
+    this.isFamilyExpense = false,
+  });
 
   @override
   State<ExpenseTrackingScreen> createState() => _ExpenseTrackingScreenState();
 }
 
 class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
+  // 输入框焦点状态
+  bool _merchantFocused = false;
+  bool _noteFocused = false;
+  bool _sourceFocused = false;
   // 交易类型 (支出, 收入)
   final List<String> _transactionTypes = ['支出', '收入'];
   int _selectedTypeIndex = 0;
@@ -45,8 +57,8 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
   // 当前选中的类别
   int _selectedCategoryIndex = 0; 
 
-  // 记为家庭支出
-  bool _isFamilyExpense = false;
+  // 记为家庭支出（从widget继承初始值，但可变）
+  late bool _isFamilyExpense;
 
   // 控制器
   final TextEditingController _amountController = TextEditingController();
@@ -112,6 +124,8 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
     _loadRecentTransactions();
     // 加载储蓄目标
     _loadSavingsGoals();
+      // 初始化 _isFamilyExpense - 始终设置为true（因为UI中已移除此选项）
+      _isFamilyExpense = true;
   }
 
   // 加载图标数据
@@ -353,32 +367,100 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
     }
   }
   
-  /// 构建日期选择按钮
+  /// 构建日期选择按钮 - 优化版
   Widget _buildDateSelector() {
+    // 获取今天、明天、昨天的日期
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = DateTime(now.year, now.month, now.day + 1);
+    final yesterday = DateTime(now.year, now.month, now.day - 1);
+    
+    // 确定选择的日期是否为特殊日期(今天/昨天/明天)，以便显示特殊标签
+    String dateLabel;
+    if (_selectedDate.year == today.year && _selectedDate.month == today.month && _selectedDate.day == today.day) {
+      dateLabel = '今天';
+    } else if (_selectedDate.year == yesterday.year && _selectedDate.month == yesterday.month && _selectedDate.day == yesterday.day) {
+      dateLabel = '昨天';
+    } else if (_selectedDate.year == tomorrow.year && _selectedDate.month == tomorrow.month && _selectedDate.day == tomorrow.day) {
+      dateLabel = '明天';
+    } else {
+      dateLabel = '';
+    }
+    
+    // 日期格式化
+    final dateStr = DateFormat('MM月dd日').format(_selectedDate);
+    final weekdayStr = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][_selectedDate.weekday % 7];
+    
     return InkWell(
       onTap: _showDatePicker,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
+          color: Colors.white,
           border: Border.all(color: Colors.grey[300]!),
           borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              _selectedDate != null
-                ? DateFormat('yyyy年MM月dd日').format(_selectedDate!)
-                : '选择日期',
-              style: TextStyle(
-                fontSize: 16,
-                color: _selectedDate != null ? Colors.black87 : Colors.grey[600],
+            // 左侧图标
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: _selectedTypeIndex == 0
+                    ? Colors.red.shade50
+                    : Colors.green.shade50,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.event,
+                  size: 20,
+                  color: _selectedTypeIndex == 0
+                      ? Colors.red.shade400
+                      : Colors.green.shade400,
+                ),
               ),
             ),
+            const SizedBox(width: 12),
+            
+            // 中间日期信息
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    dateLabel.isEmpty ? dateStr : '$dateLabel ($dateStr)',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$weekdayStr · ${DateFormat('yyyy年').format(_selectedDate)}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // 右侧修改图标
             Icon(
-              Icons.calendar_today,
-              size: 20,
+              Icons.arrow_drop_down,
+              size: 24,
               color: Colors.grey[600],
             ),
           ],
@@ -412,6 +494,10 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
                 colors: _selectedTypeIndex == 0
                     ? [const Color(0xFFF97316), const Color(0xFFEF4444)]
                     : [const Color(0xFF10B981), const Color(0xFF059669)],
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
         ),
         ),
             child: SafeArea(
@@ -592,6 +678,8 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
       final response = await _financeService.getRecentTransactions(
         context: context,
         type: 'expense', // 添加必需的type参数
+        familyId: widget.familyId, // 添加家庭ID
+        isFamilyBudget: widget.familyId != null, // 如果有家庭ID，则使用家庭预算
       );
       
       if (mounted && response.success && response.data != null) {
@@ -1170,26 +1258,81 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(FontAwesomeIcons.store, color: Colors.grey, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: _merchantController,
-                        style: const TextStyle(
-                          fontSize: 16,
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _merchantFocused ? const Color(0xFF3B82F6) : Colors.grey.shade200,
+                    width: _merchantFocused ? 1.5 : 1,
+                  ),
+                  boxShadow: _merchantFocused 
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF3B82F6).withOpacity(0.1),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 2),
+                        )
+                      ] 
+                    : null,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 3,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(FontAwesomeIcons.store, color: Color(0xFF3B82F6), size: 18),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Focus(
+                        onFocusChange: (hasFocus) {
+                          setState(() {
+                            // 状态更新会触发重建，让我们能够响应焦点变化
+                            _merchantFocused = hasFocus;
+                          });
+                        },
+                        child: TextField(
+                          controller: _merchantController,
+                          style: const TextStyle(
+                            fontSize: 16,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: '输入商家名称',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                            hintStyle: const TextStyle(color: Color(0xFFA3A3A3)),
+                            // 移除默认的下划线效果
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            // 移除内部填充，使其更加贴合我们的自定义容器
+                            isDense: true,
+                          ),
+                          cursorColor: const Color(0xFF3B82F6),
+                          // 点击时添加触觉反馈
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                          },
                         ),
-                      decoration: const InputDecoration(
-                        hintText: '输入商家名称',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const Divider(height: 32),
+              const SizedBox(height: 16),
             ],
           ),
           
@@ -1205,26 +1348,92 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(FontAwesomeIcons.stickyNote, color: Colors.grey, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: _noteController,
-                        style: const TextStyle(
-                          fontSize: 16,
-                      ),
-                      decoration: const InputDecoration(
-                        hintText: '添加备注',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _noteFocused ? const Color(0xFFEC4899) : Colors.grey.shade200,
+                    width: _noteFocused ? 1.5 : 1,
                   ),
-                ],
+                  boxShadow: _noteFocused 
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFFEC4899).withOpacity(0.1),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 2),
+                        )
+                      ] 
+                    : null,
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: _noteFocused ? const Color(0xFFFDF2F8) : Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 3,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            FontAwesomeIcons.stickyNote, 
+                            color: _noteFocused ? const Color(0xFFEC4899) : const Color(0xFFEC4899).withOpacity(0.7), 
+                            size: 18
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Focus(
+                            onFocusChange: (hasFocus) {
+                              setState(() {
+                                _noteFocused = hasFocus;
+                              });
+                            },
+                            child: SizedBox(
+                              height: 40, // 固定高度
+                              child: Center(
+                                child: TextField(
+                                  controller: _noteController,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                  decoration: const InputDecoration(
+                                    hintText: '添加备注',
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.zero,
+                                    hintStyle: TextStyle(color: Color(0xFFA3A3A3)),
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    isDense: true,
+                                  ),
+                                  maxLines: 1, // 先限制为单行，解决对齐问题
+                                  cursorColor: Color(0xFFEC4899),
+                                  onTap: () {
+                                    HapticFeedback.lightImpact();
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              const Divider(height: 32),
+              const SizedBox(height: 16),
             ],
           ),
           
@@ -1245,36 +1454,9 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
             ],
           ),
           
-          // 家庭支出开关
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-              const Row(
-                children: [
-                  Icon(FontAwesomeIcons.users, color: Colors.grey, size: 20),
-                  SizedBox(width: 12),
-                  Text(
-                    '记为家庭支出',
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              Switch(
-                value: _isFamilyExpense,
-                onChanged: (value) {
-                  setState(() {
-                    _isFamilyExpense = value;
-                  });
-                },
-                activeColor: Colors.orange,
-              ),
-            ],
-          ),
+          // 家庭支出开关已移除
           
-          // 储蓄目标选择器
-          _buildSavingsGoalSelector(),
+          // 对于支出类型，不显示储蓄目标选择器
         ],
       ),
     );
@@ -1380,26 +1562,81 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(FontAwesomeIcons.building, color: Colors.grey, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: _sourceController,
-                      style: const TextStyle(
-                        fontSize: 16,
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _sourceFocused ? const Color(0xFF6366F1) : Colors.grey.shade200,
+                    width: _sourceFocused ? 1.5 : 1,
+                  ),
+                  boxShadow: _sourceFocused 
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF6366F1).withOpacity(0.1),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 2),
+                        )
+                      ] 
+                    : null,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: _sourceFocused ? const Color(0xFFF0F1FF) : Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 3,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                       ),
-                      decoration: const InputDecoration(
-                        hintText: '输入收入来源',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
+                      child: Icon(
+                        FontAwesomeIcons.building,
+                        color: _sourceFocused ? const Color(0xFF6366F1) : const Color(0xFF6366F1).withOpacity(0.7), 
+                        size: 18
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Focus(
+                        onFocusChange: (hasFocus) {
+                          setState(() {
+                            _sourceFocused = hasFocus;
+                          });
+                        },
+                        child: TextField(
+                          controller: _sourceController,
+                          style: const TextStyle(
+                            fontSize: 16,
+                          ),
+                          decoration: const InputDecoration(
+                            hintText: '输入收入来源',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                            hintStyle: TextStyle(color: Color(0xFFA3A3A3)),
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            isDense: true,
+                          ),
+                          cursorColor: Color(0xFF6366F1),
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const Divider(height: 32),
+              const SizedBox(height: 16),
             ],
           ),
           
@@ -1418,26 +1655,56 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(FontAwesomeIcons.stickyNote, color: Colors.grey, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: _noteController,
-                      style: const TextStyle(
-                        fontSize: 16,
-                      ),
-                      decoration: const InputDecoration(
-                        hintText: '添加备注',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                      ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 3,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(FontAwesomeIcons.stickyNote, color: Color(0xFFEC4899), size: 18),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            controller: _noteController,
+                            style: const TextStyle(
+                              fontSize: 16,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: '添加备注',
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.zero,
+                              hintStyle: TextStyle(color: Color(0xFFA3A3A3)),
+                            ),
+                            maxLines: 3,
+                            minLines: 1,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const Divider(height: 32),
+              const SizedBox(height: 16),
             ],
           ),
           
@@ -1849,12 +2116,7 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
       );
       return;
     }
-    if (_selectedRecorder == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请选择记账人'), backgroundColor: Colors.orange),
-      );
-      return;
-    }
+    // 移除记账人必选校验
     // 确保类别已选择 (不是 "添加" 按钮)
     if (_selectedCategoryIndex >= _allCategories.length - 1) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1911,7 +2173,8 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
 
     final String merchant = _merchantController.text;
     final String notes = _noteController.text;
-    final int recorderId = _selectedRecorder!.id;
+    // 修改记账人ID的获取方式，允许为空
+    final int? recorderId = _selectedRecorder?.id;
     
     // 获取储蓄目标ID (仅当交易类型为收入且已选择储蓄目标时)
     int? goalId;
@@ -1930,10 +2193,11 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
         date: _selectedDate,
         merchant: merchant,
         notes: notes,
-        recorderId: recorderId,
+        recorderId: recorderId ?? 0, // 如果为null则使用0作为默认值
         isFamilyExpense: _isFamilyExpense,
         imageUrl: _uploadedImagePath, // 传递图片路径，如果需要的话
         goalId: goalId, // 传递储蓄目标ID
+        familyId: widget.familyId, // 添加家庭ID参数
       );
 
       // 5. 处理结果
@@ -2104,20 +2368,21 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
 
   // 加载家庭成员
   Future<void> _loadFamilyMembers() async {
-    if (mounted) {
+    if (!mounted) return;
+
       setState(() {
         _isLoadingMembers = true;
       });
-    }
 
     try {
       final familyMemberService = FamilyMemberService(context: context);
-      final response = await familyMemberService.getFamilyMembers();
+      final response = await familyMemberService.getFamilyMembers(
+        familyId: widget.familyId, // 传递家庭ID
+      );
       
-      if (response.success && mounted) {
+      if (mounted && response.success && response.data != null) {
         setState(() {
-          // 确保response.data不为空，否则使用空列表
-          _familyMembers = response.data ?? [];
+          _familyMembers = response.data!;
           
           // 寻找当前用户，找不到则使用第一个家庭成员作为默认记账人
           if (_familyMembers.isNotEmpty) {
@@ -2128,6 +2393,8 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
             // 如果没有家庭成员，则设置为null
             _selectedRecorder = null;
           }
+          
+          _isLoadingMembers = false;
         });
       }
     } catch (e) {
@@ -2474,6 +2741,8 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
       final goals = await _budgetService.getSavingsGoals(
         status: 'in_progress',
         context: context,
+        familyId: widget.familyId, // 添加家庭ID
+        isFamilySavings: widget.familyId != null, // 如果有家庭ID，则使用家庭储蓄
       );
       
       // 为每个目标加载真实图标
@@ -2502,73 +2771,153 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '储蓄目标',
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              '储蓄目标',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey,
+              ),
+            ),
+            if (_selectedSavingsGoal != null)
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedSavingsGoal = null;
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  child: Text(
+                    '清除选择',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.blue[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 8),
         InkWell(
           onTap: _showSavingsGoalPicker,
           borderRadius: BorderRadius.circular(12),
-          child: Container(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!),
+              color: _selectedSavingsGoal != null 
+                  ? Colors.white 
+                  : Colors.grey.shade50,
+              border: Border.all(
+                color: _selectedSavingsGoal != null 
+                    ? const Color(0xFF6366F1).withOpacity(0.5)
+                    : Colors.grey.shade200,
+                width: _selectedSavingsGoal != null ? 1.5 : 1,
+              ),
               borderRadius: BorderRadius.circular(12),
+              boxShadow: _selectedSavingsGoal != null
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFF6366F1).withOpacity(0.1),
+                        blurRadius: 4,
+                        spreadRadius: 0,
+                        offset: const Offset(0, 1),
+                      ),
+                    ]
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 2,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: _selectedSavingsGoal != null
-                    ? Row(
-                        children: [
-                          Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: _selectedSavingsGoal!.color.withOpacity(0.2),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              _selectedSavingsGoal!.icon,
-                              size: 14,
-                              color: _selectedSavingsGoal!.color,
-                            ),
+                // 图标部分
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _selectedSavingsGoal != null
+                        ? _selectedSavingsGoal!.color.withOpacity(0.15)
+                        : Colors.blue.shade50,
+                    shape: BoxShape.circle,
+                    border: _selectedSavingsGoal != null
+                        ? Border.all(
+                            color: _selectedSavingsGoal!.color.withOpacity(0.4),
+                            width: 1.5,
+                          )
+                        : null,
+                  ),
+                  child: Center(
+                    child: _selectedSavingsGoal != null
+                        ? Icon(
+                            _selectedSavingsGoal!.icon,
+                            size: 18,
+                            color: _selectedSavingsGoal!.color,
+                          )
+                        : Icon(
+                            Icons.savings_outlined,
+                            size: 20,
+                            color: Colors.blue.shade400,
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _selectedSavingsGoal!.name,
-                              style: const TextStyle(fontSize: 16),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      )
-                    : Text(
-                        _isLoadingSavingsGoals 
-                            ? '加载中...' 
-                            : '选择储蓄目标（可选）',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
-                      ),
+                  ),
                 ),
-                Icon(
-                  Icons.arrow_drop_down,
-                  size: 24,
-                  color: Colors.grey[600],
+                const SizedBox(width: 12),
+                
+                // 文本内容部分
+                                  Expanded(
+                  child: _selectedSavingsGoal != null
+                      ? Text(
+                          _selectedSavingsGoal!.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      : Text(
+                          _isLoadingSavingsGoals 
+                              ? '加载中...' 
+                              : '选择储蓄目标（可选）',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                ),
+                
+                // 箭头按钮
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: _selectedSavingsGoal != null
+                        ? _selectedSavingsGoal!.color.withOpacity(0.1)
+                        : Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.arrow_forward_ios,
+                      size: 14,
+                      color: _selectedSavingsGoal != null
+                          ? _selectedSavingsGoal!.color
+                          : Colors.grey[500],
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
         ),
-        const Divider(height: 32),
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -2588,120 +2937,226 @@ class _ExpenseTrackingScreenState extends State<ExpenseTrackingScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
+        height: MediaQuery.of(context).size.height * 0.5,  // 减小高度
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
+            // 顶部拖动条和标题
             Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+                color: Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 5,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
               ),
-            ),
-            const Text(
-              '选择储蓄目标',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (_isLoadingSavingsGoals)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(32.0),
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            else if (_savingsGoals.isEmpty)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(32.0),
-                  child: Text('没有可用的储蓄目标'),
-                ),
-              )
-            else
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.4,
-                child: ListView(
-                  children: [
-                    // 添加"不选择"选项
-                    ListTile(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      tileColor: _selectedSavingsGoal == null 
-                          ? Colors.green.shade50 
-                          : null,
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.grey.shade200,
-                        child: const Icon(Icons.close, color: Colors.grey),
-                      ),
-                      title: const Text('不选择储蓄目标'),
-                      trailing: _selectedSavingsGoal == null
-                          ? Icon(Icons.check_circle, color: Colors.green.shade600)
-                          : null,
-                      onTap: () {
-                        setState(() {
-                          _selectedSavingsGoal = null;
-                        });
-                        Navigator.pop(context);
-                      },
+              child: Column(
+                children: [
+                  // 拖动指示器
+                  Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    const Divider(),
-                    ..._savingsGoals.map((goal) {
-                      final bool isSelected = _selectedSavingsGoal?.id == goal.id;
-                      final double progress = goal.progress;
-                      
-                      return ListTile(
-                        contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  ),
+                  // 标题
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.indigo.shade50,
+                          shape: BoxShape.circle,
                         ),
-                        tileColor: isSelected ? Colors.green.shade50 : null,
-                        leading: CircleAvatar(
-                          backgroundColor: goal.color.withOpacity(0.2),
-                          child: Icon(goal.icon, color: goal.color, size: 18),
+                        child: Icon(
+                          Icons.savings,
+                          color: Colors.indigo.shade400,
+                          size: 20,
                         ),
-                        title: Text(goal.name),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 4),
-                            LinearProgressIndicator(
-                              value: progress,
-                              backgroundColor: Colors.grey.shade200,
-                              color: goal.color,
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        '选择储蓄目标',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      // 添加关闭按钮
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.close,
+                            size: 16,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            
+            // 内容区域
+            Expanded(
+              child: _isLoadingSavingsGoals
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : _savingsGoals.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.hourglass_empty,
+                            size: 64,
+                            color: Colors.grey[300],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            '没有可用的储蓄目标',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '已存 ¥${goal.currentAmount.toStringAsFixed(2)} / ¥${goal.targetAmount.toStringAsFixed(2)}',
-                              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                      children: [
+                        // "不选择"选项
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: _selectedSavingsGoal == null 
+                                  ? Colors.green.shade300
+                                  : Colors.grey.shade200,
+                              width: _selectedSavingsGoal == null ? 2 : 1,
                             ),
-                          ],
+                          ),
+                          tileColor: _selectedSavingsGoal == null 
+                              ? Colors.green.shade50 
+                              : Colors.white,
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.grey.shade200,
+                            child: const Icon(Icons.not_interested, color: Colors.grey),
+                          ),
+                          title: const Text('不选择储蓄目标'),
+                          trailing: _selectedSavingsGoal == null
+                              ? Icon(Icons.check_circle, color: Colors.green.shade600)
+                              : null,
+                          onTap: () {
+                            setState(() {
+                              _selectedSavingsGoal = null;
+                            });
+                            Navigator.pop(context);
+                          },
                         ),
-                        trailing: isSelected
-                            ? Icon(Icons.check_circle, color: Colors.green.shade600)
-                            : null,
-                        onTap: () {
-                          setState(() {
-                            _selectedSavingsGoal = goal;
-                          });
-                          Navigator.pop(context);
-                        },
-                      );
-                    }).toList(),
-                  ],
-                ),
+                        
+                        // 分隔线和标题
+                        if (_savingsGoals.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 4,
+                                  height: 16,
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade400,
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '你的储蓄目标',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${_savingsGoals.length}个',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        
+                        // 简化后的储蓄目标列表
+                        ..._savingsGoals.map((goal) {
+                          final bool isSelected = _selectedSavingsGoal?.id == goal.id;
+                          return ListTile(
+                            contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(
+                                color: isSelected 
+                                    ? goal.color.withOpacity(0.7) 
+                                    : Colors.grey.shade200,
+                                width: isSelected ? 2 : 1,
+                              ),
+                            ),
+                            tileColor: isSelected 
+                                ? goal.color.withOpacity(0.05) 
+                                : Colors.white,
+                            leading: CircleAvatar(
+                              backgroundColor: goal.color.withOpacity(0.2),
+                              child: Icon(goal.icon, color: goal.color, size: 20),
+                            ),
+                            title: Text(
+                              goal.name,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: isSelected
+                                ? Icon(Icons.check_circle, color: goal.color)
+                                : null,
+                            onTap: () {
+                              setState(() {
+                                _selectedSavingsGoal = goal;
+                              });
+                              Navigator.pop(context);
+                            },
+                          );
+                        }).toList(),
+                      ],
+                    ),
             ),
           ],
         ),

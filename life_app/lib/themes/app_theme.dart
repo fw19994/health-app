@@ -152,7 +152,21 @@ class AppTheme {
           borderSide: const BorderSide(color: error, width: 1),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        focusColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: error, width: 1),
+        ),
       ),
+      textSelectionTheme: const TextSelectionThemeData(
+        cursorColor: primaryColor,
+        selectionColor: primaryColor,
+        selectionHandleColor: primaryColor,
+      ),
+      splashFactory: NoSplash.splashFactory,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,

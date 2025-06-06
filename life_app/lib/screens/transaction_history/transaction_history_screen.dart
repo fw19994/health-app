@@ -19,11 +19,13 @@ import 'package:intl/intl.dart';
 class TransactionHistoryScreen extends StatefulWidget {
   final String? initialMemberId;
   final FilterOptions? initialFilters;
+  final int? familyId;
   
   const TransactionHistoryScreen({
     super.key, 
     this.initialMemberId,
     this.initialFilters,
+    this.familyId,
   });
 
   @override
@@ -88,18 +90,18 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       debugPrint('应用初始筛选条件: ${_filterOptions.toJson()}');
     }
     
-    // 如果提供了初始成员ID，就加载该成员
-    if (widget.initialMemberId != null) {
-      debugPrint('【交易记录页面】有initialMemberId，准备加载初始成员');
-      _loadInitialMember(); // 在_loadInitialMember方法内会调用_loadTransactionData
-    } else {
-      // 只有当没有初始成员ID时才直接加载交易数据
-      debugPrint('【交易记录页面】无initialMemberId，直接加载交易数据');
-      _loadTransactionData();
-    }
-    
-    // 加载成员数据
-    _loadFamilyMembersData();
+    // 优先加载家庭成员数据，然后再加载交易数据
+    _loadFamilyMembersData().then((_) {
+      // 加载成员数据完成后再加载交易数据
+      if (widget.initialMemberId != null) {
+        debugPrint('【交易记录页面】有initialMemberId，准备加载初始成员');
+        _loadInitialMember(); // 在_loadInitialMember方法内会调用_loadTransactionData
+      } else {
+        // 只有当没有初始成员ID时才直接加载交易数据
+        debugPrint('【交易记录页面】无initialMemberId，直接加载交易数据');
+        _loadTransactionData();
+      }
+    });
     
     debugPrint('交易记录页面初始化，initialMemberId: ${widget.initialMemberId}');
   }
@@ -217,7 +219,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       _selectedMember = member;
       // 更新筛选条件中的成员ID
       _filterOptions = _filterOptions.copyWith(
-        memberId: member?.id.toString(),
+        memberId: member?.id.toString() ?? "0", // 选择全部成员时使用"0"
       );
     });
     // 根据选择的成员筛选交易记录
@@ -279,6 +281,16 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     } else if (_filterOptions.memberId != null && _filterOptions.memberId!.isNotEmpty) {
       memberIdParam = _filterOptions.memberId;
       debugPrint('使用筛选条件中的成员ID: $memberIdParam');
+    }
+    
+    // 如果memberIdParam为"0"，表示选择了全部成员
+    if (memberIdParam == "0") {
+      debugPrint('选择了全部成员，发送成员ID=0到接口');
+      // 仍然发送"0"，不设为null
+    } else if (memberIdParam == null || memberIdParam.isEmpty) {
+      // 如果memberIdParam为null或空字符串，仍然设置为"0"
+      memberIdParam = "0";
+      debugPrint('成员ID为空，默认设置为0');
     }
     
     debugPrint('${loadMore ? "加载更多" : "加载"} 交易数据，当前页码: $_currentPage，筛选条件: ${_filterOptions.toJson()}, 选择的成员ID: $memberIdParam');
@@ -389,11 +401,11 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           startDate: startDate,
           endDate: endDate,
           type: transactionType,
-          memberId: memberIdParam != null ? int.tryParse(memberIdParam) : null,
+          memberId: memberIdParam != null ? int.tryParse(memberIdParam) ?? 0 : 0,
           categoryIds: _filterOptions.categoryIds.isNotEmpty ? 
             _parseFilterCategoryIds(_filterOptions.categoryIds) : 
             null,
-          familyId: null, // 如果需要家庭ID过滤，在这里添加
+          familyId: widget.familyId,
         );
         
         if (response.success && mounted) {
@@ -461,11 +473,11 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         startDate: startDate,
         endDate: endDate,
         type: transactionType,
-        memberId: memberIdParam != null ? int.tryParse(memberIdParam) : null,
+        memberId: memberIdParam != null ? int.tryParse(memberIdParam) ?? 0 : 0,
         categoryIds: _filterOptions.categoryIds.isNotEmpty ? 
           _parseFilterCategoryIds(_filterOptions.categoryIds) : 
           null,
-        familyId: null, // 如果需要家庭ID过滤，在这里添加
+        familyId: widget.familyId,
         limit: _pageSize, // 每次加载30条数据
         page: _currentPage, // 添加页码参数
       );
@@ -479,11 +491,11 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           endDate: endDate,
           interval: _getTrendInterval(startDate, endDate),
           type: transactionType,
-          memberId: memberIdParam != null ? int.tryParse(memberIdParam) : null,
+          memberId: memberIdParam != null ? int.tryParse(memberIdParam) ?? 0 : 0,
           categoryIds: _filterOptions.categoryIds.isNotEmpty ? 
             _parseFilterCategoryIds(_filterOptions.categoryIds) : 
             null,
-          familyId: null, // 如果需要家庭ID过滤，在这里添加
+          familyId: widget.familyId,
         );
         
         if (trendResponse.success && mounted && trendResponse.data != null) {
@@ -544,6 +556,14 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           final now = DateTime.now();
           final today = DateTime(now.year, now.month, now.day);
           final yesterday = today.subtract(const Duration(days: 1));
+          
+          // 创建成员ID到成员信息的映射，以便快速查找
+          Map<String, FamilyMember> memberMap = {};
+          for (var member in _familyMembers) {
+            memberMap[member.id.toString()] = member;
+          }
+          
+          debugPrint('已加载成员ID映射表: ${memberMap.keys.toList()}');
           
           for (final groupData in groupsData) {
             // 获取日期和交易列表
@@ -751,14 +771,85 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                   
                   // 获取成员信息
                   final member = transaction['member'] ?? {};
-                  final memberId = member['id']?.toString() ?? '';
-                  final memberName = member['name'] ?? '未知';
-                  final memberRole = member['role'] ?? '';
+                  String memberId = '';
+                  String memberName = '';
+                  String memberRole = '';
+                  Color memberColor = const Color(0xFF6B7280);
+                  String memberAvatarUrl = '';
                   
-                  // 成员颜色（简化处理）
-                  final memberColor = memberId == '1' 
-                      ? const Color(0xFF4F46E5) 
-                      : const Color(0xFF7C3AED);
+                  // 首先尝试从transaction['member']获取成员ID
+                  if (member['id'] != null) {
+                    memberId = member['id'].toString();
+                  } 
+                  // 如果没有member['id']，尝试从transaction['recorder_id']获取
+                  else if (transaction['recorder_id'] != null) {
+                    memberId = transaction['recorder_id'].toString();
+                  }
+                  
+                  debugPrint('【交易$transId】获取到成员ID: $memberId, 开始查找成员信息');
+                  
+                  // 从成员映射表中查找完整的成员信息
+                  if (memberId.isNotEmpty && memberMap.containsKey(memberId)) {
+                    final familyMember = memberMap[memberId]!;
+                    memberName = familyMember.name;
+                    memberRole = familyMember.role;
+                    memberAvatarUrl = familyMember.avatarUrl ?? '';
+                    
+                    // 设置一些默认的成员颜色，基于角色
+                    switch (familyMember.getRoleEnum()) {
+                      case MemberRole.head:
+                        memberColor = const Color(0xFF4F46E5);
+                        break;
+                      case MemberRole.spouse:
+                        memberColor = const Color(0xFF7C3AED);
+                        break;
+                      case MemberRole.child:
+                        memberColor = const Color(0xFFEC4899);
+                        break;
+                      case MemberRole.other:
+                        memberColor = const Color(0xFF0EA5E9);
+                        break;
+                    }
+                    
+                    debugPrint('【交易$transId】找到对应家庭成员: $memberName, ID: $memberId, 头像: $memberAvatarUrl');
+                  } else {
+                    // 如果在映射表中找不到，尝试从transaction['member']中获取基本信息
+                    if (member['name'] != null && member['name'].toString().isNotEmpty) {
+                      memberName = member['name'].toString();
+                    } else if (memberId.isNotEmpty) {
+                      // 如果没有名称但有ID，使用ID作为名称的一部分
+                      memberName = '成员 ' + memberId;
+                    } else {
+                      memberName = '未知成员';
+                    }
+                    
+                    if (member['role'] != null && member['role'].toString().isNotEmpty) {
+                      memberRole = member['role'].toString();
+                    }
+                    
+                    // 尝试获取头像URL
+                    if (member['avatar'] != null && member['avatar'].toString().isNotEmpty) {
+                      memberAvatarUrl = member['avatar'].toString();
+                    } else if (member['avatar_url'] != null && member['avatar_url'].toString().isNotEmpty) {
+                      memberAvatarUrl = member['avatar_url'].toString();
+                    } else if (member['avatarUrl'] != null && member['avatarUrl'].toString().isNotEmpty) {
+                      memberAvatarUrl = member['avatarUrl'].toString();
+                    }
+                    
+                    // 为未映射成员分配随机颜色，但保持一致性
+                    final int colorSeed = memberId.isEmpty ? 0 : memberId.hashCode;
+                    final List<Color> memberColors = [
+                      const Color(0xFF4F46E5),  // 蓝色
+                      const Color(0xFF7C3AED),  // 紫色
+                      const Color(0xFFEC4899),  // 粉色
+                      const Color(0xFF0EA5E9),  // 天蓝色
+                      const Color(0xFF10B981),  // 绿色
+                      const Color(0xFFF59E0B),  // 黄色
+                    ];
+                    memberColor = memberColors[colorSeed.abs() % memberColors.length];
+                    
+                    debugPrint('【交易$transId】未找到对应家庭成员映射，使用构造数据: $memberName, ID: $memberId, 头像URL: $memberAvatarUrl');
+                  }
                   
                   // 解析交易时间
                   DateTime transDate = date;
@@ -796,6 +887,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     memberName: memberName,
                     memberRole: memberRole,
                     memberColor: memberColor,
+                    memberAvatarUrl: memberAvatarUrl,
                   ));
                 }
                 
@@ -1037,15 +1129,75 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   // 加载家庭成员数据
   Future<void> _loadFamilyMembersData() async {
     try {
+      debugPrint('【交易记录页面】开始加载家庭成员数据');
       final familyMemberService = FamilyMemberService(context: context);
-      final response = await familyMemberService.getFamilyMembers();
+      final response = await familyMemberService.getFamilyMembers(
+        familyId: widget.familyId,
+      );
       
       if (response.success && mounted) {
         setState(() {
           _familyMembers = response.data ?? [];
+        });
+        
+        // 记录加载到的成员信息，方便调试
+        debugPrint('【交易记录页面】已加载 ${_familyMembers.length} 个家庭成员:');
+        for (var member in _familyMembers) {
+          debugPrint('  - 成员ID=${member.id}, 名称=${member.name}, 角色=${member.role}, 头像=${member.avatarUrl}');
+        }
+        
+        // 为图表创建成员贡献数据
+        final List<chart_models.FamilyMember> chartData = [];
+        
+        // 使用真实成员数据创建图表数据
+        for (var member in _familyMembers) {
+          // 根据角色分配不同的颜色
+          Color memberColor;
+          Color avatarBgColor;
           
-          // 为图表创建成员贡献数据
-          _chartMembers = [
+          switch (member.getRoleEnum()) {
+            case MemberRole.head:
+              memberColor = const Color(0xFF4F46E5);
+              avatarBgColor = const Color(0xFFEEF2FF);
+              break;
+            case MemberRole.spouse:
+              memberColor = const Color(0xFF7C3AED);
+              avatarBgColor = const Color(0xFFF3E8FF);
+              break;
+            case MemberRole.child:
+              memberColor = const Color(0xFFEC4899);
+              avatarBgColor = const Color(0xFFFCE7F3);
+              break;
+            case MemberRole.other:
+            default:
+              memberColor = const Color(0xFF0EA5E9);
+              avatarBgColor = const Color(0xFFE0F2FE);
+              break;
+          }
+          
+          chartData.add(chart_models.FamilyMember(
+            name: member.name,
+            role: member.role,
+            // 以下为默认数据，实际应该从API获取
+            income: 0,
+            expenses: 0,
+            budget: 0,
+            savingsRate: 0,
+            budgetUsage: 0,
+            incomeChange: 0,
+            expensesChange: 0,
+            color: memberColor,
+            icon: Icons.person,
+            avatarBgColor: avatarBgColor,
+            incomeContribution: 0,
+            expenseContribution: 0,
+            mainConsumption: '',
+          ));
+        }
+        
+        // 如果没有成员数据，使用默认示例数据
+        if (chartData.isEmpty) {
+          chartData.addAll([
             chart_models.FamilyMember(
               name: '爸爸',
               role: '爸爸',
@@ -1080,45 +1232,28 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               expenseContribution: 0.35,
               mainConsumption: '购物',
             ),
-            chart_models.FamilyMember(
-              name: '女儿',
-              role: '女儿',
-              income: 0,
-              expenses: 3048,
-              budget: 3000,
-              savingsRate: 0.0,
-              budgetUsage: 1.01,
-              incomeChange: 0.0,
-              expensesChange: 0.1,
-              color: const Color(0xFFDB2777),
-              icon: Icons.face,
-              avatarBgColor: const Color(0xFFFCE7F3),
-              incomeContribution: 0.0,
-              expenseContribution: 0.2,
-              mainConsumption: '教育',
-            ),
-            chart_models.FamilyMember(
-              name: '儿子',
-              role: '儿子',
-              income: 0,
-              expenses: 1524,
-              budget: 2000,
-              savingsRate: 0.0,
-              budgetUsage: 0.76,
-              incomeChange: 0.0,
-              expensesChange: 0.05,
-              color: const Color(0xFF3B82F6),
-              icon: Icons.child_care,
-              avatarBgColor: const Color(0xFFDBEAFE),
-              incomeContribution: 0.0,
-              expenseContribution: 0.1,
-              mainConsumption: '娱乐',
-            ),
-          ];
+          ]);
+        }
+        
+        setState(() {
+          _chartMembers = chartData;
         });
+        
+        // 成员数据加载完成后，始终刷新交易数据以确保正确显示成员信息
+        debugPrint('【交易记录页面】成员数据加载完成，刷新交易记录以显示正确的成员信息');
+        debugPrint('【交易记录页面】已加载家庭成员: ${_familyMembers.length}个，成员ID列表: ${_familyMembers.map((m) => m.id.toString()).toList()}');
+        
+        // 添加短暂延迟确保状态更新完成
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+          _loadTransactionData();
+        }
+        });
+      } else {
+        debugPrint('【交易记录页面】加载家庭成员失败: ${response.message}');
       }
     } catch (e) {
-      debugPrint('加载家庭成员失败: $e');
+      debugPrint('【交易记录页面】加载家庭成员数据时发生异常: $e');
     }
   }
   
@@ -1447,6 +1582,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           TransactionHeader(
               selectedMember: _selectedMember,
               onMemberSelected: _onMemberSelected,
+              familyId: widget.familyId,
             ),
             
             // 筛选系统 - 传入初始筛选条件和回调

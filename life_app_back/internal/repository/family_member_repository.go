@@ -68,6 +68,12 @@ func (r *FamilyMemberRepository) DeleteFamilyMember(id uint) error {
 	return db.Delete(&model.FamilyMember{}, id).Error
 }
 
+// DeleteByOwnerID 根据家庭ID(owner_id)删除所有成员
+func (r *FamilyMemberRepository) DeleteByOwnerID(ownerID uint) error {
+	db := model.DB
+	return db.Where("owner_id = ?", ownerID).Delete(&model.FamilyMember{}).Error
+}
+
 // CreateInvitation 创建邀请
 func (r *FamilyMemberRepository) CreateInvitation(invitation *model.Invitation) error {
 	db := model.DB

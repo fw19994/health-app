@@ -14,10 +14,12 @@ import 'package:intl/intl.dart';
 
 class SavingsGoalsScreen extends StatefulWidget {
   final bool isFamilySavings; // 添加家庭储蓄标识
+  final int? familyId; // 添加家庭ID参数
   
   const SavingsGoalsScreen({
     super.key,
     this.isFamilySavings = false, // 默认为个人储蓄目标
+    this.familyId, // 添加家庭ID参数
   });
 
   @override
@@ -59,6 +61,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
         status: 'in_progress', 
         context: context,
         isFamilySavings: widget.isFamilySavings, // 添加家庭标识
+        familyId: widget.familyId, // 添加家庭ID参数
       );
       
       // 为每个目标加载真实图标
@@ -97,6 +100,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
         status: 'completed', 
         context: context,
         isFamilySavings: widget.isFamilySavings, // 添加家庭标识
+        familyId: widget.familyId, // 添加家庭ID参数
       );
       
       // 为每个已完成目标加载真实图标
@@ -157,6 +161,10 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
             Color(0xFF3B82F6),  // 蓝色
             Color(0xFF60A5FA),  // 浅蓝色
           ],
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
         ),
       ),
       padding: EdgeInsets.only(
@@ -898,6 +906,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
       builder: (context) => SavingsGoalModal(
         goal: goal,
         isFamilySavings: widget.isFamilySavings, // 传递家庭储蓄标识
+        familyId: widget.familyId, // 传递家庭ID参数
       ),
     );
     

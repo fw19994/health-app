@@ -12,6 +12,7 @@ class FamilyFinanceHeader extends StatelessWidget {
   final MonthlyBudget? monthlyBudget;
   final Function(DateTime) onMonthSelected;
   final VoidCallback onBack;
+  final int familyId;
 
   const FamilyFinanceHeader({
     Key? key,
@@ -21,6 +22,7 @@ class FamilyFinanceHeader extends StatelessWidget {
     required this.monthlyBudget,
     required this.onMonthSelected,
     required this.onBack,
+    required this.familyId,
   }) : super(key: key);
 
   @override
@@ -112,7 +114,9 @@ class FamilyFinanceHeader extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const FamilyMembersScreen()),
+                          MaterialPageRoute(builder: (context) => FamilyMembersScreen(
+                            familyId: familyId,
+                          )),
                         );
                       },
                       child: Container(

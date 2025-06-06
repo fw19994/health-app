@@ -7,7 +7,14 @@ import 'forecast_planning_screen.dart';
 
 /// 财务报告主页面 - 包含三个标签页：月度报告、趋势分析和预测规划
 class FinanceReportScreen extends StatefulWidget {
-  const FinanceReportScreen({super.key});
+  final int? familyId;
+  final bool isFamilyReport;
+  
+  const FinanceReportScreen({
+    super.key,
+    this.familyId,
+    this.isFamilyReport = false,
+  });
 
   @override
   State<FinanceReportScreen> createState() => _FinanceReportScreenState();

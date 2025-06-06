@@ -5,17 +5,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/user_service.dart';
-import '../../services/family_member_service.dart';
-import '../../models/family_member_model.dart';
 import '../../widgets/login/custom_toast.dart';
 import 'models/user_profile.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/info_card.dart';
 import 'widgets/preference_card.dart';
-import 'widgets/family_members_card.dart';
 import 'widgets/account_actions.dart';
 import 'edit_basic_info_screen.dart';
-import '../family_members_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -27,16 +23,13 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late UserProfile _userProfile;
   late UserService _userService;
-  late FamilyMemberService _familyMemberService;
   bool _isLoading = true;
-  List<FamilyMember> _familyMembers = [];
   
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // 在这里初始化服务，确保能访问到context
     _userService = UserService(context: context);
-    _familyMemberService = FamilyMemberService(context: context);
   }
 
   @override
@@ -46,24 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // 使用WidgetsBinding确保在UI渲染完成后加载数据
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadUserProfile();
-      _loadFamilyMembers();
     });
-  }
-  
-  // 加载家庭成员列表
-  Future<void> _loadFamilyMembers() async {
-    try {
-      final response = await _familyMemberService.getFamilyMembers();
-      if (response.success) {
-        setState(() {
-          _familyMembers = response.data ?? [];
-        });
-      } else {
-        showCustomToast(context, '加载家庭成员失败: ${response.message}', ToastType.error);
-      }
-    } catch (e) {
-      showCustomToast(context, '加载家庭成员失败: $e', ToastType.error);
-    }
   }
   
   // 从服务器加载用户资料
@@ -650,31 +626,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _onAddFamilyMember() {
-    // 导航到家庭成员管理页面，并在返回时刷新数据
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const FamilyMembersScreen()),
-    ).then((_) => _loadFamilyMembers());
-  }
-
-  void _onFamilyMemberTap(FamilyMember member) {
-    // 导航到家庭成员管理页面，并在返回时刷新数据
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const FamilyMembersScreen()),
-    ).then((_) => _loadFamilyMembers());
-  }
-
   void _showLogoutConfirmation() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+      builder: (context) => Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: const Text(
+        child: Container(
+          color: Colors.white,
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+                color: Colors.white,
+                child: const Text(
           '退出登录',
           style: TextStyle(
             fontSize: 18,
@@ -682,29 +651,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Color(0xFF1F2937),
           ),
         ),
-        content: const Text(
+              ),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+                color: Colors.white,
+                child: const Text(
           '确定要退出登录吗？',
           style: TextStyle(
             fontSize: 16,
             color: Color(0xFF6B7280),
           ),
         ),
-        actions: [
+              ),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                color: Colors.white,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             style: TextButton.styleFrom(
-              foregroundColor: Color(0xFF6B7280),
-              backgroundColor: Color(0xFFF9FAFB),
+                        foregroundColor: const Color(0xFF6B7280),
+                        backgroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
+                          side: const BorderSide(color: Color(0xFFE5E7EB)),
               ),
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
             child: const Text(
               '取消',
               style: TextStyle(fontWeight: FontWeight.w500),
             ),
           ),
+                    const SizedBox(width: 12),
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
@@ -722,11 +705,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
-              backgroundColor: Color(0xFFEF4444),
+                        backgroundColor: const Color(0xFFEF4444),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
             child: const Text(
               '确定',
@@ -734,9 +717,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ],
-        contentPadding: EdgeInsets.fromLTRB(24, 20, 24, 24),
-        actionsPadding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-        titlePadding: EdgeInsets.fromLTRB(24, 24, 24, 8),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -762,13 +747,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      // 家庭成员卡片
-                      FamilyMembersCard(
-                        members: _familyMembers,
-                        onAddMember: _onAddFamilyMember,
-                        onMemberTap: _onFamilyMemberTap,
-                      ),
-                      
                       // 账户操作 - 只保留退出登录
                       Container(
                         margin: const EdgeInsets.only(top: 8),

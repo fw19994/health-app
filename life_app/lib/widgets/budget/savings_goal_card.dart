@@ -9,6 +9,8 @@ class SavingsGoalCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback? onMarkAsCompleted;
   final VoidCallback? onMarkAsDeleted;
+  final bool isFamilySavings;
+  final int? familyId;
 
   const SavingsGoalCard({
     super.key,
@@ -16,6 +18,8 @@ class SavingsGoalCard extends StatelessWidget {
     required this.onEdit,
     this.onMarkAsCompleted,
     this.onMarkAsDeleted,
+    this.isFamilySavings = false,
+    this.familyId,
   });
 
   String _formatDate(DateTime date) {

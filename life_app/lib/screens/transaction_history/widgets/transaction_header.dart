@@ -5,11 +5,13 @@ import '../../../services/family_member_service.dart';
 class TransactionHeader extends StatefulWidget {
   final Function(FamilyMember?)? onMemberSelected;
   final FamilyMember? selectedMember;
+  final int? familyId;
 
   const TransactionHeader({
     Key? key, 
     this.onMemberSelected,
-    this.selectedMember
+    this.selectedMember,
+    this.familyId,
   }) : super(key: key);
 
   @override
@@ -51,7 +53,9 @@ class _TransactionHeaderState extends State<TransactionHeader> {
 
     try {
       final familyMemberService = FamilyMemberService(context: context);
-      final response = await familyMemberService.getFamilyMembers();
+      final response = await familyMemberService.getFamilyMembers(
+        familyId: widget.familyId,
+      );
       
       if (response.success && mounted) {
         // 获取预选成员ID

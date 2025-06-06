@@ -11,6 +11,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'finance/family_finance/family_finance_screen.dart';
 import 'expense_tracking_screen.dart';
 import 'budget_settings_screen.dart';
+import 'family_management_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -576,10 +577,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    // 跳转到财务详情页面
+                    // 跳转到家庭管理页面
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const FamilyFinanceScreen()),
+                      MaterialPageRoute(builder: (context) => const FamilyManagementScreen()),
                     ).then((_) => _loadMonthlyBudget()); // 返回时刷新数据
                   },
                   child: const Text(
@@ -695,6 +696,7 @@ class _HomeScreenState extends State<HomeScreen> {
             // 操作按钮行
             Row(
               children: [
+                // 个人记账按钮
                 Expanded(
                   child: _buildFinanceActionButton(
                     icon: FontAwesomeIcons.plus,
@@ -712,6 +714,27 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (result == true) {
                         _loadMonthlyBudget();
                       }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // 家庭记账按钮
+                Expanded(
+                  child: _buildFinanceActionButton(
+                    icon: FontAwesomeIcons.peopleGroup,
+                    label: '家庭记账',
+                    bgColor: const Color(0xFFF0FDF4),
+                    textColor: const Color(0xFF16A34A),
+                    onTap: () {
+                      // 使用全局路由返回主页面，并设置底部导航栏索引为1（家庭页）
+                      // 获取最近的Navigator
+                      final navigator = Navigator.of(context, rootNavigator: true);
+                      // 导航到主页面并传递索引参数
+                      navigator.pushNamedAndRemoveUntil(
+                        '/main',
+                        (route) => false, // 清除所有路由
+                        arguments: 1 // 切换到家庭管理标签（索引为1）
+                      );
                     },
                   ),
                 ),

@@ -1,15 +1,42 @@
-// 用于在Web和非Web环境中提供统一接口的存根文件
-import 'dart:io' as io;
+// 用于在Web环境中提供dart:io替代实现的存根文件
+// 不要从dart:io导出类型，因为在web上不可用
 
-// 重新导出标准io库中的部分类，以便在导入此文件时可用
-export 'dart:io' show HttpClient, SecurityContext, X509Certificate, Platform;
+// HttpClient和SecurityContext的模拟实现
+class HttpClient {
+  Duration? connectionTimeout;
+  int? maxConnectionsPerHost;
+  
+  bool Function(X509Certificate, String, int)? badCertificateCallback;
+  String Function(Uri)? findProxy;
+  
+  Future<HttpClientRequest> getUrl(Uri url) async {
+    return HttpClientRequest();
+  }
+  
+  Future<HttpClientRequest> postUrl(Uri url) async {
+    return HttpClientRequest();
+  }
+}
 
-// 自定义HttpOverrides类
+class SecurityContext {
+  SecurityContext();
+  static SecurityContext defaultContext() => SecurityContext();
+}
+
+class X509Certificate {
+  final String subject = 'Web Stub Certificate';
+}
+
+// 自定义HttpOverrides类，完全在web环境中模拟
 class HttpOverrides {
   static HttpOverrides? global;
   
   HttpClient createHttpClient(SecurityContext? context) {
     return HttpClient();
+  }
+  
+  String findProxyFromEnvironment(Uri url, Map<String, String>? environment) {
+    return 'DIRECT';
   }
 }
 
@@ -75,22 +102,6 @@ class ProcessResult {
 }
 
 // HTTP相关类
-class HttpClient {
-  Duration? connectionTimeout;
-  int? maxConnectionsPerHost;
-  
-  bool Function(X509Certificate, String, int)? badCertificateCallback;
-  String Function(Uri)? findProxy;
-  
-  Future<HttpClientRequest> getUrl(Uri url) async {
-    return HttpClientRequest();
-  }
-  
-  Future<HttpClientRequest> postUrl(Uri url) async {
-    return HttpClientRequest();
-  }
-}
-
 class HttpClientRequest {
   Future<HttpClientResponse> close() async {
     return HttpClientResponse();
@@ -109,14 +120,6 @@ class HttpClientResponse {
   }
 }
 
-class SecurityContext {
-  SecurityContext.defaultContext();
-}
-
-class X509Certificate {
-  final String subject = 'Web Stub Certificate';
-}
-
 // Platform类模拟
 class Platform {
   static bool get isAndroid => false;
@@ -125,6 +128,7 @@ class Platform {
   static bool get isWindows => false;
   static bool get isLinux => false;
   static bool get isFuchsia => false;
+  static bool get isWeb => true;
   
   static String get operatingSystem => 'web';
   static String get operatingSystemVersion => '1.0.0';

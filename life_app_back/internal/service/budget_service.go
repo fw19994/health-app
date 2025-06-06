@@ -22,7 +22,7 @@ func (s *BudgetService) GetUserBudgetCategories(userID uint, year, month int) ([
 	}
 
 	// 获取上月统计数据用于计算环比
-	prevStats, err := repo.GetPreviousMonthStats(userID, year, month, false)
+	prevStats, err := repo.GetPreviousMonthStats(userID, year, month, 0)
 	if err != nil {
 		// 如果获取环比数据失败，不影响主流程，继续执行
 		prevStats = make(map[string]float64)
@@ -42,7 +42,7 @@ func (s *BudgetService) GetUserBudgetCategories(userID uint, year, month int) ([
 				response.MonthOverMonth = currentUsage - prevUsage
 			}
 		}
-		
+
 		// 计算实际支出金额
 		spent, err := s.CalculateCategorySpent(uint(category.IconID), userID, year, month, false, 0)
 		if err == nil {
@@ -54,7 +54,7 @@ func (s *BudgetService) GetUserBudgetCategories(userID uint, year, month int) ([
 			// 重新计算是否超出预算
 			response.IsOverBudget = spent > category.Budget
 		}
-		
+
 		responses = append(responses, response)
 	}
 
@@ -62,26 +62,17 @@ func (s *BudgetService) GetUserBudgetCategories(userID uint, year, month int) ([
 }
 
 // GetFamilyBudgetCategories 获取家庭某月的预算列表
-func (s *BudgetService) GetFamilyBudgetCategories(userID uint, year, month int) ([]model.BudgetCategoryResponse, error) {
+func (s *BudgetService) GetFamilyBudgetCategories(familyId int, year, month int) ([]model.BudgetCategoryResponse, error) {
 	repo := &repository.BudgetCategoryRepository{}
 
-	// 先获取用户所在的家庭ID
-	familyMemberRepo := &repository.FamilyMemberRepository{}
-	familyMember, err := familyMemberRepo.GetFamilyMemberByUserIDDirect(userID)
-	if err != nil {
-		return nil, errors.New("未找到用户所属家庭")
-	}
-
-	familyID := familyMember.OwnerID
-
 	// 获取预算列表
-	categories, err := repo.GetFamilyBudgetCategoriesByMonth(familyID, year, month)
+	categories, err := repo.GetFamilyBudgetCategoriesByMonth(uint(familyId), year, month)
 	if err != nil {
 		return nil, err
 	}
 
 	// 获取上月统计数据用于计算环比
-	prevStats, err := repo.GetPreviousMonthStats(userID, year, month, true)
+	prevStats, err := repo.GetPreviousMonthStats(0, year, month, familyId)
 	if err != nil {
 		// 如果获取环比数据失败，不影响主流程，继续执行
 		prevStats = make(map[string]float64)
@@ -102,9 +93,9 @@ func (s *BudgetService) GetFamilyBudgetCategories(userID uint, year, month int) 
 				response.MonthOverMonth = currentUsage - prevUsage
 			}
 		}
-		
+
 		// 计算实际支出金额
-		spent, err := s.CalculateCategorySpent(uint(category.IconID), userID, year, month, true, familyID)
+		spent, err := s.CalculateCategorySpent(uint(category.IconID), 0, year, month, true, uint(familyId))
 		if err == nil {
 			response.Spent = spent
 			// 重新计算使用百分比
@@ -172,29 +163,8 @@ func (s *BudgetService) UpdateBudgetCategory(category *model.BudgetCategory, use
 }
 
 // DeleteBudgetCategory 删除预算
-func (s *BudgetService) DeleteBudgetCategory(id, userID uint) error {
+func (s *BudgetService) DeleteBudgetCategory(id uint) error {
 	repo := &repository.BudgetCategoryRepository{}
-
-	// 获取预算
-	category, err := repo.GetBudgetCategoryByID(id)
-	if err != nil {
-		return errors.New("预算不存在")
-	}
-
-	// 验证权限（只有自己的预算或家庭预算且自己是家庭成员才能删除）
-	if category.UserID != userID && !category.IsFamilyBudget {
-		return errors.New("无权删除该预算")
-	}
-
-	// 如果是家庭预算，还需要验证用户是否属于同一个家庭
-	if category.IsFamilyBudget {
-		familyMemberRepo := &repository.FamilyMemberRepository{}
-		familyMember, err := familyMemberRepo.GetFamilyMemberByUserIDDirect(userID)
-		if err != nil || familyMember.OwnerID != category.FamilyID {
-			return errors.New("无权删除该家庭预算")
-		}
-	}
-
 	return repo.DeleteBudgetCategory(id)
 }
 
@@ -231,47 +201,27 @@ func (s *BudgetService) UpdateBudgetSpent(categoryID uint, amount float64) error
 	return repo.UpdateBudgetCategory(category)
 }
 
-// GetAllBudgetCategoriesForUser 获取用户所有的预算（当前月）
-func (s *BudgetService) GetAllBudgetCategoriesForUser(userID uint, year, month int) ([]model.BudgetCategoryResponse, error) {
-
-	// 获取个人预算
-	userBudgets, err := s.GetUserBudgetCategories(userID, year, month)
-	if err != nil {
-		return nil, err
-	}
-
-	// 获取家庭预算
-	familyBudgets, err := s.GetFamilyBudgetCategories(userID, year, month)
-	if err != nil {
-		// 如果获取家庭预算失败，不影响主流程，只返回个人预算
-		return userBudgets, nil
-	}
-
-	// 合并预算列表
-	return append(userBudgets, familyBudgets...), nil
-}
-
 // CalculateCategorySpent 计算预算类别的实际支出金额
 func (s *BudgetService) CalculateCategorySpent(categoryID uint, userID uint, year int, month int, isFamilyBudget bool, familyID uint) (float64, error) {
 	// 计算日期范围
 	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.Local)
 	endDate := time.Date(year, time.Month(month+1), 0, 23, 59, 59, 0, time.Local)
-	
+
 	// 构建查询
 	query := model.DB.Model(&model.Transaction{}).
 		Where("type = ? AND date BETWEEN ? AND ? AND icon_id = ?",
 			"expense", startDate, endDate, categoryID)
-	
+
 	// 根据是否为家庭预算添加不同的条件
 	if isFamilyBudget {
 		query = query.Where("family_id = ?", familyID)
 	} else {
-		query = query.Where("user_id = ?", userID)
+		query = query.Where("user_id = ? and family_id =0", userID)
 	}
-	
+
 	// 计算总支出
 	var totalSpent float64
 	err := query.Select("COALESCE(SUM(amount), 0)").Scan(&totalSpent).Error
-	
+
 	return totalSpent, err
 }

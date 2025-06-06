@@ -15,6 +15,7 @@ import 'finance_report_screen.dart';
 import 'budget_settings_screen.dart';
 import 'savings_goals_screen.dart';
 import '../widgets/finance/simplified_savings_goal_card.dart';
+import '../widgets/common/month_picker_modal.dart';
 
 class FinanceScreen extends StatefulWidget {
   const FinanceScreen({super.key});
@@ -31,8 +32,8 @@ class _FinanceScreenState extends State<FinanceScreen> {
   final IconService _iconService = IconService();
   
   // 当前年月
-  late int _currentYear;
-  late int _currentMonth;
+  late DateTime _selectedDate;
+  late List<DateTime> _recentMonths;
   late String _currentMonthText;
   
   // 添加图标数据列表和近期交易列表
@@ -63,8 +64,13 @@ class _FinanceScreenState extends State<FinanceScreen> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    _currentYear = now.year;
-    _currentMonth = now.month;
+    _selectedDate = now;
+    
+    // 初始化最近3个月的记录
+    _recentMonths = [];
+    for (int i = 1; i <= 3; i++) {
+      _recentMonths.add(DateTime(now.year, now.month - i));
+    }
     
     // 格式化月份显示
     final monthFormat = DateFormat('M月', 'zh_CN');
@@ -77,6 +83,46 @@ class _FinanceScreenState extends State<FinanceScreen> {
     _loadTransactionSummary(); // 添加加载交易摘要数据
     _loadExpenseAnalysis(); // 添加加载支出分析数据
     _loadSavingsGoals(); // 添加加载储蓄目标数据
+  }
+  
+  // 处理月份选择
+  void _onMonthSelected(DateTime date) {
+    setState(() {
+      _selectedDate = date;
+      
+      // 更新格式化的月份显示
+      final monthFormat = DateFormat('M月', 'zh_CN');
+      _currentMonthText = monthFormat.format(date);
+      
+      // 更新最近记录
+      if (!_recentMonths.any((month) => 
+        month.year == date.year && month.month == date.month
+      )) {
+        _recentMonths.insert(0, date);
+        if (_recentMonths.length > 5) {
+          _recentMonths.removeLast();
+        }
+      }
+    });
+    
+    // 重新加载所有与月份相关的数据
+    _loadCurrentBudget();
+    _loadTransactionSummary();
+    _loadExpenseAnalysis();
+    _loadRecentTransactions();
+  }
+  
+  // 显示月份选择器
+  void _showMonthPicker() async {
+    final result = await MonthPickerModal.show(
+      context: context,
+      initialDate: _selectedDate,
+      recentMonths: _recentMonths,
+    );
+    
+    if (result != null) {
+      _onMonthSelected(result);
+    }
   }
   
   // 加载图标数据
@@ -101,10 +147,17 @@ class _FinanceScreenState extends State<FinanceScreen> {
     });
 
     try {
-      // 调用API获取近期交易数据，获取所有类型交易（不指定type）
-      final response = await _financeService.getRecentTransactions(
+      // 创建选择月份的起始日期和结束日期
+      final startDate = DateTime(_selectedDate.year, _selectedDate.month, 1);
+      final lastDay = DateTime(_selectedDate.year, _selectedDate.month + 1, 0).day;
+      final endDate = DateTime(_selectedDate.year, _selectedDate.month, lastDay, 23, 59, 59);
+      
+      // 获取指定日期范围内的交易记录
+      final response = await _financeService.getTransactions(
         context: context,
-        type: '', // 不指定交易类型，获取所有类型交易
+        limit: 5, // 只获取5条最新的
+        startDate: startDate,
+        endDate: endDate,
       );
       
       if (mounted && response.success && response.data != null) {
@@ -130,26 +183,22 @@ class _FinanceScreenState extends State<FinanceScreen> {
     });
     
     try {
-      final budget = await _budgetService.getMonthlyBudget(
-        year: _currentYear,
-        month: _currentMonth,
+      // 使用选择的年月加载预算数据
+      final data = await _budgetService.getMonthlyBudget(
+        year: _selectedDate.year,
+        month: _selectedDate.month,
         context: context,
       );
       
-      if (mounted) {
         setState(() {
-          _currentBudget = budget;
+        _currentBudget = data;
           _isLoadingBudget = false;
         });
-      }
     } catch (e) {
-      debugPrint('加载预算数据失败: $e');
-      if (mounted) {
+      debugPrint('加载预算数据出错: $e');
         setState(() {
-          _currentBudget = null;
           _isLoadingBudget = false;
         });
-      }
     }
   }
   
@@ -160,11 +209,10 @@ class _FinanceScreenState extends State<FinanceScreen> {
     });
     
     try {
-      // 创建当前月份的起始日期和结束日期
-      final now = DateTime.now();
-      final startDate = DateTime(_currentYear, _currentMonth, 1); // 当月第一天
-      final lastDay = DateTime(_currentYear, _currentMonth + 1, 0).day; // 当月最后一天
-      final endDate = DateTime(_currentYear, _currentMonth, lastDay, 23, 59, 59); // 当月最后一天的23:59:59
+      // 创建选择月份的起始日期和结束日期
+      final startDate = DateTime(_selectedDate.year, _selectedDate.month, 1);
+      final lastDay = DateTime(_selectedDate.year, _selectedDate.month + 1, 0).day;
+      final endDate = DateTime(_selectedDate.year, _selectedDate.month, lastDay, 23, 59, 59);
       
       // 调用获取交易摘要的方法
       final response = await _financeService.getTransactionSummary(
@@ -201,12 +249,12 @@ class _FinanceScreenState extends State<FinanceScreen> {
     });
     
     try {
-      // 创建当前月份的起始日期和结束日期
-      final startDate = DateTime(_currentYear, _currentMonth, 1); // 当月第一天
-      final lastDay = DateTime(_currentYear, _currentMonth + 1, 0).day; // 当月最后一天
-      final endDate = DateTime(_currentYear, _currentMonth, lastDay, 23, 59, 59); // 当月最后一天的23:59:59
+      // 创建选择月份的起始日期和结束日期
+      final startDate = DateTime(_selectedDate.year, _selectedDate.month, 1);
+      final lastDay = DateTime(_selectedDate.year, _selectedDate.month + 1, 0).day;
+      final endDate = DateTime(_selectedDate.year, _selectedDate.month, lastDay, 23, 59, 59);
       
-      // 调用获取支出分析数据的方法
+      // 调用财务服务获取支出分析数据
       final response = await _financeService.getExpenseAnalysis(
         context: context,
         startDate: startDate,
@@ -385,7 +433,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
     );
   }
 
-  // 财务仪表盘头部 - 橙黄色渐变背景
+  // 财务仪表盘头部 - 更新为包含月份选择器
   Widget _buildHeader(BuildContext context) {
     // 获取状态栏高度
     final statusBarHeight = MediaQuery.of(context).padding.top;
@@ -397,6 +445,10 @@ class _FinanceScreenState extends State<FinanceScreen> {
     final String remainingAmount = _isLoadingBudget || _currentBudget == null
         ? '加载中...'
         : '¥${formatter.format(_currentBudget!.remainingAmount)}';
+    
+    // 格式化年月显示
+    final dateFormatter = DateFormat('yyyy年M月', 'zh_CN');
+    final formattedDate = dateFormatter.format(_selectedDate);
     
     return Container(
       padding: EdgeInsets.fromLTRB(12, statusBarHeight + 8, 12, 8),
@@ -410,7 +462,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 标题与余额并排
+          // 标题和月份选择器并排
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -422,6 +474,42 @@ class _FinanceScreenState extends State<FinanceScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+              // 添加月份选择器
+              GestureDetector(
+                onTap: _showMonthPicker,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        formattedDate,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.calendar_today_outlined,
+                        color: Colors.white,
+                        size: 12,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 4),
+          
+          // 余额标签
               const Text(
                       '本月余额',
                       style: TextStyle(
@@ -429,8 +517,6 @@ class _FinanceScreenState extends State<FinanceScreen> {
                   fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
-                    ),
-                  ],
                 ),
           
           // 金额和上月比较

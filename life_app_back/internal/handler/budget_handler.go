@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"life_app_back/internal/repository"
 	"math"
 	"strconv"
 	"time"
@@ -24,45 +23,19 @@ func GetBudgetCategories(c *gin.Context) {
 	// 获取查询参数
 	year, _ := strconv.Atoi(c.DefaultQuery("year", strconv.Itoa(time.Now().Year())))
 	month, _ := strconv.Atoi(c.DefaultQuery("month", strconv.Itoa(int(time.Now().Month()))))
-	categoryType := c.DefaultQuery("is_family_budget", "false") // all, personal 或 family
-
+	familyIdStr := c.DefaultQuery("family_id", "false")
+	familyId, _ := strconv.Atoi(familyIdStr)
 	// 调用服务
 	budgetService := &service.BudgetService{}
 	var categories []model.BudgetCategoryResponse
 	var err error
-	ss, _ := strconv.ParseBool(categoryType)
+	if familyId > 0 {
+		categories, err = budgetService.GetFamilyBudgetCategories(familyId, year, month)
 
-	// 根据类型获取不同的预算列表
-	switch ss {
-	case false:
+	} else {
 		categories, err = budgetService.GetUserBudgetCategories(userID, year, month)
-	case true:
-		categories, err = budgetService.GetFamilyBudgetCategories(userID, year, month)
-	default: // "all"
-		categories, err = budgetService.GetAllBudgetCategoriesForUser(userID, year, month)
+
 	}
-
-	if err != nil {
-		utils.ServerError(c, err)
-		return
-	}
-
-	utils.Success(c, categories, "获取预算成功")
-}
-
-// GetAllBudgetCategories 获取所有预算（当前月，包括个人和家庭）
-func GetAllBudgetCategories(c *gin.Context) {
-	// 从请求中获取当前用户ID
-	userID, ok := utils.MustGetUserID(c)
-	if !ok {
-		return // MustGetUserID函数已经处理了错误响应
-	}
-	year, _ := strconv.Atoi(c.DefaultQuery("year", strconv.Itoa(time.Now().Year())))
-	month, _ := strconv.Atoi(c.DefaultQuery("month", strconv.Itoa(int(time.Now().Month()))))
-
-	// 调用服务
-	budgetService := &service.BudgetService{}
-	categories, err := budgetService.GetAllBudgetCategoriesForUser(userID, year, month)
 
 	if err != nil {
 		utils.ServerError(c, err)
@@ -90,6 +63,7 @@ func CreateBudgetCategory(c *gin.Context) {
 		Month             int     `json:"month" binding:"required,min=1,max=12"`
 		ReminderThreshold int     `json:"reminder_threshold" binding:"required,min=0,max=100"`
 		IsFamilyBudget    bool    `json:"is_family_budget"`
+		FamilyId          int     `json:"family_id"`
 	}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -109,16 +83,17 @@ func CreateBudgetCategory(c *gin.Context) {
 		Month:             request.Month,
 		ReminderThreshold: request.ReminderThreshold,
 		IsFamilyBudget:    request.IsFamilyBudget,
+		FamilyID:          uint(request.FamilyId),
 	}
 	if request.IsFamilyBudget {
-		userFamilyMembers, err := new(service.FamilyMemberService).GetUserFamilyMembers(userID)
-		if err != nil {
-			utils.ServerError(c, err)
-			return
-		}
-		if len(userFamilyMembers) > 0 {
-			category.FamilyID = userFamilyMembers[0].OwnerID
-		}
+		//userFamilyMembers, err := new(service.FamilyMemberService).GetUserFamilyMembers(userID)
+		//if err != nil {
+		//	utils.ServerError(c, err)
+		//	return
+		//}
+		//if len(userFamilyMembers) > 0 {
+		//	category.FamilyID = userFamilyMembers[0].OwnerID
+		//}
 	}
 	// 调用服务
 	budgetService := &service.BudgetService{}
@@ -186,11 +161,6 @@ func UpdateBudgetCategory(c *gin.Context) {
 // DeleteBudgetCategory 删除预算
 func DeleteBudgetCategory(c *gin.Context) {
 	// 从请求中获取当前用户ID
-	userID, ok := utils.MustGetUserID(c)
-	if !ok {
-		return // MustGetUserID函数已经处理了错误响应
-	}
-
 	// 获取预算ID
 	categoryIDStr := c.Param("id")
 	categoryID, err := strconv.ParseUint(categoryIDStr, 10, 32)
@@ -201,7 +171,7 @@ func DeleteBudgetCategory(c *gin.Context) {
 
 	// 调用服务
 	budgetService := &service.BudgetService{}
-	if err := budgetService.DeleteBudgetCategory(uint(categoryID), userID); err != nil {
+	if err := budgetService.DeleteBudgetCategory(uint(categoryID)); err != nil {
 		utils.ServerError(c, err)
 		return
 	}
@@ -269,16 +239,11 @@ func GetMonthlyBudget(c *gin.Context) {
 	var categories []model.BudgetCategory
 	querys := model.DB.Where(" year = ? AND month = ? and is_family_budget = ?", req.Year, req.Month, req.IsFamilyBudget)
 	ownerID := 0
-	if req.IsFamilyBudget {
-		familyMemberRepository := &repository.FamilyMemberRepository{}
-		familyMember, err := familyMemberRepository.GetFamilyMemberByUserIDDirect(userID)
-		if err != nil {
-			utils.ServerError(c, err)
-		}
-		querys = querys.Where("family_id=?", familyMember.OwnerID)
-		ownerID = int(familyMember.OwnerID)
+	if req.FamilyId > 0 {
+		querys = querys.Where("family_id=?", req.FamilyId)
+		ownerID = req.FamilyId
 	} else {
-		querys = querys.Where("user_id = ?", userID)
+		querys = querys.Where("user_id = ?  and family_id=0", userID)
 	}
 	err := querys.Find(&categories).Error
 	if err != nil {
@@ -295,11 +260,11 @@ func GetMonthlyBudget(c *gin.Context) {
 		Select("COALESCE(SUM(amount), 0)")
 	// 查询当月总消费
 	var totalSpent float64
-	if req.IsFamilyBudget {
+	if req.FamilyId > 0 {
 		querys1 = querys1.Where("family_id=?", ownerID)
 
 	} else {
-		querys1 = querys1.Where("user_id=?", userID)
+		querys1 = querys1.Where("user_id=? and family_id=0 ", userID)
 	}
 	err = querys1.Scan(&totalSpent).Error
 	// 准备响应数据
@@ -315,41 +280,5 @@ func GetMonthlyBudget(c *gin.Context) {
 		response.UsagePercent = 0
 	}
 
-	//// 查询各分类的消费数据并组装
-	//categoriesWithUsage := make([]model.BudgetCategoryWithUsage, 0, len(categories))
-	//
-	//for _, category := range categories {
-	//	// 查询该分类的消费
-	//	var categorySpent float64
-	//	err = model.DB.Model(&model.Transaction{}).
-	//		Where("user_id = ? AND type = ? AND icon_id = ? AND date BETWEEN ? AND ?",
-	//			userID, "expense", category.IconID, startDate, endDate).
-	//		Select("COALESCE(SUM(amount), 0)").
-	//		Scan(&categorySpent).Error
-	//
-	//	if err != nil {
-	//		utils.ServerError(c, err)
-	//		return
-	//	}
-	//
-	//	// 计算分类使用百分比
-	//	var usagePercent float64
-	//	if category.Budget > 0 {
-	//		usagePercent = math.Round((categorySpent/category.Budget)*10000) / 100 // 保留两位小数
-	//	}
-	//
-	//	// 添加到结果集
-	//	categoryWithUsage := model.BudgetCategoryWithUsage{
-	//		ID:           int(category.ID),
-	//		Name:         category.Name,
-	//		Amount:       category.Budget,
-	//		SpentAmount:  categorySpent,
-	//		UsagePercent: usagePercent,
-	//	}
-	//
-	//	categoriesWithUsage = append(categoriesWithUsage, categoryWithUsage)
-	//}
-	//
-	//response.Categories = categoriesWithUsage
 	utils.Success(c, response, "获取预算数据成功")
 }

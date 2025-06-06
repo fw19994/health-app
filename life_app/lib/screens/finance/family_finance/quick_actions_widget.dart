@@ -6,12 +6,14 @@ class QuickActionsWidget extends StatelessWidget {
   final Function() onAddExpense;
   final Function() onViewReport;
   final Function() onMemberAnalysis;
+  final int familyId;
 
   const QuickActionsWidget({
     Key? key,
     required this.onAddExpense,
     required this.onViewReport,
     required this.onMemberAnalysis,
+    required this.familyId,
   }) : super(key: key);
 
   @override
@@ -53,7 +55,12 @@ class QuickActionsWidget extends StatelessWidget {
     // 使用await等待记一笔页面返回结果
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(builder: (context) => const ExpenseTrackingScreen()),
+      MaterialPageRoute(
+        builder: (context) => ExpenseTrackingScreen(
+          familyId: familyId,
+          isFamilyExpense: true,
+        ),
+      ),
     );
     
     // 如果返回结果为true（表示记账成功），则调用刷新方法

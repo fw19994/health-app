@@ -12,10 +12,12 @@ import 'models/family_member.dart';
 class MemberFinancesScreen extends StatefulWidget {
   // 可选参数：外部传入的选定成员
   final app_model.FamilyMember? selectedMember;
+  final int? familyId;
 
   const MemberFinancesScreen({
     super.key,
     this.selectedMember,
+    this.familyId,
   });
 
   @override

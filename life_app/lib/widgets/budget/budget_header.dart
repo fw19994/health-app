@@ -9,18 +9,22 @@ import '../../models/monthly_budget.dart';
 class BudgetHeader extends StatefulWidget {
   final Function(DateTime)? onMonthSelected;
   final DateTime? selectedDate;
+  final bool isFamilyBudget;
+  final int? familyId;
   
   const BudgetHeader({
     Key? key,
     this.onMonthSelected,
     this.selectedDate,
+    this.isFamilyBudget = false,
+    this.familyId,
   }) : super(key: key);
   
   @override
-  State<BudgetHeader> createState() => _BudgetHeaderState();
+  State<BudgetHeader> createState() => BudgetHeaderState();
 }
 
-class _BudgetHeaderState extends State<BudgetHeader> {
+class BudgetHeaderState extends State<BudgetHeader> {
   late DateTime _currentDate;
   late List<DateTime> recentMonths;
   final BudgetService _budgetService = BudgetService();
@@ -60,6 +64,11 @@ class _BudgetHeaderState extends State<BudgetHeader> {
     }
   }
   
+  // 公开刷新数据的方法
+  void refreshData() {
+    _loadBudgetData();
+  }
+  
   // 加载预算数据
   Future<void> _loadBudgetData() async {
     setState(() => _isLoading = true);
@@ -68,7 +77,9 @@ class _BudgetHeaderState extends State<BudgetHeader> {
       final data = await _budgetService.getMonthlyBudget(
         year: _currentDate.year,
         month: _currentDate.month,
-        context: context
+        context: context,
+        isFamilyBudget: widget.isFamilyBudget,
+        familyId: widget.familyId,
       );
       
       setState(() {
@@ -141,6 +152,10 @@ class _BudgetHeaderState extends State<BudgetHeader> {
             Color(0xFFF97316),  // 橙色
             Color(0xFFF59E0B),  // 浅橙色
           ],
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
         ),
       ),
       child: SafeArea(

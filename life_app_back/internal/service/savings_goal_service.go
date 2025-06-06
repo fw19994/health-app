@@ -12,21 +12,35 @@ import (
 type SavingsGoalService struct{}
 
 // GetUserSavingsGoals 获取用户的储蓄目标列表
-func (s *SavingsGoalService) GetUserSavingsGoals(userID uint) ([]model.SavingsGoalResponse, error) {
+func (s *SavingsGoalService) GetUserSavingsGoals(userID uint, familyId int) ([]model.SavingsGoalResponse, error) {
 	repo := &repository.SavingsGoalRepository{}
-
-	// 获取个人储蓄目标
-	goals, err := repo.GetSavingsGoalsByUser(userID)
-	if err != nil {
-		return nil, err
+	var goals []model.SavingsGoal
+	err := errors.New("")
+	if familyId == 0 {
+		goals, err = repo.GetSavingsGoalsByUser(userID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		goals, err = repo.GetFamilySavingsGoals(uint(familyId))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// 转换为响应结构
 	var responses []model.SavingsGoalResponse
 	for _, goal := range goals {
 		// 查询与该储蓄目标相关的收入交易总额
+
 		var totalIncome float64
-		query := model.DB.Model(&model.Transaction{}).Where("user_id = ? AND type = ? AND goal_id = ?", userID, model.Income, goal.ID)
+		query := model.DB.Model(&model.Transaction{}).Where(" type = ? AND goal_id = ?", model.Income, goal.ID)
+		if familyId == 0 {
+			query = query.Where("user_id = ? ", userID)
+		} else {
+			query = query.Where("family_id = ? ", familyId)
+		}
+
 		query.Select("COALESCE(SUM(amount), 0)").Scan(&totalIncome)
 
 		// 更新当前金额为收入交易总额
@@ -72,25 +86,6 @@ func (s *SavingsGoalService) GetFamilySavingsGoals(userID uint) ([]model.Savings
 	return responses, nil
 }
 
-// GetAllSavingsGoalsForUser 获取用户的所有储蓄目标（包括个人和家庭）
-func (s *SavingsGoalService) GetAllSavingsGoalsForUser(userID uint) ([]model.SavingsGoalResponse, error) {
-	// 获取个人储蓄目标
-	personalGoals, err := s.GetUserSavingsGoals(userID)
-	if err != nil {
-		return nil, err
-	}
-
-	// 获取家庭储蓄目标
-	familyGoals, err := s.GetFamilySavingsGoals(userID)
-	if err != nil {
-		// 如果获取家庭目标失败，不影响主流程，只返回个人目标
-		return personalGoals, nil
-	}
-
-	// 合并目标列表
-	return append(personalGoals, familyGoals...), nil
-}
-
 // CreateSavingsGoal 创建储蓄目标
 func (s *SavingsGoalService) CreateSavingsGoal(goal *model.SavingsGoal) error {
 	repo := &repository.SavingsGoalRepository{}
@@ -108,15 +103,6 @@ func (s *SavingsGoalService) CreateSavingsGoal(goal *model.SavingsGoal) error {
 	// 验证目标日期是否在未来
 	if goal.TargetDate.Before(now) {
 		return errors.New("目标日期必须在未来")
-	}
-
-	// 如果是家庭目标，验证用户是否属于该家庭
-	if goal.IsFamilyGoal && goal.FamilyID > 0 {
-		familyMemberRepo := &repository.FamilyMemberRepository{}
-		familyMember, err := familyMemberRepo.GetFamilyMemberByUserIDDirect(goal.UserID)
-		if err != nil || familyMember.OwnerID != goal.FamilyID {
-			return errors.New("无权为该家庭创建储蓄目标")
-		}
 	}
 
 	return repo.CreateSavingsGoal(goal)
@@ -168,27 +154,6 @@ func (s *SavingsGoalService) UpdateSavingsGoal(goal *model.SavingsGoal, userID u
 // DeleteSavingsGoal 删除储蓄目标
 func (s *SavingsGoalService) DeleteSavingsGoal(id, userID uint) error {
 	repo := &repository.SavingsGoalRepository{}
-
-	// 获取储蓄目标
-	goal, err := repo.GetSavingsGoalByID(id)
-	if err != nil {
-		return errors.New("储蓄目标不存在")
-	}
-
-	// 验证权限（只有自己的目标或家庭目标且自己是家庭成员才能删除）
-	if goal.UserID != userID && !goal.IsFamilyGoal {
-		return errors.New("无权删除该储蓄目标")
-	}
-
-	// 如果是家庭目标，还需要验证用户是否属于同一个家庭
-	if goal.IsFamilyGoal {
-		familyMemberRepo := &repository.FamilyMemberRepository{}
-		familyMember, err := familyMemberRepo.GetFamilyMemberByUserIDDirect(userID)
-		if err != nil || familyMember.OwnerID != goal.FamilyID {
-			return errors.New("无权删除该家庭储蓄目标")
-		}
-	}
-
 	return repo.DeleteSavingsGoal(id)
 }
 
@@ -250,20 +215,6 @@ func (s *SavingsGoalService) UpdateSavingsGoalStatus(id, userID uint, status str
 		return errors.New("储蓄目标不存在")
 	}
 
-	// 验证权限（只有自己的目标或家庭目标且自己是家庭成员才能更新）
-	if goal.UserID != userID && !goal.IsFamilyGoal {
-		return errors.New("无权更新该储蓄目标状态")
-	}
-
-	// 如果是家庭目标，还需要验证用户是否属于同一个家庭
-	if goal.IsFamilyGoal {
-		familyMemberRepo := &repository.FamilyMemberRepository{}
-		familyMember, err := familyMemberRepo.GetFamilyMemberByUserIDDirect(userID)
-		if err != nil || familyMember.OwnerID != goal.FamilyID {
-			return errors.New("无权更新该家庭储蓄目标状态")
-		}
-	}
-
 	// 更新状态
 	goal.Status = status
 
@@ -275,7 +226,7 @@ func (s *SavingsGoalService) UpdateSavingsGoalStatus(id, userID uint, status str
 		// 如果重新设置为进行中，清除完成时间
 		goal.CompletedAt = nil
 	}
-
+	
 	// 更新时间戳
 	goal.UpdatedAt = time.Now()
 

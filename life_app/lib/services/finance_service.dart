@@ -22,6 +22,7 @@ class FinanceService {
     bool? isFamilyExpense,
     String? imageUrl,
     int? goalId, // 添加储蓄目标ID参数
+    int? familyId, // 添加家庭ID参数
   }) async {
     try {
       final Map<String, dynamic> data = {
@@ -47,6 +48,10 @@ class FinanceService {
       // 添加储蓄目标ID
       if (goalId != null) {
         data['goal_id'] = goalId;
+      }
+      // 添加家庭ID
+      if (familyId != null) {
+        data['family_id'] = familyId;
       }
 
       print("Sending transaction data: ${jsonEncode(data)}");
@@ -85,6 +90,8 @@ class FinanceService {
     required String type, // 'expense' 或 'income'，空字符串表示获取所有类型
     int? memberId, // 添加可选的成员ID参数
     bool isFamilyBudget = false, // 添加是否为家庭预算的参数
+    int? familyId, // 添加家庭ID参数
+    int limit = 10, // 添加限制数量参数
   }) async {
     try {
       Map<String, String> params = {};
@@ -101,6 +108,14 @@ class FinanceService {
 
       // 添加家庭预算标识
       params['is_family_budget'] = isFamilyBudget.toString();
+      
+      // 添加家庭ID
+      if (familyId != null) {
+        params['family_id'] = familyId.toString();
+      }
+      
+      // 添加限制数量
+      params['limit'] = limit.toString();
 
       final responseData = await _apiService.get(
         path: '/api/v1/finance/recent-transactions',
@@ -401,6 +416,7 @@ class FinanceService {
     DateTime? startDate,
     DateTime? endDate,
     int? memberId,
+    int? familyId, // 添加familyId参数
     String? transaction_type, // 记账类型参数，可以是'expense'或'income'
     bool isFamilyBudget = false, // 添加是否为家庭预算的参数
   }) async {
@@ -419,6 +435,11 @@ class FinanceService {
       // 添加成员ID参数
       if (memberId != null) {
         params['member_id'] = memberId.toString();
+      }
+      
+      // 添加家庭ID参数
+      if (familyId != null) {
+        params['family_id'] = familyId.toString();
       }
       
       // 添加类型参数
@@ -511,12 +532,14 @@ class FinanceService {
     required BuildContext context,
     int? year,
     int? month,
+    int? familyId, // 添加familyId参数
   }) async {
     try {
       // 构建查询参数
       Map<String, String> params = {};
       if (year != null) params['year'] = year.toString();
       if (month != null) params['month'] = month.toString();
+      if (familyId != null) params['family_id'] = familyId.toString(); // 添加familyId参数
       
       // 发起请求
       final response = await _apiService.get(
@@ -617,6 +640,71 @@ class FinanceService {
         success: false,
         message: '删除交易记录失败: ${e.toString()}',
         error: e.toString(),
+      );
+    }
+  }
+
+  /// 获取交易记录列表
+  Future<ApiResponse> getTransactions({
+    required BuildContext context,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? type,
+    int? limit,
+    int? page,
+    int? memberId,
+    bool isFamilyBudget = false,
+  }) async {
+    try {
+      // 构建查询参数
+      Map<String, String> params = {};
+      
+      // 添加日期范围参数
+      if (startDate != null) {
+        params['start_date'] = DateFormat('yyyy-MM-dd HH:mm:ss').format(startDate);
+      }
+      if (endDate != null) {
+        params['end_date'] = DateFormat('yyyy-MM-dd HH:mm:ss').format(endDate);
+      }
+      
+      // 添加其他可选参数
+      if (type != null && type.isNotEmpty) {
+        params['type'] = type;
+      }
+      if (limit != null) {
+        params['limit'] = limit.toString();
+      }
+      if (page != null) {
+        params['page'] = page.toString();
+      }
+      if (memberId != null) {
+        params['member_id'] = memberId.toString();
+      }
+      
+      // 添加家庭预算标识
+      params['is_family_budget'] = isFamilyBudget.toString();
+      
+      print('获取交易记录列表，参数: $params');
+      
+      // 调用API
+      final responseData = await _apiService.get(
+        path: '/api/v1/finance/recent-transactions',
+        params: params,
+        context: context,
+      );
+      
+      bool success = responseData['code'] == 0 || responseData['code'] == 200;
+      
+      return ApiResponse(
+        success: success,
+        data: success ? responseData['data'] : null,
+        message: responseData['message'] ?? (success ? '获取成功' : '获取失败'),
+      );
+    } catch (e) {
+      print("Error in FinanceService.getTransactions: $e");
+      return ApiResponse(
+        success: false,
+        message: '获取交易记录失败: $e',
       );
     }
   }

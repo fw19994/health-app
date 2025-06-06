@@ -138,10 +138,10 @@ func GetRecentTransactions(c *gin.Context) {
 		utils.ParameterError(c, "无效的交易类型，必须是'expense'或'income'")
 		return
 	}
-	memberId := c.Query("member_id")              // expense 或 income
-	isFamilyBudget := c.Query("is_family_budget") // expense 或 income
-	isFamilyBudgetBool, _ := strconv.ParseBool(isFamilyBudget)
+	memberId := c.Query("member_id") // expense 或 income
+	familyIdStr := c.Query("family_id")
 
+	familyId, _ := strconv.Atoi(familyIdStr)
 	limit := 5
 	// 获取限制数量参数
 	if limitParam := c.Query("limit"); limitParam != "" {
@@ -149,7 +149,7 @@ func GetRecentTransactions(c *gin.Context) {
 	}
 	memberIdInt, _ := strconv.Atoi(memberId)
 	// 调用服务获取近期交易
-	transactions, err := financeService.GetRecentTransactions(userID, transactionType, limit, memberIdInt, isFamilyBudgetBool)
+	transactions, err := financeService.GetRecentTransactions(userID, transactionType, limit, memberIdInt, familyId)
 	if err != nil {
 		utils.ServerError(c, err)
 		return
@@ -173,6 +173,7 @@ func GetTransactions(c *gin.Context) {
 		Categories []int  `form:"categories"`
 		StartDate  string `form:"start_date"` // 开始日期
 		EndDate    string `form:"end_date"`   // 结束日期
+		FamilyId   uint   `form:"family_id"`
 	}
 
 	// 绑定请求参数
@@ -193,6 +194,7 @@ func GetTransactions(c *gin.Context) {
 		Type:       query.Type,
 		MemberID:   query.MemberID,
 		CategoryID: query.Categories,
+		FamilyId:   query.FamilyId,
 	}
 
 	// 解析日期范围
@@ -236,6 +238,7 @@ func GetTransactionGroups(c *gin.Context) {
 		EndDate    string `form:"end_date"`
 		Page       int    `form:"page,default=1"`
 		Limit      int    `form:"limit,default=20"`
+		FamilyId   uint   `form:"family_id"`
 	}
 
 	var req QueryRequest
@@ -256,6 +259,7 @@ func GetTransactionGroups(c *gin.Context) {
 		Type:       req.Type,
 		MemberID:   req.MemberID,
 		CategoryID: req.CategoryID,
+		FamilyId:   req.FamilyId,
 	}
 
 	// 解析并验证日期范围
@@ -280,7 +284,7 @@ func GetTransactionGroups(c *gin.Context) {
 	// 解析并验证分页参数
 
 	// 获取分组数据
-	transactionGroups, err := financeService.GetTransactionGroups(queryParams.UserID, queryParams.StartDate, queryParams.EndDate, req.Limit, req.Page, req.Type, req.MemberID, req.CategoryID)
+	transactionGroups, err := financeService.GetTransactionGroups(queryParams.UserID, queryParams.StartDate, queryParams.EndDate, req.Limit, req.Page, req.Type, req.MemberID, req.CategoryID, req.FamilyId)
 	if err != nil {
 		utils.ServerError(c, err)
 		return
@@ -305,6 +309,7 @@ func GetTransactionTrend(c *gin.Context) {
 		StartDate  string `form:"start_date"` // 开始日期
 		EndDate    string `form:"end_date"`   // 结束日期
 		Interval   string `form:"interval"`
+		FamilyId   uint   `form:"family_id"`
 	}
 
 	// 绑定请求参数
@@ -340,7 +345,7 @@ func GetTransactionTrend(c *gin.Context) {
 	}
 
 	// 获取趋势数据
-	trendData, err := financeService.GetTransactionTrend(userID, startDate, endDate, query.Interval, uint(query.MemberID), query.CategoryID)
+	trendData, err := financeService.GetTransactionTrend(userID, startDate, endDate, query.Interval, uint(query.MemberID), query.CategoryID, query.FamilyId)
 	if err != nil {
 		utils.ServerError(c, err)
 		return
@@ -408,6 +413,7 @@ func GetExpenseAnalysis(c *gin.Context) {
 		TransactionType string `form:"transaction_type" default:"expense"`
 		MemberId        int    `form:"member_id"`
 		IsFamilyBudget  bool   `form:"is_family_budget"`
+		FamilyId        int    `form:"family_id"`
 	}
 
 	// 绑定请求参数
@@ -447,7 +453,7 @@ func GetExpenseAnalysis(c *gin.Context) {
 		req.TransactionType = "expense"
 	}
 	// 调用服务获取支出分析数据
-	analysisData, err := financeService.GetExpenseAnalysis(userID, startDate, endDate, uint(req.MemberId), req.TransactionType, req.IsFamilyBudget)
+	analysisData, err := financeService.GetExpenseAnalysis(userID, startDate, endDate, uint(req.MemberId), req.TransactionType, req.FamilyId)
 	if err != nil {
 		utils.ServerError(c, err)
 		return

@@ -412,42 +412,86 @@ class TransactionList extends StatelessWidget {
                   ],
                 ),
                 
-                // 成员标签 - 如果需要显示
-                if (transaction.memberName.isNotEmpty && transaction.memberName != '未知')
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: transaction.memberColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        transaction.memberName,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: transaction.memberColor,
-                        ),
-                      ),
-                  ),
-                ),
               ],
             ),
           ),
           
           const SizedBox(width: 8),
           
-          // 金额
-          Text(
-            transaction.formattedAmount,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: transaction.amountColor,
-            ),
+          // 右侧区域 - 金额和用户信息
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // 金额
+              Text(
+                transaction.formattedAmount,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: transaction.amountColor,
+                ),
+              ),
+              
+              // 成员信息 - 如果有成员ID则显示
+              if (transaction.memberId.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 用户头像
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: transaction.memberAvatarUrl.isNotEmpty
+                          ? Image.network(
+                              transaction.memberAvatarUrl,
+                              width: 16,
+                              height: 16,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return _buildDefaultAvatar(transaction.memberName, 16, transaction.memberColor);
+                              },
+                            )
+                          : _buildDefaultAvatar(transaction.memberName, 16, transaction.memberColor),
+                      ),
+                      const SizedBox(width: 4),
+                      // 用户名称
+                      Text(
+                        transaction.memberName,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: transaction.memberColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
         ],
+        ),
+      ),
+    );
+  }
+  
+  // 创建默认头像 - 使用用户名首字母
+  Widget _buildDefaultAvatar(String name, double size, Color color) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(size / 2),
+      ),
+      child: Center(
+        child: Text(
+          name.isNotEmpty ? name[0].toUpperCase() : '?',
+          style: TextStyle(
+            color: color,
+            fontSize: size * 0.6,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

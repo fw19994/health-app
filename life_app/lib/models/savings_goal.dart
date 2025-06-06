@@ -15,6 +15,7 @@ class SavingsGoal {
   final String colorCode;
   final DateTime? completedAt; // 完成时间，仅对已完成目标有效
   final bool isFamilySavings; // 是否为家庭储蓄目标
+  final int? familyId; // 添加家庭ID字段
   bool _iconLoaded = false; // 跟踪图标是否已加载
 
   SavingsGoal({
@@ -31,6 +32,7 @@ class SavingsGoal {
     required this.colorCode,
     this.completedAt,
     this.isFamilySavings = false, // 默认为个人储蓄目标
+    this.familyId,
   });
 
   double get progress => targetAmount > 0 ? (currentAmount / targetAmount) : 0;
@@ -150,6 +152,7 @@ class SavingsGoal {
       colorCode: colorStr,
       completedAt: completedAt,
       isFamilySavings: isFamilySavings,
+      familyId: json['family_id'] is int ? json['family_id'] : int.tryParse(json['family_id']?.toString() ?? '0'),
     );
   }
   
@@ -166,6 +169,7 @@ class SavingsGoal {
       'note': note,
       'completed_at': completedAt?.toIso8601String(),
       'is_family_savings': isFamilySavings,
+      'family_id': familyId,
     };
   }
 }

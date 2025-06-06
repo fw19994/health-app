@@ -57,6 +57,9 @@ class Transaction {
   // 成员颜色
   final Color memberColor;
   
+  // 成员头像URL
+  final String memberAvatarUrl;
+  
   const Transaction({
     required this.id,
     required this.title,
@@ -74,6 +77,7 @@ class Transaction {
     required this.memberName,
     required this.memberRole,
     required this.memberColor,
+    this.memberAvatarUrl = '',
   });
   
   // 获取收支前缀

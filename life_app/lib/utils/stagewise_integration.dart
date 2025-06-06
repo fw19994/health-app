@@ -1,31 +1,15 @@
-import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
+// 条件导入，确保只在Web平台引用dart:html
+import 'stagewise_web.dart' if (dart.library.io) 'stagewise_stub.dart';
 
+/// Stagewise开发工具集成
+/// 只在Web平台的Debug模式下生效
 class StagewiseIntegration {
+  /// 初始化Stagewise工具
   static void initialize() {
     if (kDebugMode && kIsWeb) {
-      _injectStagewiseScript();
+      // 调用平台特定的实现
+      StagewiseImplementation.injectStagewiseScript();
     }
-  }
-
-  static void _injectStagewiseScript() {
-    final script = html.ScriptElement()
-      ..src = 'https://unpkg.com/@stagewise/toolbar@latest/dist/index.js'
-      ..type = 'module';
-    
-    script.onLoad.listen((_) {
-      // Initialize stagewise with empty plugins
-      final initScript = html.ScriptElement()
-        ..text = '''
-        if (window.Stagewise) {
-          window.Stagewise.initToolbar({
-            plugins: []
-          });
-        }
-      ''';
-      html.document.body!.append(initScript);
-    });
-
-    html.document.head!.append(script);
   }
 } 

@@ -20,12 +20,32 @@ class BudgetService {
   }
 
   // 获取预算类别列表
-  Future<List<BudgetCategory>> getBudgetCategories({BuildContext? context, bool isFamilyBudget = false}) async {
+  Future<List<BudgetCategory>> getBudgetCategories({
+    BuildContext? context, 
+    bool isFamilyBudget = false,
+    int? familyId,
+    int? year,
+    int? month,
+  }) async {
+    Map<String, String> params = {
+      'is_family_budget': isFamilyBudget.toString()
+    };
+    
+    if (familyId != null) {
+      params['family_id'] = familyId.toString();
+    }
+    
+    if (year != null) {
+      params['year'] = year.toString();
+    }
+    
+    if (month != null) {
+      params['month'] = month.toString();
+    }
+    
     final response = await _api.get(
       path: '/api/v1/budget/categories',
-      params: {
-        'is_family_budget': isFamilyBudget.toString()
-      },
+      params: params,
       context: context
     );
     if (response['code'] != 0) {
@@ -40,6 +60,7 @@ class BudgetService {
     String? status, 
     BuildContext? context,
     bool isFamilySavings = false, // 添加家庭储蓄标识参数
+    int? familyId, // 添加家庭ID参数
   }) async {
     try {
       // 构建查询参数
@@ -51,8 +72,13 @@ class BudgetService {
       // 添加家庭储蓄标识参数
       queryParams['is_family_savings'] = isFamilySavings.toString();
       
+      // 添加家庭ID参数
+      if (familyId != null) {
+        queryParams['family_id'] = familyId.toString();
+      }
+      
       // 打印查询信息，方便调试
-      print('开始获取储蓄目标: status=$status, is_family_savings=$isFamilySavings, 请求路径=/api/v1/savings/goals');
+      print('开始获取储蓄目标: status=$status, is_family_savings=$isFamilySavings, family_id=$familyId, 请求路径=/api/v1/savings/goals');
       
       final response = await _api.get(
         path: '/api/v1/savings/goals',
@@ -110,7 +136,12 @@ class BudgetService {
   }
 
   // 更新预算类别
-  Future<void> updateBudgetCategory(BudgetCategory category, {BuildContext? context, bool? isFamilyBudget}) async {
+  Future<void> updateBudgetCategory(
+    BudgetCategory category, 
+    {BuildContext? context, 
+    bool? isFamilyBudget,
+    int? familyId} // 添加家庭ID参数
+  ) async {
     final data = {
       'name': category.name,
       'description': category.description ?? '',
@@ -125,6 +156,11 @@ class BudgetService {
       data['is_family_budget'] = isFamilyBudget;
     }
     
+    // 添加家庭ID参数
+    if (familyId != null) {
+      data['family_id'] = familyId;
+    }
+    
     final response = await _api.put(
       path: '/api/v1/budget/category/${category.id}',
       data: data,
@@ -136,7 +172,12 @@ class BudgetService {
   }
 
   // 添加预算类别
-  Future<void> addBudgetCategory(BudgetCategory category, {BuildContext? context, bool isFamilyBudget = false}) async {
+  Future<void> addBudgetCategory(
+    BudgetCategory category, 
+    {BuildContext? context, 
+    bool isFamilyBudget = false,
+    int? familyId} // 添加家庭ID参数
+  ) async {
     final data = {
       'name': category.name,
       'description': category.description ?? '',
@@ -148,6 +189,12 @@ class BudgetService {
       'reminder_threshold': category.reminderEnabled ? 80 : 0,
       'is_family_budget': isFamilyBudget,
     };
+    
+    // 添加家庭ID参数
+    if (familyId != null) {
+      data['family_id'] = familyId;
+    }
+    
     final response = await _api.post(
       path: '/api/v1/budget/category',
       data: data,
@@ -159,9 +206,24 @@ class BudgetService {
   }
 
   // 删除预算类别
-  Future<void> deleteBudgetCategory(String categoryId, {BuildContext? context}) async {
+  Future<void> deleteBudgetCategory(
+    String categoryId, 
+    {BuildContext? context, 
+    bool isFamilyBudget = false,
+    int? familyId} // 添加家庭ID参数
+  ) async {
+    Map<String, String> params = {
+      'is_family_budget': isFamilyBudget.toString()
+    };
+    
+    // 添加家庭ID参数
+    if (familyId != null) {
+      params['family_id'] = familyId.toString();
+    }
+    
     final response = await _api.delete(
       path: '/api/v1/budget/category/$categoryId',
+      params: params,
       context: context,
     );
     if (response['code'] != 0) {
@@ -172,7 +234,7 @@ class BudgetService {
   // 更新储蓄目标
   Future<void> updateSavingsGoal(
     SavingsGoal goal, 
-    {BuildContext? context, bool isFamilySavings = false} // 添加家庭储蓄标识参数
+    {BuildContext? context, bool isFamilySavings = false, int? familyId} // 添加familyId参数
   ) async {
     try {
       final data = {
@@ -186,6 +248,11 @@ class BudgetService {
         'target_date': '${goal.targetDate.toIso8601String()}Z', // 添加Z表示UTC时区
         'is_family_savings': isFamilySavings, // 使用传入的家庭储蓄标识
       };
+      
+      // 添加家庭ID参数
+      if (familyId != null) {
+        data['family_id'] = familyId.toString();
+      }
       
       final response = await _api.put(
         path: '/api/v1/savings/goal/${goal.id}',
@@ -205,7 +272,7 @@ class BudgetService {
   // 添加储蓄目标
   Future<void> addSavingsGoal(
     SavingsGoal goal, 
-    {BuildContext? context, bool isFamilySavings = false} // 添加家庭储蓄标识参数
+    {BuildContext? context, bool isFamilySavings = false, int? familyId} // 添加familyId参数
   ) async {
     try {
       final data = {
@@ -219,6 +286,11 @@ class BudgetService {
         'target_date': '${goal.targetDate.toIso8601String()}Z', // 添加Z表示UTC时区
         'is_family_savings': isFamilySavings, // 使用传入的家庭储蓄标识
       };
+      
+      // 添加家庭ID参数
+      if (familyId != null) {
+        data['family_id'] = familyId.toString();
+      }
       
       final response = await _api.post(
         path: '/api/v1/savings/goal',
@@ -261,7 +333,13 @@ class BudgetService {
   }
 
   /// 获取月度预算和消费数据
-  Future<MonthlyBudget> getMonthlyBudget({int? year, int? month, BuildContext? context, bool isFamilyBudget = false}) async {
+  Future<MonthlyBudget> getMonthlyBudget({
+    int? year, 
+    int? month, 
+    BuildContext? context, 
+    bool isFamilyBudget = false,
+    int? familyId,
+  }) async {
     try {
       // 构建查询参数
       Map<String, String> queryParams = {};
@@ -272,6 +350,10 @@ class BudgetService {
         queryParams['month'] = month.toString();
       }
       queryParams['is_family_budget'] = isFamilyBudget.toString();
+      
+      if (familyId != null) {
+        queryParams['family_id'] = familyId.toString();
+      }
       
       try {
         // 尝试调用monthly接口

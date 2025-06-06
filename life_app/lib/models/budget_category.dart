@@ -37,12 +37,10 @@ class BudgetCategory {
       return Colors.grey; // 默认颜色
     }
 
-    // 解析图标
+    // 解析图标 - 使用常量图标而不是动态创建IconData
     IconData parseIcon(dynamic iconValue) {
-      if (iconValue is int) {
-        return IconData(iconValue, fontFamily: 'FontAwesomeIcons');
-      }
-      return Icons.category; // 默认图标
+      // 使用预定义图标而不是动态创建
+      return Icons.category; // 使用默认图标，后续可以在UI层面使用iconId加载正确图标
     }
 
     return BudgetCategory(

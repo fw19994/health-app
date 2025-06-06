@@ -76,13 +76,13 @@ func SetupRouter(router *gin.Engine) *gin.Engine {
 				finance.GET("/report", handler.GenerateFinancialReport)            // 生成财务报告
 				finance.GET("/recent-transactions", handler.GetRecentTransactions) // 获取近期交易记录
 				finance.DELETE("/transaction/:id", handler.DeleteTransaction)      // 删除交易记录
-				
+
 				// 新增API路由
-				finance.GET("/transactions", handler.GetTransactions)              // 获取交易记录，支持筛选和分页
-				finance.GET("/transaction-groups", handler.GetTransactionGroups)   // 获取按日期分组的交易记录
-				finance.GET("/trend", handler.GetTransactionTrend)                 // 获取交易趋势数据
-				finance.GET("/member-stats", handler.GetMemberExpenseStats)        // 获取成员支出统计
-				finance.GET("/expense-analysis", handler.GetExpenseAnalysis)       // 获取支出分析数据，按类别统计
+				finance.GET("/transactions", handler.GetTransactions)                // 获取交易记录，支持筛选和分页
+				finance.GET("/transaction-groups", handler.GetTransactionGroups)     // 获取按日期分组的交易记录
+				finance.GET("/trend", handler.GetTransactionTrend)                   // 获取交易趋势数据
+				finance.GET("/member-stats", handler.GetMemberExpenseStats)          // 获取成员支出统计
+				finance.GET("/expense-analysis", handler.GetExpenseAnalysis)         // 获取支出分析数据，按类别统计
 				finance.GET("/family-contributions", handler.GetFamilyContributions) // 获取家庭成员财务贡献数据
 			}
 
@@ -90,7 +90,6 @@ func SetupRouter(router *gin.Engine) *gin.Engine {
 			budget := authenticated.Group("/budget")
 			{
 				budget.GET("/categories", handler.GetBudgetCategories)             // 获取预算列表
-				budget.GET("/all-categories", handler.GetAllBudgetCategories)      // 获取所有预算
 				budget.POST("/category", handler.CreateBudgetCategory)             // 创建预算
 				budget.PUT("/category/:id", handler.UpdateBudgetCategory)          // 更新预算
 				budget.DELETE("/category/:id", handler.DeleteBudgetCategory)       // 删除预算
@@ -113,12 +112,19 @@ func SetupRouter(router *gin.Engine) *gin.Engine {
 			// 家庭成员路由
 			family := authenticated.Group("/family")
 			{
-				family.GET("/members", handler.GetFamilyMembers)         // 获取家庭成员
-				family.POST("/member", handler.AddFamilyMember)          // 添加家庭成员
-				family.PUT("/member/:id", handler.UpdateFamilyMember)    // 更新家庭成员
-				family.DELETE("/member/:id", handler.RemoveFamilyMember) // 移除家庭成员
-				family.POST("/invite", handler.CreateInvitation)         // 创建邀请
-				family.GET("/roles", handler.GetFamilyRoles)             // 获取家庭角色
+				family.GET("/members", handler.GetFamilyMembers)             // 获取家庭成员
+				family.POST("/member", handler.AddFamilyMember)              // 添加家庭成员
+				family.PUT("/member/:id", handler.UpdateFamilyMember)        // 更新家庭成员
+				family.DELETE("/member/:id", handler.RemoveFamilyMember)     // 移除家庭成员
+				family.POST("/invite", handler.CreateInvitation)             // 创建邀请
+				family.GET("/roles", handler.GetFamilyRoles)                 // 获取家庭角色
+				family.GET("familyInfo/", handler.GetFamilies)               // 获取家庭列表
+				family.POST("familyInfo/", handler.CreateFamily)             // 创建家庭
+				family.GET("familyInfo/:id", handler.GetFamilyDetail)        // 获取家庭详情
+				family.PUT("familyInfo/:id", handler.UpdateFamily)           // 更新家庭信息
+				family.PUT("familyInfo/:id/status", handler.SetFamilyStatus) // 设置家庭状态
+				family.DELETE("familyInfo/:id", handler.DeleteFamily)        // 删除家庭
+				family.POST("familyInfo/join", handler.JoinFamilyByCode)     // 通过邀请码加入家庭
 			}
 
 			// 图标路由

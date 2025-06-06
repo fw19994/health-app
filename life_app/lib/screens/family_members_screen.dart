@@ -12,7 +12,9 @@ import '../widgets/family_member_card.dart';
 import 'family_member/add_edit/index.dart';
 
 class FamilyMembersScreen extends StatefulWidget {
-  const FamilyMembersScreen({super.key});
+  final int? familyId; // 添加家庭ID参数
+  
+  const FamilyMembersScreen({super.key, this.familyId});
 
   @override
   State<FamilyMembersScreen> createState() => _FamilyMembersScreenState();
@@ -54,10 +56,12 @@ class _FamilyMembersScreenState extends State<FamilyMembersScreen> {
         return;
       }
 
-      // 获取家庭成员列表 - 不需要传递ownerId，后端会自动查询
+      // 获取家庭成员列表 - 传递familyId参数
       final familyService = FamilyMemberService(context: context);
-      print('调用家庭成员服务...');
-      final response = await familyService.getFamilyMembers();
+      print('调用家庭成员服务，家庭ID: ${widget.familyId}');
+      final response = await familyService.getFamilyMembers(
+        familyId: widget.familyId, // 传递家庭ID
+      );
       
       print('响应状态: ${response.success ? "成功" : "失败"}');
       print('响应消息: ${response.message}');
@@ -273,6 +277,7 @@ class _FamilyMembersScreenState extends State<FamilyMembersScreen> {
                       Navigator.of(dialogContext).pop();
                     }
                   },
+                  familyId: widget.familyId, // 传递家庭ID
                 ),
               ),
             );
@@ -376,6 +381,7 @@ class _FamilyMembersScreenState extends State<FamilyMembersScreen> {
                       Navigator.of(dialogContext).pop();
                     }
                   },
+                  familyId: widget.familyId, // 传递家庭ID
                 ),
               ),
             );
@@ -398,7 +404,10 @@ class _FamilyMembersScreenState extends State<FamilyMembersScreen> {
                 onPressed: () async {
                   // 调用移除服务
                   final familyService = FamilyMemberService(context: context);
-                  final response = await familyService.removeFamilyMember(member.id);
+                  final response = await familyService.removeFamilyMember(
+                    member.id,
+                    familyId: widget.familyId,
+                  );
                   
                   if (response.success) {
                     // 刷新列表

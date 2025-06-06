@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"math/rand"
-	"strconv"
 	"time"
 
 	"life_app_back/internal/model"
@@ -14,9 +13,9 @@ import (
 type FamilyMemberService struct{}
 
 // GetFamilyMembers 获取家庭成员列表
-func (s *FamilyMemberService) GetFamilyMembers(ownerID, currentUserID uint) ([]model.FamilyMemberResponse, error) {
+func (s *FamilyMemberService) GetFamilyMembers(familyId, currentUserID uint) ([]model.FamilyMemberResponse, error) {
 	repo := &repository.FamilyMemberRepository{}
-	members, err := repo.GetFamilyMembers(ownerID)
+	members, err := repo.GetFamilyMembers(familyId)
 	if err != nil {
 		return nil, err
 	}
@@ -31,53 +30,9 @@ func (s *FamilyMemberService) GetFamilyMembers(ownerID, currentUserID uint) ([]m
 }
 
 // GetUserFamilyMembers 获取当前用户所属家庭的所有成员
-func (s *FamilyMemberService) GetUserFamilyMembers(userID uint) ([]model.FamilyMemberResponse, error) {
-	repo := &repository.FamilyMemberRepository{}
-	db := model.DB
-
+func (s *FamilyMemberService) GetUserFamilyMembers(familyId, currentUserID uint) ([]model.FamilyMemberResponse, error) {
 	// 直接检查用户是否存在于任何家庭（无论是作为家主还是成员）
-	var member model.FamilyMember
-	if err := db.Where("user_id = ? AND user_id != 0 and status=1", userID).First(&member).Error; err != nil {
-		// 用户不在任何家庭中，创建一个新的家庭记录，用户为家主
-		family := model.Family{
-			Name: strconv.Itoa(int(userID)),
-		}
-		familyRepository := repository.FamilyRepository{}
-		familyId, err := familyRepository.Create(family)
-		if err != nil {
-			return []model.FamilyMemberResponse{}, errors.New("获取用户信息失败")
-		}
-		var user model.User
-		if err := db.First(&user, userID).Error; err != nil {
-			return []model.FamilyMemberResponse{}, errors.New("获取用户信息失败")
-		}
-
-		// 创建新的家庭成员记录
-		newMember := &model.FamilyMember{
-			OwnerID:    familyId, // 自己是家主
-			UserID:     userID,   // 自己是成员
-			Name:       user.Nickname,
-			Phone:      user.Phone,
-			Role:       "家庭主账户",
-			AvatarURL:  user.Avatar,
-			Permission: "管理员",
-			JoinTime:   time.Now(),
-			Status:     1,
-		}
-
-		// 保存到数据库
-		if err := repo.CreateFamilyMember(newMember); err != nil {
-			return []model.FamilyMemberResponse{}, errors.New("创建家庭失败: " + err.Error())
-		}
-
-		// 将自己标记为当前用户
-		newMember.IsCurrentUser = true
-		return []model.FamilyMemberResponse{newMember.ToResponse()}, nil
-	}
-
-	// 用户已存在于某个家庭中，获取该家庭的所有成员
-	ownerID := member.OwnerID
-	return s.GetFamilyMembers(ownerID, userID)
+	return s.GetFamilyMembers(familyId, currentUserID)
 }
 
 // AddFamilyMember 添加家庭成员

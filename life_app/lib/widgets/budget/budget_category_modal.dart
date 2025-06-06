@@ -12,12 +12,20 @@ import '../../services/icon_service.dart';
 
 class BudgetCategoryModal extends StatefulWidget {
   final BudgetCategory? category;
+  final void Function(BudgetCategory)? onSave;
+  final Function()? onDelete;
+  final String? title;
   final bool isFamilyBudget;
+  final int? familyId;
 
   const BudgetCategoryModal({
     super.key,
     this.category,
+    this.onSave,
+    this.onDelete,
+    this.title,
     this.isFamilyBudget = false,
+    this.familyId,
   });
 
   @override
@@ -404,6 +412,38 @@ class _BudgetCategoryModalState extends State<BudgetCategoryModal> {
                         width: double.infinity,
                         child: Row(
                           children: [
+                            // 在编辑模式下显示删除按钮
+                            if (widget.category != null)
+                              Expanded(
+                                child: TextButton.icon(
+                                  onPressed: () => _showDeleteConfirmation(context),
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.red,
+                                  ),
+                                  label: const Text(
+                                    '删除',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      side: BorderSide(color: Colors.red[300]!),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            
+                            // 如果是编辑模式，添加间距
+                            if (widget.category != null)
+                              const SizedBox(width: 12),
+                            
+                            // 取消按钮
                             Expanded(
                               child: TextButton(
                                 onPressed: () => Navigator.pop(context),
@@ -425,6 +465,7 @@ class _BudgetCategoryModalState extends State<BudgetCategoryModal> {
                               ),
                             ),
                             const SizedBox(width: 12),
+                            // 保存按钮
                             Expanded(
                               child: ElevatedButton(
                                 onPressed: _categories.isEmpty || _selectedCategoryIndex >= _categories.length 
@@ -443,31 +484,13 @@ class _BudgetCategoryModalState extends State<BudgetCategoryModal> {
                                       description: _note,
                                       iconId: selectedCategory.id,
                                     );
-                                    
-                                    try {
-                                      final budgetService = BudgetService();
-                                      await budgetService.addBudgetCategory(
-                                        budgetCategory,
-                                        context: context, // 传递context以获取认证令牌
-                                        isFamilyBudget: widget.isFamilyBudget, // 传递是否为家庭预算
-                                      );
-                                      
-                                      // 显示成功消息
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('预算添加成功'),
-                                          backgroundColor: Colors.green,
-                                        ),
-                                      );
+
+                                    // 直接调用传入的onSave回调，而不是内部处理API调用
+                                    if (widget.onSave != null) {
+                                      widget.onSave!(budgetCategory);
+                                    } else {
+                                      // 如果没有提供onSave回调，则使用默认行为关闭模态框
                                       Navigator.pop(context);
-                                    } catch (e) {
-                                      // 显示错误消息
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('预算添加失败: $e'),
-                                          backgroundColor: Colors.red,
-                                        ),
-                                      );
                                     }
                                   },
                                 style: ElevatedButton.styleFrom(
@@ -637,6 +660,54 @@ class _BudgetCategoryModalState extends State<BudgetCategoryModal> {
           ),
         ),
       ],
+    );
+  }
+
+  // 显示删除确认对话框
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Theme(
+        data: ThemeData(
+          dialogBackgroundColor: Colors.white,
+          dialogTheme: const DialogTheme(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+          ),
+        ),
+        child: AlertDialog(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          title: const Text('删除预算类别'),
+          content: Text('确定要删除"${widget.category?.name}"预算类别吗？该操作不可恢复。'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // 关闭对话框
+                
+                // 调用传入的删除回调
+                if (widget.onDelete != null) {
+                  widget.onDelete!();
+                } else {
+                  // 如果没有删除回调，只关闭模态框
+                  Navigator.of(context).pop();
+                }
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('删除'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

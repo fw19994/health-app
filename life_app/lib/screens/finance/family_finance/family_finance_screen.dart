@@ -29,7 +29,12 @@ import 'models.dart';
 import '../../../models/savings_goal.dart';
 
 class FamilyFinanceScreen extends StatefulWidget {
-  const FamilyFinanceScreen({super.key});
+  final int familyId;
+  
+  const FamilyFinanceScreen({
+    super.key, 
+    required this.familyId,
+  });
 
   @override
   State<FamilyFinanceScreen> createState() => _FamilyFinanceScreenState();
@@ -38,6 +43,9 @@ class FamilyFinanceScreen extends StatefulWidget {
 class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsBindingObserver {
   // 调试开关
   final bool _enableDebug = true;
+  
+  // 当前家庭ID
+  late int _familyId;
   
   // 当前选择的月份 (默认为当前月份)
   DateTime _selectedMonth = DateTime.now();
@@ -78,6 +86,8 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
   @override
   void initState() {
     super.initState();
+    // 初始化家庭ID
+    _familyId = widget.familyId;
     // 注册生命周期监听器
     WidgetsBinding.instance.addObserver(this);
     // 加载数据
@@ -136,7 +146,9 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
     
     try {
       final familyMemberService = FamilyMemberService(context: context);
-      final response = await familyMemberService.getFamilyMembers();
+      final response = await familyMemberService.getFamilyMembers(
+        familyId: _familyId, // 传递家庭ID
+      );
       
       if (response.success && response.data != null) {
         setState(() {
@@ -230,6 +242,7 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
     try {
       final response = await _financeService.getFamilyContributions(
         context: context,
+        familyId: _familyId, // 传递家庭ID
         year: _selectedMonth.year,
         month: _selectedMonth.month,
       );
@@ -386,6 +399,7 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
         year: _selectedMonth.year,
         month: _selectedMonth.month,
         context: context,
+        familyId: _familyId, // 传递家庭ID
         isFamilyBudget: true, // 确保使用家庭预算标识
       );
       
@@ -421,6 +435,7 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
       // 调用API获取支出分析数据
       final response = await _financeService.getExpenseAnalysis(
         context: context,
+        familyId: _familyId, // 传递家庭ID
         startDate: startDate,
         endDate: endDate,
         isFamilyBudget: true, // 添加家庭预算标识
@@ -571,6 +586,8 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
         context: context,
         type: 'expense', // 只获取支出类型的交易
         isFamilyBudget: true, // 添加家庭预算标识
+        familyId: _familyId, // 添加家庭ID
+        limit: 5, // 获取5条记录
       );
       
       if (_enableDebug) {
@@ -723,6 +740,9 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
       final budgetCategories = await budgetService.getBudgetCategories(
         context: context,
         isFamilyBudget: true, // 重要：指定获取家庭预算
+        familyId: _familyId, // 添加家庭ID
+        year: _selectedMonth.year,
+        month: _selectedMonth.month,
       );
       
       if (_enableDebug) {
@@ -821,6 +841,7 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
       // 构建查询参数字典
       Map<String, String> queryParams = {
         'is_family_savings': 'true', // 添加家庭标识
+        'family_id': _familyId.toString(), // 添加家庭ID
       };
       
       // 请求API获取家庭储蓄目标
@@ -944,6 +965,40 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
     _loadBudgetPlanningData(); // 刷新家庭预算规划数据
   }
   
+  // 构建快捷操作区域
+  Widget _buildQuickActions() {
+    return QuickActionsWidget(
+      familyId: _familyId, // 传递家庭ID
+      onAddExpense: () {
+        // 刷新数据
+        _refreshAllData();
+      },
+      onViewReport: () {
+        // 跳转到财务报告页面
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FinanceReportScreen(
+              familyId: _familyId,
+              isFamilyReport: true,
+            ),
+          ),
+        );
+      },
+      onMemberAnalysis: () {
+        // 跳转到成员财务页面
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MemberFinancesScreen(
+              familyId: _familyId,
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -961,6 +1016,7 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
               // 注意：从本页面返回时不需要刷新，因为回到首页了
               Navigator.pop(context);
             },
+            familyId: _familyId, // 传递家庭ID
           ),
           
           // 主要内容区域
@@ -971,25 +1027,7 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
                 child: Column(
                   children: [
                     // 快捷操作
-                    QuickActionsWidget(
-                      onAddExpense: () {
-                        // 仅刷新数据，不再负责导航
-                        print('收到记账成功通知，立即刷新数据');
-                        _refreshAllData();
-                      },
-                      onViewReport: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const FinanceReportScreen()),
-                        );
-                      },
-                      onMemberAnalysis: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const MemberFinancesScreen()),
-                        );
-                      },
-                    ),
+                    _buildQuickActions(),
                     const SizedBox(height: 16),
                     
                     // 支出分类
@@ -1049,7 +1087,9 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
                       onViewAll: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const TransactionHistoryScreen()),
+                          MaterialPageRoute(builder: (context) => TransactionHistoryScreen(
+                            familyId: _familyId, // 传递家庭ID到交易记录页面
+                          )),
                         );
                       },
                     ),
@@ -1062,7 +1102,10 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
                         Navigator.push(
                           context, 
                           MaterialPageRoute(
-                            builder: (context) => const BudgetSettingsScreen(isFamilyBudget: true),
+                            builder: (context) => BudgetSettingsScreen(
+                              isFamilyBudget: true,
+                              familyId: _familyId, // 传递家庭ID
+                            ),
                           ),
                         ).then((_) => _loadBudgetPlanningData()); // 返回时刷新数据
                       },
@@ -1077,8 +1120,9 @@ class _FamilyFinanceScreenState extends State<FamilyFinanceScreen> with WidgetsB
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const SavingsGoalsScreen(
+                            builder: (context) => SavingsGoalsScreen(
                               isFamilySavings: true, // 设置为家庭储蓄目标
+                              familyId: _familyId, // 传递家庭ID
                             ),
                           ),
                         ).then((_) => _loadFamilySavingsGoals()); // 返回时刷新数据

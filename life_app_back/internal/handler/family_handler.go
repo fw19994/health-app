@@ -20,10 +20,14 @@ func GetFamilyMembers(c *gin.Context) {
 	if !ok {
 		return // MustGetUserID函数已经处理了错误响应
 	}
-
+	familyId := c.DefaultQuery("family_id", "0")
+	if familyId == "" {
+		utils.Fail(c, utils.CodeInvalidParams, "family_id参数错误", nil)
+	}
 	// 调用服务层获取用户所属家庭的所有成员
 	memberService := &service.FamilyMemberService{}
-	members, err := memberService.GetUserFamilyMembers(userID)
+	familyIdInt, _ := strconv.Atoi(familyId)
+	members, err := memberService.GetUserFamilyMembers(uint(familyIdInt), userID)
 
 	if err != nil {
 		statusCode := http.StatusInternalServerError
@@ -64,6 +68,7 @@ func AddFamilyMember(c *gin.Context) {
 		Gender      string `json:"gender"`
 		AvatarURL   string `json:"avatar_url"`
 		Permission  string `json:"permission" binding:"required"`
+		FamilyId    string `json:"family_id"`
 	}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -73,39 +78,11 @@ func AddFamilyMember(c *gin.Context) {
 		})
 		return
 	}
-
-	// 确定owner_id，先检查当前用户是否已属于某个家庭
-	repo := &repository.FamilyMemberRepository{}
-	db := model.DB
-	var existingMember model.FamilyMember
-	var ownerID uint = userID // 默认当前用户为家主
-	
-	// 查询用户是否已经是其他家庭的成员
-	if err := db.Where("user_id = ? AND user_id != 0", userID).First(&existingMember).Error; err == nil {
-		// 用户已属于某个家庭，使用该家庭的owner_id
-		ownerID = existingMember.OwnerID
-	} else {
-		// 检查用户是否有成员（即是否已经是家主）
-		members, err := repo.GetFamilyMembers(userID)
-		if err == nil && len(members) > 0 {
-			// 用户已经是家主，使用自己的ID作为owner_id
-			ownerID = userID
-		} else {
-			// 用户既不是家主也不是其他家庭的成员，使用自己的ID创建新家庭
-			ownerID = userID
-		}
-	}
-
-	// 如果请求中提供了user_id，使用它，否则使用当前登录的用户ID
-	userToAdd := request.UserID
-	if userToAdd == 0 { // 如果前端未指定用户ID，则使用当前登录用户
-		userToAdd = userID
-	}
-
+	familyId, _ := strconv.Atoi(request.FamilyId)
 	// 构建成员模型
 	member := &model.FamilyMember{
-		OwnerID:     ownerID,
-		UserID:      userToAdd,
+		OwnerID:     uint(familyId),
+		UserID:      userID,
 		Name:        request.Name,
 		Nickname:    request.Nickname,
 		Description: request.Description,
@@ -349,7 +326,7 @@ func JoinFamily(c *gin.Context) {
 		Name:       user.Nickname,
 		Phone:      user.Phone,
 		AvatarURL:  user.Avatar,
-		Role:       "其他",   // 默认角色
+		Role:       "其他",  // 默认角色
 		Permission: "查看者", // 默认权限
 	}
 
@@ -370,4 +347,221 @@ func JoinFamily(c *gin.Context) {
 			"member_id": member.ID,
 		},
 	})
+}
+
+// GetFamilies 获取用户关联的所有家庭
+func GetFamilies(c *gin.Context) {
+	// 从请求中获取当前用户ID
+	userID, ok := utils.MustGetUserID(c)
+	if !ok {
+		return // MustGetUserID函数已经处理了错误响应
+	}
+
+	// 调用服务层获取家庭列表
+	familyService := &service.FamilyService{}
+	families, err := familyService.GetFamilies(userID)
+
+	if err != nil {
+		utils.ServerError(c, err)
+		return
+	}
+
+	// 返回结果
+	utils.Success(c, families, "获取家庭列表成功")
+}
+
+// CreateFamily 创建新家庭
+func CreateFamily(c *gin.Context) {
+	// 从请求中获取当前用户ID
+	userID, ok := utils.MustGetUserID(c)
+	if !ok {
+		return // MustGetUserID函数已经处理了错误响应
+	}
+
+	// 绑定请求参数
+	var request struct {
+		Name        string `json:"name" binding:"required"`
+		Description string `json:"description"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		utils.ParameterError(c, "请求参数错误: "+err.Error())
+		return
+	}
+
+	// 调用服务层创建家庭
+	familyService := &service.FamilyService{}
+	family, err := familyService.CreateFamily(userID, request.Name, request.Description)
+
+	if err != nil {
+		utils.ServerError(c, err)
+		return
+	}
+
+	// 返回结果
+	utils.Success(c, family, "创建家庭成功")
+}
+
+// GetFamilyDetail 获取家庭详情
+func GetFamilyDetail(c *gin.Context) {
+	// 从请求中获取当前用户ID
+	_, ok := utils.MustGetUserID(c)
+	if !ok {
+		return // MustGetUserID函数已经处理了错误响应
+	}
+
+	// 获取家庭ID
+	familyIDStr := c.Param("id")
+	familyID, err := strconv.ParseUint(familyIDStr, 10, 32)
+	if err != nil {
+		utils.ParameterError(c, "无效的家庭ID")
+		return
+	}
+
+	// 调用服务层获取家庭详情
+	familyService := &service.FamilyService{}
+	family, err := familyService.GetFamilyByID(uint(familyID))
+
+	if err != nil {
+		utils.ServerError(c, err)
+		return
+	}
+
+	// 返回结果
+	utils.Success(c, family, "获取家庭详情成功")
+}
+
+// UpdateFamily 更新家庭信息
+func UpdateFamily(c *gin.Context) {
+	// 从请求中获取当前用户ID
+	_, ok := utils.MustGetUserID(c)
+	if !ok {
+		return // MustGetUserID函数已经处理了错误响应
+	}
+
+	// 获取家庭ID
+	familyIDStr := c.Param("id")
+	familyID, err := strconv.ParseUint(familyIDStr, 10, 32)
+	if err != nil {
+		utils.ParameterError(c, "无效的家庭ID")
+		return
+	}
+
+	// 绑定请求参数
+	var request struct {
+		Name        string `json:"name" binding:"required"`
+		Description string `json:"description"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		utils.ParameterError(c, "请求参数错误: "+err.Error())
+		return
+	}
+
+	// 调用服务层更新家庭
+	familyService := &service.FamilyService{}
+	family, err := familyService.UpdateFamily(uint(familyID), request.Name, request.Description)
+
+	if err != nil {
+		utils.ServerError(c, err)
+		return
+	}
+
+	// 返回结果
+	utils.Success(c, family, "更新家庭信息成功")
+}
+
+// SetFamilyStatus 设置家庭状态
+func SetFamilyStatus(c *gin.Context) {
+	// 从请求中获取当前用户ID
+	_, ok := utils.MustGetUserID(c)
+	if !ok {
+		return // MustGetUserID函数已经处理了错误响应
+	}
+
+	// 获取家庭ID
+	familyIDStr := c.Param("id")
+	familyID, err := strconv.ParseUint(familyIDStr, 10, 32)
+	if err != nil {
+		utils.ParameterError(c, "无效的家庭ID")
+		return
+	}
+
+	// 绑定请求参数
+	var request struct {
+		IsActive bool `json:"is_active"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		utils.ParameterError(c, "请求参数错误: "+err.Error())
+		return
+	}
+
+	// 调用服务层设置家庭状态
+	familyService := &service.FamilyService{}
+	if err := familyService.SetFamilyStatus(uint(familyID), request.IsActive); err != nil {
+		utils.ServerError(c, err)
+		return
+	}
+
+	// 返回结果
+	utils.Success(c, nil, "设置家庭状态成功")
+}
+
+// DeleteFamily 删除家庭
+func DeleteFamily(c *gin.Context) {
+	// 从请求中获取当前用户ID
+	_, ok := utils.MustGetUserID(c)
+	if !ok {
+		return // MustGetUserID函数已经处理了错误响应
+	}
+
+	// 获取家庭ID
+	familyIDStr := c.Param("id")
+	familyID, err := strconv.ParseUint(familyIDStr, 10, 32)
+	if err != nil {
+		utils.ParameterError(c, "无效的家庭ID")
+		return
+	}
+
+	// 调用服务层删除家庭
+	familyService := &service.FamilyService{}
+	if err := familyService.DeleteFamily(uint(familyID)); err != nil {
+		utils.ServerError(c, err)
+		return
+	}
+
+	// 返回结果
+	utils.Success(c, nil, "删除家庭成功")
+}
+
+// JoinFamilyByCode 通过邀请码加入家庭
+func JoinFamilyByCode(c *gin.Context) {
+	// 从请求中获取当前用户ID
+	userID, ok := utils.MustGetUserID(c)
+	if !ok {
+		return // MustGetUserID函数已经处理了错误响应
+	}
+
+	// 绑定请求参数
+	var request struct {
+		Code string `json:"code" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		utils.ParameterError(c, "请求参数错误: "+err.Error())
+		return
+	}
+
+	// 调用服务层加入家庭
+	familyService := &service.FamilyService{}
+	family, err := familyService.JoinFamily(userID, request.Code)
+
+	if err != nil {
+		utils.ServerError(c, err)
+		return
+	}
+
+	// 返回结果
+	utils.Success(c, family, "加入家庭成功")
 }

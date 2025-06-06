@@ -45,7 +45,7 @@ type AddTransactionRequest struct {
 	Date            time.Time `json:"date" binding:"required"`
 	Merchant        string    `json:"merchant"`
 	Notes           string    `json:"notes"`
-	RecorderID      uint      `json:"recorder_id" binding:"required"`
+	RecorderID      uint      `json:"recorder_id"`
 	IsFamilyExpense bool      `json:"is_family_expense"`
 	ImageURL        string    `json:"image_url"`
 	FamilyId        int       `json:"family_id" gorm:"index;comment:家庭ID"`
@@ -69,6 +69,7 @@ type TransactionQueryParams struct {
 	PageSize   int       `form:"page_size" binding:"min=1,max=100"`
 	SortBy     string    `form:"sort_by"`
 	SortOrder  string    `form:"sort_order"`
+	FamilyId   uint      `form:"family_id"`
 }
 
 // TransactionResponse 交易记录响应结构体，包含分页信息和汇总统计

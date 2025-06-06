@@ -13,7 +13,7 @@ class FamilyMemberService {
   FamilyMemberService({this.context});
 
   // 获取家庭成员列表
-  Future<ApiResponse<List<FamilyMember>>> getFamilyMembers() async {
+  Future<ApiResponse<List<FamilyMember>>> getFamilyMembers({int? familyId}) async {
     try {
       print('开始获取家庭成员列表...');
       // 检查授权状态
@@ -52,10 +52,17 @@ class FamilyMemberService {
         }
       }
       
+      // 构建查询参数
+      Map<String, String> params = {};
+      if (familyId != null) {
+        params['family_id'] = familyId.toString();
+      }
+      
       // 确保路径与后端路由完全一致
       print('调用API端点: GET /api/v1/family/members');
       final response = await _apiService.get(
         path: '/api/v1/family/members',
+        params: params, // 添加查询参数
         context: context,
       );
       print('原始响应: $response');
@@ -175,6 +182,7 @@ class FamilyMemberService {
     String? gender,
     String? avatarUrl,
     required String permission,
+    int? familyId, // 添加家庭ID参数
   }) async {
     try {
       final data = {
@@ -188,6 +196,11 @@ class FamilyMemberService {
         'avatar_url': avatarUrl ?? '',
         'permission': permission,
       };
+      
+      // 添加家庭ID参数，如果提供了
+      if (familyId != null) {
+        data['family_id'] = familyId.toString();
+      }
       
       final response = await _apiService.post(
         path: '/api/v1/family/member',
@@ -227,6 +240,7 @@ class FamilyMemberService {
     String? gender,
     String? permission,
     String? avatarUrl,
+    int? familyId,
   }) async {
     try {
       final data = {
@@ -238,6 +252,11 @@ class FamilyMemberService {
         'permission': permission,
         'avatar_url': avatarUrl,
       };
+      
+      // 添加家庭ID参数，如果提供了
+      if (familyId != null) {
+        data['family_id'] = familyId.toString();
+      }
       
       // 移除空值
       data.removeWhere((key, value) => value == null);
@@ -271,14 +290,21 @@ class FamilyMemberService {
   }
 
   // 移除家庭成员
-  Future<ApiResponse<bool>> removeFamilyMember(int memberId) async {
+  Future<ApiResponse<bool>> removeFamilyMember(int memberId, {int? familyId}) async {
     try {
       print('正在移除家庭成员 ID: $memberId');
+      
+      // 构建查询参数
+      Map<String, String> params = {};
+      if (familyId != null) {
+        params['family_id'] = familyId.toString();
+      }
       
       // 直接调用删除接口，不处理owner_id
       final response = await _apiService.delete(
         path: '/api/v1/family/member/$memberId',
         context: context,
+        params: params, // 传递查询参数
       );
       
       print('删除成员响应: $response');

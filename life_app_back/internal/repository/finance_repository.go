@@ -88,7 +88,7 @@ func (r FinanceRepository) GetTransactionsByFilters(params model.TransactionQuer
 }
 
 // GetTransactionStats 获取交易统计数据
-func (r FinanceRepository) GetTransactionStats(memberID uint, startDate, endDate time.Time, types string, iconIds []int, userId uint) (int, float64, float64, error) {
+func (r FinanceRepository) GetTransactionStats(memberID uint, startDate, endDate time.Time, types string, iconIds []int, userId, familyId uint) (int, float64, float64, error) {
 	var totalCount int64
 	var totalIncome, totalExpense float64
 	baseQuery := model.DB.Debug().Model(&model.Transaction{}).Where(" 1=1")
@@ -97,8 +97,10 @@ func (r FinanceRepository) GetTransactionStats(memberID uint, startDate, endDate
 		// 构建基础查询
 		baseQuery = baseQuery.Where("recorder_id = ?", memberID)
 
+	} else if familyId > 0 {
+		baseQuery = baseQuery.Where("family_id = ?", familyId)
 	} else {
-		baseQuery = baseQuery.Where("user_id = ?", userId)
+		baseQuery = baseQuery.Where("user_id = ? and family_id=0 ", userId)
 
 	}
 
@@ -139,7 +141,7 @@ func (r FinanceRepository) GetTransactionStats(memberID uint, startDate, endDate
 	if err != nil {
 		return 0, 0, 0, err
 	}
-	totalExpense, err = r.getTotalExpense(memberID, startDate, endDate, types, iconIds, userId)
+	totalExpense, err = r.getTotalExpense(memberID, startDate, endDate, types, iconIds, userId, familyId)
 	if err != nil {
 		return 0, 0, 0, err
 	}
@@ -147,7 +149,7 @@ func (r FinanceRepository) GetTransactionStats(memberID uint, startDate, endDate
 }
 
 // GetTransactionStats 获取交易统计数据
-func (r FinanceRepository) getTotalExpense(memberID uint, startDate, endDate time.Time, types string, iconIds []int, userId uint) (float64, error) {
+func (r FinanceRepository) getTotalExpense(memberID uint, startDate, endDate time.Time, types string, iconIds []int, userId, familyId uint) (float64, error) {
 	totalExpense := 0.0
 	baseQuery := model.DB.Debug().Model(&model.Transaction{}).Where(" 1=1")
 
@@ -155,8 +157,10 @@ func (r FinanceRepository) getTotalExpense(memberID uint, startDate, endDate tim
 		// 构建基础查询
 		baseQuery = baseQuery.Where("recorder_id = ? ", memberID)
 
+	} else if familyId > 0 {
+		baseQuery = baseQuery.Where("family_id = ? ", familyId)
 	} else {
-		baseQuery = baseQuery.Where("user_id = ?", userId)
+		baseQuery = baseQuery.Where("user_id = ? and family_id = 0 ", userId)
 
 	}
 
@@ -188,7 +192,7 @@ func (r FinanceRepository) getTotalExpense(memberID uint, startDate, endDate tim
 }
 
 // GetTransactionsByDate 按日期分组获取交易记录
-func (r FinanceRepository) GetTransactionsByDate(userID uint, startDate, endDate time.Time, limit int, page int, types string, memberID uint, categoryID []int) ([]model.TransactionDateGroup, error) {
+func (r FinanceRepository) GetTransactionsByDate(userID uint, startDate, endDate time.Time, limit int, page int, types string, memberID uint, categoryID []int, familyId uint) ([]model.TransactionDateGroup, error) {
 	var result []model.TransactionDateGroup
 
 	// 获取日期列表
@@ -208,8 +212,11 @@ func (r FinanceRepository) GetTransactionsByDate(userID uint, startDate, endDate
 	if memberID > 0 {
 		querySql += " and recorder_id = ? "
 		queryArgs = append(queryArgs, memberID)
+	} else if familyId > 0 {
+		querySql += " and family_id = ? "
+		queryArgs = append(queryArgs, familyId)
 	} else {
-		querySql += " and user_id = ? "
+		querySql += " and user_id = ? and family_id = 0 "
 		queryArgs = append(queryArgs, userID)
 	}
 
@@ -266,7 +273,7 @@ func (r FinanceRepository) GetTransactionsByDate(userID uint, startDate, endDate
 }
 
 // GetTransactionTrend 获取交易趋势数据
-func (r FinanceRepository) GetTransactionTrend(userID uint, startDate, endDate time.Time, interval string, memberID uint, CategoryID []int) ([]model.TrendDataPoint, error) {
+func (r FinanceRepository) GetTransactionTrend(userID uint, startDate, endDate time.Time, interval string, memberID uint, CategoryID []int, familyId uint) ([]model.TrendDataPoint, error) {
 	var result []model.TrendDataPoint
 
 	// 根据不同的时间间隔构建不同的SQL
@@ -298,8 +305,10 @@ func (r FinanceRepository) GetTransactionTrend(userID uint, startDate, endDate t
 	baseQuery := model.DB.Debug().Model(&model.Transaction{}).Where(" date BETWEEN ? AND ?", startDate, endDate)
 	if memberID > 0 {
 		baseQuery = baseQuery.Where("recorder_id IN (?)", memberID)
+	} else if familyId > 0 {
+		baseQuery = baseQuery.Where("family_id = ?", familyId)
 	} else {
-		baseQuery = baseQuery.Where("user_id = ? ", userID)
+		baseQuery = baseQuery.Where("user_id = ? and family_id = 0", userID)
 	}
 
 	if len(CategoryID) > 0 {
@@ -371,10 +380,12 @@ func (r FinanceRepository) GetCategoryExpenseStats(userID uint, startDate, endDa
 	// 查询总支出金额
 	var totalExpense float64
 	totalQuery := db.Debug().Model(&model.Transaction{}).
-		Where("user_id = ? AND type = ? AND date BETWEEN ? AND ?", userID, types, startDate, endDate)
+		Where(" type = ? AND date BETWEEN ? AND ?", types, startDate, endDate)
 
 	if len(memberIDs) > 0 {
 		totalQuery = totalQuery.Where("recorder_id IN ?", memberIDs)
+	} else {
+		totalQuery = totalQuery.Where("user_id = ? AND family_id = 0", userID)
 	}
 
 	if err := totalQuery.Select("COALESCE(SUM(amount), 0) as total_expense").Scan(&totalExpense).Error; err != nil {
@@ -402,7 +413,7 @@ func (r FinanceRepository) GetCategoryExpenseStats(userID uint, startDate, endDa
 	if len(memberIDs) > 0 {
 		query = query.Where("recorder_id IN ?", memberIDs)
 	} else {
-		query = query.Where("user_id = ? ", userID)
+		query = query.Where("user_id = ? AND family_id = 0 ", userID)
 	}
 
 	if err := query.Find(&results).Error; err != nil {

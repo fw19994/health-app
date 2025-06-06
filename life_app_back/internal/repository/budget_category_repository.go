@@ -104,7 +104,7 @@ func (r *BudgetCategoryRepository) CopyFromPreviousMonth(userID uint, targetYear
 }
 
 // GetPreviousMonthStats 获取上月预算统计，用于计算环比
-func (r *BudgetCategoryRepository) GetPreviousMonthStats(userID uint, year, month int, isFamily bool) (map[string]float64, error) {
+func (r *BudgetCategoryRepository) GetPreviousMonthStats(userID uint, year, month int, familyId int) (map[string]float64, error) {
 	// 计算上个月的年月
 	prevMonth := month - 1
 	prevYear := year
@@ -117,8 +117,8 @@ func (r *BudgetCategoryRepository) GetPreviousMonthStats(userID uint, year, mont
 	db := model.DB
 	var query = db.Where("year = ? AND month = ?", prevYear, prevMonth)
 
-	if isFamily {
-		query = query.Where("is_family_budget = ? AND family_id = (SELECT family_id FROM budget_categories WHERE user_id = ? AND is_family_budget = true LIMIT 1)", true, userID)
+	if familyId > 0 {
+		query = query.Where("is_family_budget = ? AND family_id = ?", true, familyId)
 	} else {
 		query = query.Where("user_id = ? AND is_family_budget = ?", userID, false)
 	}

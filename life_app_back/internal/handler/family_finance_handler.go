@@ -29,8 +29,9 @@ func GetFamilyContributions(c *gin.Context) {
 
 	// 解析查询参数
 	var query struct {
-		Year  int `form:"year"`
-		Month int `form:"month"`
+		Year     int `form:"year"`
+		Month    int `form:"month"`
+		FamilyId int `form:"family_id"`
 	}
 
 	if err := c.ShouldBindQuery(&query); err != nil {
@@ -56,7 +57,7 @@ func GetFamilyContributions(c *gin.Context) {
 
 	// 查询家庭成员
 	familyService := &service.FamilyMemberService{}
-	members, err := familyService.GetUserFamilyMembers(userID)
+	members, err := familyService.GetUserFamilyMembers(uint(query.FamilyId), userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    -1,

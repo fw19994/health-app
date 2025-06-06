@@ -20,6 +20,8 @@ import 'widgets/assistant/assistant_chat_screen.dart';
 import 'services/auth_service.dart';
 import 'constants/api_constants.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'screens/family_management_screen.dart';
+import 'screens/finance/family_finance/family_finance_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +33,11 @@ void main() async {
   
   // 添加网络调试 - 仅在Android平台
   if (!kIsWeb && io.Platform.isAndroid) {
-    io.HttpOverrides.global = MyHttpOverrides();
+    try {
+      io.HttpOverrides.global = MyHttpOverrides();
+    } catch (e) {
+      debugPrint('设置HttpOverrides失败: $e');
+    }
   }
   
   // 请求必要权限 - 仅在移动平台
@@ -91,8 +97,16 @@ class MyApp extends StatelessWidget {
           // 根据登录状态决定初始页面
           home: authService.isLoggedIn ? const MainScreen() : const LoginScreen(),
           routes: {
-            '/main': (context) => const MainScreen(),
+            '/main': (context) {
+              // 获取路由参数
+              final args = ModalRoute.of(context)?.settings.arguments;
+              // 如果提供了索引参数，则传递给MainScreen
+              return MainScreen(initialIndex: args is int ? args : null);
+            },
             '/login': (context) => const LoginScreen(),
+            '/home': (context) => const HomeScreen(),
+            '/profile': (context) => const ProfileScreen(),
+            '/family_management': (context) => const FamilyManagementScreen(),
             '/transaction_history': (context) => const TransactionHistoryScreen(),
           },
           // 添加本地化支持
@@ -121,7 +135,10 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  // 添加可选的初始索引参数
+  final int? initialIndex;
+  
+  const MainScreen({super.key, this.initialIndex});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -134,10 +151,35 @@ class _MainScreenState extends State<MainScreen> {
   // 主要页面
   final List<Widget> _pages = [
     const HomeScreen(),
-    const FamilyFinanceScreen(), // 家庭财务页面
+    const FamilyManagementScreen(), // 修改为家庭管理页面
     const FinanceScreen(),
     const ProfileScreen(), // 个人资料页面
   ];
+  
+  @override
+  void initState() {
+    super.initState();
+    // 如果提供了初始索引，使用它
+    if (widget.initialIndex != null) {
+      _currentIndex = widget.initialIndex!;
+    }
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // 检查是否有参数传入
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is int && args >= 0 && args < _pages.length) {
+      // 延迟设置索引，避免在build过程中setState
+      Future.microtask(() {
+        setState(() {
+          _currentIndex = args;
+        });
+      });
+    }
+  }
 
   void _onTabTapped(int index) {
     setState(() {
@@ -226,22 +268,33 @@ class _MainScreenState extends State<MainScreen> {
 class MyHttpOverrides extends io.HttpOverrides {
   @override
   io.HttpClient createHttpClient(io.SecurityContext? context) {
-    final client = io.HttpClient();
+    // 直接使用父类方法创建基础HttpClient
+    final client = super.createHttpClient(context);
+    
+    // 然后自定义配置
     client.badCertificateCallback = (cert, host, port) {
-      print('=== SSL证书验证 ===');
-      print('主机: $host');
-      print('端口: $port');
-      print('证书: ${cert.subject}');
+      debugPrint('=== SSL证书验证 ===');
+      debugPrint('主机: $host');
+      debugPrint('端口: $port');
+      debugPrint('证书: ${cert.subject}');
       return true; // 允许所有证书，仅用于调试
     };
     client.connectionTimeout = const Duration(seconds: 15);
     client.maxConnectionsPerHost = 5;
     client.findProxy = (uri) {
       // 添加DNS配置
-      print('=== DNS解析 ===');
-      print('正在解析域名: ${uri.host}');
+      debugPrint('=== DNS解析 ===');
+      debugPrint('正在解析域名: ${uri.host}');
       return 'DIRECT';
     };
     return client;
+  }
+  
+  @override
+  String findProxyFromEnvironment(Uri url, Map<String, String>? environment) {
+    // 添加DNS配置
+    debugPrint('=== DNS解析 (环境) ===');
+    debugPrint('正在解析域名: ${url.host}');
+    return 'DIRECT';
   }
 }

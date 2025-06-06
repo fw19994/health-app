@@ -5,6 +5,7 @@ type MonthlyBudgetRequest struct {
 	Year           int  `form:"year" json:"year"`
 	Month          int  `form:"month" json:"month"`
 	IsFamilyBudget bool `form:"is_family_budget" json:"is_family_budget"`
+	FamilyId       int  `form:"family_id" json:"family_id"`
 }
 
 // MonthlyBudgetResponse 月度预算响应

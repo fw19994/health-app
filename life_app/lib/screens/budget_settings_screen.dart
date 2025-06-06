@@ -14,10 +14,12 @@ import '../widgets/budget/budget_header.dart';
 
 class BudgetSettingsScreen extends StatefulWidget {
   final bool isFamilyBudget;
+  final int? familyId;
   
   const BudgetSettingsScreen({
     super.key,
     this.isFamilyBudget = false,
+    this.familyId,
   });
 
   @override
@@ -29,6 +31,9 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
   final List<DateTime> recentMonths = [];
   final BudgetService _budgetService = BudgetService();
   final IconService _iconService = IconService();
+  
+  // 添加一个GlobalKey来引用BudgetHeader
+  final GlobalKey<BudgetHeaderState> _headerKey = GlobalKey<BudgetHeaderState>();
   
   // 预算类别列表
   List<BudgetCategory> _budgetCategories = [];
@@ -86,8 +91,12 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
       final categories = await _budgetService.getBudgetCategories(
         context: context,
         isFamilyBudget: widget.isFamilyBudget, // 使用widget属性
+        familyId: widget.familyId, // 添加家庭ID参数
+        year: _selectedDate.year,
+        month: _selectedDate.month,
       );
       
+      if (mounted) {
       setState(() {
         _budgetCategories = categories;
         _isLoading = false;
@@ -95,7 +104,14 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
       
       // 预加载所有图标
       _preloadIcons();
+        
+        // 刷新头部数据
+        if (_headerKey.currentState != null) {
+          _headerKey.currentState!.refreshData();
+        }
+      }
     } catch (e) {
+      if (mounted) {
       setState(() {
         _errorMessage = '加载预算数据失败: $e';
         _isLoading = false;
@@ -108,6 +124,7 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
           _preloadIcons();
         }
       });
+      }
     }
   }
 
@@ -144,8 +161,11 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
 
   Widget _buildHeader() {
     return BudgetHeader(
+      key: _headerKey,
       selectedDate: _selectedDate,
       onMonthSelected: _handleMonthChanged,
+      isFamilyBudget: widget.isFamilyBudget,
+      familyId: widget.familyId,
     );
   }
 
@@ -311,7 +331,7 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
           ...List.generate(
               _budgetCategories.length,
             (index) => Padding(
-                padding: EdgeInsets.only(bottom: index < _budgetCategories.length - 1 ? 12 : 0),
+                padding: EdgeInsets.only(bottom: index < _budgetCategories.length - 1 ? 8 : 0),
                 child: StatefulBuilder(
                   builder: (context, setState) {
                     bool isHovered = false;
@@ -322,7 +342,7 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
                       onExit: (_) => setState(() => isHovered = false),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                   decoration: BoxDecoration(
                           color: isHovered ? Colors.grey[50] : Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -364,34 +384,61 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
                             children: [
                               // 类别图标
                               Container(
-                                width: 40,
-                                height: 40,
-                                margin: const EdgeInsets.only(right: 12),
+                                width: 36,
+                                height: 36,
+                                margin: const EdgeInsets.only(right: 10),
                                 decoration: BoxDecoration(
                                               color: _getCategoryColor(_budgetCategories[index].iconId).withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(18),
                                 ),
                                 child: Icon(
                                               _getCategoryIcon(_budgetCategories[index].iconId),
                                               color: _getCategoryColor(_budgetCategories[index].iconId),
-                                  size: 20,
+                                  size: 18,
                                 ),
                               ),
-                              // 类别名称和描述
+                              // 合并类别名称和描述
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Row(
                                 children: [
                                   Text(
                                                 _budgetCategories[index].name,
                                     style: const TextStyle(
-                                      fontSize: 16,
+                                          fontSize: 15,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
+                                      if (_budgetCategories[index].monthOverMonthChange != 0)
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 8),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                FontAwesomeIcons.chartLine,
+                                                size: 10,
+                                                color: _getComparisonColor(_budgetCategories[index].monthOverMonthChange),
+                                              ),
+                                              const SizedBox(width: 2),
+                                              Text(
+                                                _getComparisonText(_budgetCategories[index].monthOverMonthChange),
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: _getComparisonColor(_budgetCategories[index].monthOverMonthChange),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  if (_budgetCategories[index].description?.isNotEmpty ?? false)
                                   Text(
                                                 _budgetCategories[index].description ?? '',
                                     style: TextStyle(
-                                      fontSize: 12,
+                                        fontSize: 11,
                                       color: Colors.grey[600],
                                     ),
                                   ),
@@ -399,35 +446,17 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
                               ),
                             ],
                           ),
-                          // 同比数据（移到右上角）
-                          Row(
-                            children: [
-                              Icon(
-                                FontAwesomeIcons.chartLine,
-                                size: 12,
-                                color: Colors.grey[600],
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '较上月',
-                                style: TextStyle(
-                                  fontSize: 12,
+                          // 显示编辑图标而不是详细的同比数据
+                          IconButton(
+                            onPressed: () => _showCategoryModal(context, _budgetCategories[index]),
+                            icon: const Icon(Icons.edit_outlined, size: 18),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
                                   color: Colors.grey[600],
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                            _getComparisonText(_budgetCategories[index].monthOverMonthChange),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                              color: _getComparisonColor(_budgetCategories[index].monthOverMonthChange),
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
 
                       // 预算进度
                       Column(
@@ -438,12 +467,12 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
                             children: [
                               Text(
                                             '已用 ¥${_budgetCategories[index].spent.toStringAsFixed(0)} / ¥${_budgetCategories[index].budget.toStringAsFixed(0)}',
-                                style: const TextStyle(fontSize: 14),
+                                style: const TextStyle(fontSize: 13),
                               ),
                               Text(
                                             '${((_budgetCategories[index].spent / _budgetCategories[index].budget) * 100).toStringAsFixed(0)}%',
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 13,
                                               color: _budgetCategories[index].spent > _budgetCategories[index].budget
                                       ? Colors.red
                                       : Colors.grey[800],
@@ -510,19 +539,169 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
     return Colors.grey[600]!;
   }
 
+  // 弹窗操作预算类别 - 添加/编辑/删除
   void _showCategoryModal(BuildContext context, [BudgetCategory? category]) async {
+    final bool isEditing = category != null;
+    final String title = isEditing ? "编辑预算类别" : "添加预算类别";
+    
     await showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-              builder: (context) => BudgetCategoryModal(
+      isScrollControlled: true, // 允许占满内容高度
+      backgroundColor: Colors.transparent, // 设置透明背景
+      builder: (BuildContext context) {
+        return BudgetCategoryModal(
+          title: title,
             category: category,
+          isFamilyBudget: widget.isFamilyBudget, // 传递家庭预算标识
+          familyId: widget.familyId, // 传递家庭ID参数
+          onSave: (BudgetCategory updatedCategory) async {
+            // 隐藏模态框
+            Navigator.pop(context);
+            
+            try {
+              if (isEditing) {
+                // 编辑现有类别
+                await _budgetService.updateBudgetCategory(
+                  updatedCategory, 
+                  context: context, 
+                  isFamilyBudget: widget.isFamilyBudget,
+                  familyId: widget.familyId, // 传递家庭ID参数
+                );
+              } else {
+                // 添加新类别
+                await _budgetService.addBudgetCategory(
+                  updatedCategory, 
+                  context: context, 
+                  isFamilyBudget: widget.isFamilyBudget,
+                  familyId: widget.familyId, // 传递家庭ID参数
+                );
+              }
+              
+              // 提示保存成功
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      isEditing ? "预算类别已更新" : "预算类别已添加", 
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    backgroundColor: AppTheme.primaryColor,
+                  ),
+                );
+              }
+              
+              // 强制完全刷新预算类别列表和头部数据
+              if (mounted) {
+                // 重新加载数据
+                await _loadBudgetData();
+                
+                // 确保UI更新
+                setState(() {
+                  // 触发UI刷新
+                });
+              }
+              
+            } catch (e) {
+              debugPrint("保存预算类别失败: $e");
+              
+              // 显示错误提示
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      "操作失败: ${e.toString()}", 
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            }
+          },
+          onDelete: isEditing ? () async {
+            // 确认删除
+            final bool? confirm = await showDialog<bool>(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text("确认删除"),
+                  content: const Text("确定要删除这个预算类别吗？相关的预算历史数据将会被保留。"),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text("取消"),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text(
+                        "删除", 
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+            
+            // 用户确认删除
+            if (confirm == true) {
+              // 关闭模态框
+              Navigator.pop(context);
+              
+              try {
+                // 调用删除API
+                await _budgetService.deleteBudgetCategory(
+                  category.id, 
+                  context: context, 
             isFamilyBudget: widget.isFamilyBudget,
-          ),
+                  familyId: widget.familyId, // 传递家庭ID参数
+                );
+                
+                // 提示删除成功
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        "预算类别已删除", 
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: Colors.grey,
+                    ),
     );
+                }
     
-    // 模态框关闭后重新加载预算数据
-    _loadBudgetData();
+                // 强制完全刷新预算类别列表和头部数据
+                if (mounted) {
+                  // 重新加载数据
+                  await _loadBudgetData();
+                  
+                  // 确保UI更新
+                  setState(() {
+                    // 触发UI刷新
+                  });
+                }
+                
+              } catch (e) {
+                debugPrint("删除预算类别失败: $e");
+                
+                // 显示错误提示
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        "删除失败: ${e.toString()}", 
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            }
+          } : null,
+        );
+      },
+    );
   }
 
   // 获取图标的辅助方法

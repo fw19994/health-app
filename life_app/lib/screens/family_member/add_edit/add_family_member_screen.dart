@@ -13,12 +13,14 @@ class AddFamilyMemberScreen extends StatefulWidget {
   final VoidCallback onMemberAdded;
   final bool isEditing;
   final FamilyMember? memberToEdit;
+  final int? familyId;
 
   const AddFamilyMemberScreen({
     Key? key,
     required this.onMemberAdded,
     this.isEditing = false,
     this.memberToEdit,
+    this.familyId,
   }) : super(key: key);
 
   @override
@@ -530,6 +532,7 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
         gender: _selectedGender,
         avatarUrl: avatarUrl,
         permission: permission,
+        familyId: widget.familyId,
       );
       
       if (response.success) {
@@ -606,6 +609,7 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
         gender: _selectedGender,
         avatarUrl: _avatarUrl,
         permission: permission,
+        familyId: widget.familyId,
       );
       
       if (response.success) {
@@ -680,6 +684,7 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
         gender: _selectedGender.isEmpty ? widget.memberToEdit!.gender : _selectedGender,
         avatarUrl: _avatarUrl ?? widget.memberToEdit!.avatarUrl,
         permission: permission,
+        familyId: widget.familyId,
       );
       
       if (response.success) {
