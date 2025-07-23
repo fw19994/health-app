@@ -109,6 +109,47 @@ func SetupRouter(router *gin.Engine) *gin.Engine {
 				savings.GET("/goal/:id/monthly", handler.GetSavingsGoalMonthlyRequirement) // 获取每月所需金额
 			}
 
+			// 计划模块路由
+			plan := authenticated.Group("/plan")
+			{
+				// 普通计划路由
+				plan.GET("/:id", handler.GetPlan)                       // 获取单个计划详情
+				plan.POST("", handler.CreatePlan)                        // 创建计划
+				plan.PUT("/:id", handler.UpdatePlan)                     // 更新计划
+				plan.DELETE("/:id", handler.DeletePlan)                  // 删除计划
+				plan.PUT("/:id/complete", handler.CompletePlan)          // 完成计划
+				plan.PUT("/:id/cancel", handler.CancelPlan)              // 取消计划
+				plan.GET("/daily", handler.GetDailyPlans)                // 获取日计划
+				plan.GET("/monthly", handler.GetMonthlyPlans)            // 获取月计划
+				plan.GET("/analysis", handler.GetPlanAnalysis)           // 获取计划分析数据
+				plan.GET("/:id/completion-history", handler.GetPlanCompletionHistory) // 获取计划完成历史记录
+				
+				// 专项计划路由
+				project := plan.Group("/project")
+				{
+					project.GET("/:id", handler.GetSpecialProject)                   // 获取专项计划详情
+					project.POST("", handler.CreateSpecialProject)                    // 创建专项计划
+					project.PUT("/:id", handler.UpdateSpecialProject)                 // 更新专项计划
+					project.DELETE("/:id", handler.DeleteSpecialProject)              // 删除专项计划
+					project.GET("/user", handler.GetUserSpecialProjects)              // 获取用户的专项计划列表
+					project.GET("/family/:family_id", handler.GetFamilySpecialProjects) // 获取家庭的专项计划列表
+					project.PUT("/:id/status", handler.UpdateSpecialProjectStatus)    // 更新专项计划状态
+					project.GET("/:id/analysis", handler.GetSpecialProjectAnalysis)   // 获取专项计划分析数据
+					
+					// 阶段路由
+					phase := project.Group("/phase")
+					{
+						phase.GET("/:id", handler.GetPhase)                           // 获取阶段详情
+						phase.POST("", handler.CreatePhase)                            // 创建阶段
+						phase.PUT("/:id", handler.UpdatePhase)                         // 更新阶段
+						phase.DELETE("/:id", handler.DeletePhase)                      // 删除阶段
+						phase.GET("/project/:project_id", handler.GetProjectPhases)    // 获取专项计划的所有阶段
+						phase.PUT("/project/:project_id/reorder", handler.ReorderPhases) // 重新排序阶段
+						phase.GET("/:id/plans", handler.GetPlansByPhaseID)             // 获取阶段的所有计划
+					}
+				}
+			}
+
 			// 家庭成员路由
 			family := authenticated.Group("/family")
 			{

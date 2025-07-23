@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>计划设置 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .header-card {
+      background: linear-gradient(135deg, #10b981, #059669);
+      padding: 20px;
+      color: white;
+    }
+    
+    .settings-section {
+      background-color: white;
+      border-radius: 16px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    
+    .settings-header {
+      padding: 16px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .settings-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #374151;
+    }
+    
+    .settings-description {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+    
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .setting-row:last-child {
+      border-bottom: none;
+    }
+    
+    .setting-label {
+      font-weight: 500;
+      color: #374151;
+    }
+    
+    .setting-desc {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #e5e7eb;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .toggle-slider {
+      background-color: #10b981;
+    }
+    
+    input:checked + .toggle-slider:before {
+      transform: translateX(22px);
+    }
+    
+    .select-control {
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #374151;
+      background-color: white;
+    }
+    
+    .time-input {
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #374151;
+      background-color: white;
+      width: 100px;
+    }
+    
+    .btn-action {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .btn-danger {
+      background-color: #fee2e2;
+      color: #ef4444;
+    }
+    
+    .btn-danger:active {
+      background-color: #fecaca;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- 头部 -->
+      <div class="header-card">
+        <div class="flex justify-between items-center">
+          <a href="daily_plan.html" class="text-white">
+            <i class="fas fa-arrow-left text-lg"></i>
+          </a>
+          <h1 class="text-xl font-bold">计划设置</h1>
+          <div class="w-6"></div> <!-- 占位元素，保持标题居中 -->
+        </div>
+      </div>
+
+      <!-- 设置内容 -->
+      <div class="p-4">
+        <!-- 提醒设置 -->
+        <div class="settings-section">
+          <div class="settings-header">
+            <div class="settings-title">提醒设置</div>
+            <div class="settings-description">设置计划的提醒方式和时间</div>
+          </div>
+          
+          <!-- 默认提醒时间 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">默认提醒时间</div>
+              <div class="setting-desc">新计划的默认提醒时间</div>
+            </div>
+            <select class="select-control">
+              <option value="0">不提醒</option>
+              <option value="5">提前5分钟</option>
+              <option value="10">提前10分钟</option>
+              <option value="15" selected>提前15分钟</option>
+              <option value="30">提前30分钟</option>
+              <option value="60">提前1小时</option>
+            </select>
+          </div>
+          
+          <!-- 未完成提醒 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">未完成提醒</div>
+              <div class="setting-desc">如果有计划未完成，在指定时间提醒</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <!-- 未完成提醒时间 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">未完成提醒时间</div>
+              <div class="setting-desc">每天几点提醒未完成的计划</div>
+            </div>
+            <input type="time" class="time-input" value="21:00">
+          </div>
+          
+          <!-- 声音提醒 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">声音提醒</div>
+              <div class="setting-desc">提醒时播放声音</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <!-- 振动提醒 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">振动提醒</div>
+              <div class="setting-desc">提醒时手机振动</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        
+        <!-- 显示设置 -->
+        <div class="settings-section">
+          <div class="settings-header">
+            <div class="settings-title">显示设置</div>
+            <div class="settings-description">自定义计划的显示方式</div>
+          </div>
+          
+          <!-- 在首页显示今日计划 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">在首页显示今日计划</div>
+              <div class="setting-desc">在应用首页显示今天的计划</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <!-- 显示已完成计划 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">显示已完成计划</div>
+              <div class="setting-desc">在计划列表中显示已完成的计划</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <!-- 自动归档已完成计划 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">自动归档已完成计划</div>
+              <div class="setting-desc">自动归档多少天前完成的计划</div>
+            </div>
+            <select class="select-control">
+              <option value="1">1天后</option>
+              <option value="3" selected>3天后</option>
+              <option value="7">7天后</option>
+              <option value="14">14天后</option>
+              <option value="30">30天后</option>
+              <option value="0">不自动归档</option>
+            </select>
+          </div>
+          
+          <!-- 默认视图 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">默认视图</div>
+              <div class="setting-desc">打开计划页面时的默认视图</div>
+            </div>
+            <select class="select-control">
+              <option value="all" selected>全部</option>
+              <option value="today">今天</option>
+              <option value="pinned">置顶</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- 同步设置 -->
+        <div class="settings-section">
+          <div class="settings-header">
+            <div class="settings-title">同步与备份</div>
+            <div class="settings-description">管理计划数据的同步和备份</div>
+          </div>
+          
+          <!-- 自动同步 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">自动同步</div>
+              <div class="setting-desc">自动同步计划到云端</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <!-- 同步到日历 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">同步到系统日历</div>
+              <div class="setting-desc">将计划同步到手机系统日历</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <!-- 备份 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">备份数据</div>
+              <div class="setting-desc">备份所有计划数据到云端</div>
+            </div>
+            <button class="text-indigo-600 font-medium">立即备份</button>
+          </div>
+          
+          <!-- 恢复 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">恢复数据</div>
+              <div class="setting-desc">从云端恢复计划数据</div>
+            </div>
+            <button class="text-indigo-600 font-medium">从备份恢复</button>
+          </div>
+        </div>
+        
+        <!-- 数据管理 -->
+        <div class="settings-section mb-6">
+          <div class="settings-header">
+            <div class="settings-title">数据管理</div>
+            <div class="settings-description">管理计划数据</div>
+          </div>
+          
+          <!-- 导出数据 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">导出数据</div>
+              <div class="setting-desc">将计划数据导出为文件</div>
+            </div>
+            <button class="text-indigo-600 font-medium">导出</button>
+          </div>
+          
+          <!-- 清空数据 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">清空所有计划</div>
+              <div class="setting-desc text-red-500">此操作不可恢复</div>
+            </div>
+            <button class="text-red-600 font-medium">清空</button>
+          </div>
+        </div>
+        
+        <!-- 重置按钮 -->
+        <div class="mb-6">
+          <button class="btn-action btn-danger">
+            恢复默认设置
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // 简单的交互效果
+    document.querySelector('.btn-danger').addEventListener('click', function() {
+      if (confirm('确定要恢复所有设置到默认值吗？')) {
+        alert('设置已重置为默认值');
+      }
+    });
+    
+    document.querySelector('button.text-red-600').addEventListener('click', function() {
+      if (confirm('警告：此操作将永久删除所有计划数据，且不可恢复。确定要继续吗？')) {
+        alert('所有计划数据已清空');
+      }
+    });
+  </script>
+</body>
+</html> 

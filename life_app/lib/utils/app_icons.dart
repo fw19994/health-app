@@ -8,6 +8,7 @@ class AppIcons {
   static const IconData health = FontAwesomeIcons.heartbeat;
   static const IconData finance = FontAwesomeIcons.wallet;
   static const IconData profile = FontAwesomeIcons.user;
+  static const IconData plan = FontAwesomeIcons.tasks;
   
   // 通用操作图标
   static const IconData back = FontAwesomeIcons.arrowLeft;
@@ -159,6 +160,18 @@ class AppIcons {
   static const IconData laptop = FontAwesomeIcons.laptop;
   static const IconData mobile = FontAwesomeIcons.mobile;
   
+  // 计划相关图标
+  static const IconData planDaily = FontAwesomeIcons.calendarDay;
+  static const IconData planMonthly = FontAwesomeIcons.calendarAlt;
+  static const IconData planAnalysis = FontAwesomeIcons.chartLine;
+  static const IconData planSettings = FontAwesomeIcons.cog;
+  static const IconData planAdd = FontAwesomeIcons.plus;
+  static const IconData planReminder = FontAwesomeIcons.bell;
+  static const IconData planRecurring = FontAwesomeIcons.repeat;
+  static const IconData planCompleted = FontAwesomeIcons.check;
+  static const IconData planPinned = FontAwesomeIcons.thumbtack;
+  static const IconData planFilter = FontAwesomeIcons.filter;
+  
   // 获取预算类别图标
   static IconData getCategoryIcon(String category) {
     switch (category.toLowerCase()) {
@@ -258,6 +271,35 @@ class AppIcons {
         return other_income;
       default:
         return FontAwesomeIcons.moneyBillWave; // 默认图标
+    }
+  }
+  
+  // 获取计划类别图标
+  static IconData getPlanCategoryIcon(String category) {
+    switch (category.toLowerCase()) {
+      case 'work':
+      case '工作':
+        return FontAwesomeIcons.briefcase;
+      case 'personal':
+      case '个人':
+        return FontAwesomeIcons.user;
+      case 'health':
+      case '健康':
+        return FontAwesomeIcons.heartbeat;
+      case 'family':
+      case '家庭':
+        return FontAwesomeIcons.users;
+      case 'study':
+      case '学习':
+        return FontAwesomeIcons.book;
+      case 'finance':
+      case '财务':
+        return FontAwesomeIcons.moneyBill;
+      case 'social':
+      case '社交':
+        return FontAwesomeIcons.userFriends;
+      default:
+        return FontAwesomeIcons.tasks;
     }
   }
   

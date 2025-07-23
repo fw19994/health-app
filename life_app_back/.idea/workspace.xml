@@ -5,61 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2e1b89c6-fa57-4e16-9de3-db71ea4265ae" name="更改" comment="init">
-      <change beforePath="$PROJECT_DIR$/../life_app/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/constants/api_constants.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/constants/api_constants.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/constants/routes.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/constants/routes.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/models/budget_category.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/models/budget_category.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/models/savings_goal.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/models/savings_goal.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/budget_settings_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/budget_settings_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/expense_tracking_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/expense_tracking_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/family_member/add_edit/add_family_member_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/family_member/add_edit/add_family_member_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/family_members_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/family_members_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/family_finance_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/family_finance_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/header_widget.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/header_widget.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/quick_actions_widget.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance/family_finance/quick_actions_widget.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance_report_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance_report_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/finance_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/finance_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/home_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/login/login_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/login/login_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/member_finances/member_finances_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/member_finances/member_finances_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/profile/profile_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/profile/profile_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/savings_goals_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/savings_goals_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/transaction_history/models/transaction.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/transaction_history/models/transaction.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/transaction_history/transaction_history_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/transaction_history/transaction_history_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/transaction_history/widgets/transaction_header.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/transaction_history/widgets/transaction_header.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/transaction_history/widgets/transaction_list.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/transaction_history/widgets/transaction_list.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/budget_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/budget_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/family_member_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/family_member_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/finance_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/finance_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/themes/app_theme.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/themes/app_theme.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/utils/stagewise_integration.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/utils/stagewise_integration.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/utils/web_stub.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/utils/web_stub.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/widgets/budget/budget_category_modal.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/widgets/budget/budget_category_modal.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/widgets/budget/budget_header.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/widgets/budget/budget_header.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/widgets/budget/savings_goal_card.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/widgets/budget/savings_goal_card.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/widgets/budget/savings_goal_modal.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/widgets/budget/savings_goal_modal.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/widgets/login/feature_preview.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/widgets/login/feature_preview.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/widgets/login/login_card.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/widgets/login/login_card.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/api_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/utils/app_icons.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/utils/app_icons.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/dataSources/1b8c4b9c-51ba-40be-892a-7abd3198744c.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/1b8c4b9c-51ba-40be-892a-7abd3198744c.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/handler/budget_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/handler/budget_handler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/handler/family_finance_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/handler/family_finance_handler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/handler/family_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/handler/family_handler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/handler/finance_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/handler/finance_handler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/handler/savings_goal_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/handler/savings_goal_handler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/model/budget.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/model/budget.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/model/family.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/model/family.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/model/transaction.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/model/transaction.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/repository/budget_category_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/repository/budget_category_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/repository/family_member_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/repository/family_member_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/repository/family_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/repository/family_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/repository/finance_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/repository/finance_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/model/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/model/db.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/router/setupRouter.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/router/setupRouter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/service/budget_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/service/budget_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/service/family_member_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/service/family_member_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/service/finance_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/service/finance_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/service/savings_goal_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/service/savings_goal_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ui/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../ui/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ui/pages/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/../ui/pages/home.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,6 +36,10 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>
@@ -107,7 +70,8 @@
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;
+    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   },
   &quot;keyToStringList&quot;: {
     &quot;DatabaseDriversLRU&quot;: [
@@ -366,6 +330,26 @@
           <url>file://$PROJECT_DIR$/internal/service/family_service.go</url>
           <line>19</line>
           <option name="timeStamp" value="92" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/handler/plan_handler.go</url>
+          <line>152</line>
+          <option name="timeStamp" value="96" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/repository/plan_repository.go</url>
+          <line>62</line>
+          <option name="timeStamp" value="98" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/handler/plan_handler.go</url>
+          <line>85</line>
+          <option name="timeStamp" value="101" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/service/special_project_service.go</url>
+          <line>45</line>
+          <option name="timeStamp" value="103" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

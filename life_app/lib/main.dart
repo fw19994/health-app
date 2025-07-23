@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'utils/stagewise_integration.dart';
 import 'screens/home_screen.dart';
 import 'screens/finance_screen.dart';
@@ -14,14 +15,31 @@ import 'screens/finance/family_finance/family_finance_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/login/login_screen.dart';
 import 'screens/transaction_history/transaction_history_screen.dart';
+import 'screens/plan/daily_plan_screen.dart';
+import 'screens/plan/monthly_plan_screen.dart';
+import 'screens/plan/add_edit_plan_screen.dart';
+import 'screens/plan/plan_settings_screen.dart';
+import 'screens/plan/plan_analysis_screen.dart';
+import 'screens/plan/special_projects_list_screen.dart';
+import 'screens/plan/special_project_detail_screen.dart';
 import 'themes/app_theme.dart';
 import 'widgets/assistant/assistant_floating_button.dart';
 import 'widgets/assistant/assistant_chat_screen.dart';
 import 'services/auth_service.dart';
+import 'services/plan_service.dart';
+import 'services/special_project_service.dart';
+import 'services/project_phase_service.dart';
 import 'constants/api_constants.dart';
+import 'constants/routes.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'screens/family_management_screen.dart';
 import 'screens/finance/family_finance/family_finance_router.dart';
+import 'utils/app_icons.dart';
+import 'services/reminder_service.dart';
+import 'services/api_service.dart';
+
+// 全局导航键
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,6 +91,10 @@ void main() async {
   // 尝试从本地存储恢复用户会话
   await authService.init();
   
+  // 初始化提醒服务
+  final reminderService = ReminderService();
+  await reminderService.initialize();
+  
   runApp(MyApp(authService: authService));
 }
 
@@ -86,14 +108,30 @@ class MyApp extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<AuthService>.value(
-      value: authService,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthService>.value(value: authService),
+        ChangeNotifierProvider<ApiService>(
+          create: (context) => ApiService(),
+        ),
+        ChangeNotifierProvider<PlanService>(
+          create: (context) => PlanService(),
+          lazy: false, // 确保立即创建
+        ),
+        ChangeNotifierProvider<SpecialProjectService>(create: (_) => SpecialProjectService()),
+        ChangeNotifierProvider<ProjectPhaseService>(create: (_) => ProjectPhaseService()),
+        ChangeNotifierProvider<ReminderService>(
+          create: (context) => ReminderService(),
+          lazy: false, // 确保立即创建
+        ),
+      ],
       child: ScaffoldMessenger(
         key: _scaffoldMessengerKey,
         child: MaterialApp(
           title: '悦管家',
           theme: AppTheme.lightTheme,
           debugShowCheckedModeBanner: false,
+          navigatorKey: navigatorKey,
           // 根据登录状态决定初始页面
           home: authService.isLoggedIn ? const MainScreen() : const LoginScreen(),
           routes: {
@@ -108,6 +146,30 @@ class MyApp extends StatelessWidget {
             '/profile': (context) => const ProfileScreen(),
             '/family_management': (context) => const FamilyManagementScreen(),
             '/transaction_history': (context) => const TransactionHistoryScreen(),
+            
+            // 计划相关路由
+            Routes.dailyPlan: (context) {
+              final args = ModalRoute.of(context)?.settings.arguments;
+              return DailyPlanScreen(
+                initialDate: args is DateTime ? args : null,
+              );
+            },
+            Routes.monthlyPlan: (context) => const MonthlyPlanScreen(),
+            Routes.addPlan: (context) => const AddEditPlanScreen(),
+            Routes.editPlan: (context) => const AddEditPlanScreen(planId: 'dummy-plan-id'),
+            Routes.planSettings: (context) => const PlanSettingsScreen(),
+            Routes.planAnalysis: (context) => const PlanAnalysisScreen(),
+            
+            // 专项计划相关路由
+            Routes.specialProjectsList: (context) => const SpecialProjectsListScreen(),
+            Routes.specialProjectDetail: (context) {
+              final args = ModalRoute.of(context)?.settings.arguments;
+              if (args is String) {
+                return SpecialProjectDetailScreen(projectId: args);
+              }
+              // 如果没有传递ID或格式不正确，返回列表页面
+              return const SpecialProjectsListScreen();
+            },
           },
           // 添加本地化支持
           localizationsDelegates: const [
@@ -122,11 +184,44 @@ class MyApp extends StatelessWidget {
           locale: const Locale('zh', 'CN'),
           // 确保SnackBar可以正确显示
           builder: (context, child) {
+            // 在应用启动后设置PlanService的context
+            final planService = Provider.of<PlanService>(context, listen: false);
+            // 使用microtask确保在build完成后设置context
+            Future.microtask(() {
+              planService.setContext(context);
+              
+              // 设置SpecialProjectService的context
+              final specialProjectService = Provider.of<SpecialProjectService>(context, listen: false);
+              specialProjectService.setContext(context);
+              
+              // 设置ProjectPhaseService的context
+              final projectPhaseService = Provider.of<ProjectPhaseService>(context, listen: false);
+              projectPhaseService.setContext(context);
+            });
             return MediaQuery(
               // 防止文字缩放影响布局
               data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-              child: child!,
+              child: child ?? Container(),
             );
+          },
+          // 处理命名路由和传参
+          onGenerateRoute: (settings) {
+            if (settings.name == Routes.editPlan) {
+              // 从路由参数中获取planId
+              final args = settings.arguments as Map<String, dynamic>;
+              final planId = args['planId'] as String;
+              return MaterialPageRoute(
+                builder: (context) => AddEditPlanScreen(planId: planId),
+              );
+            } else if (settings.name == Routes.specialProjectDetail) {
+              // 从路由参数中获取projectId
+              final args = settings.arguments as Map<String, dynamic>;
+              final projectId = args['projectId'] as String;
+              return MaterialPageRoute(
+                builder: (context) => SpecialProjectDetailScreen(projectId: projectId),
+              );
+            }
+            return null;
           },
         ),
       ),
@@ -151,9 +246,10 @@ class _MainScreenState extends State<MainScreen> {
   // 主要页面
   final List<Widget> _pages = [
     const HomeScreen(),
-    const FamilyManagementScreen(), // 修改为家庭管理页面
+    const DailyPlanScreen(initialDate: null, noAutoLoad: true),
+    const FamilyManagementScreen(),
     const FinanceScreen(),
-    const ProfileScreen(), // 个人资料页面
+    const ProfileScreen(),
   ];
   
   @override
@@ -225,10 +321,11 @@ class _MainScreenState extends State<MainScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(0, FontAwesomeIcons.house, FontAwesomeIcons.house, '首页'),
-              _buildNavItem(1, FontAwesomeIcons.moneyBillWave, FontAwesomeIcons.moneyBillWave, '家庭财务'),
-              _buildNavItem(2, FontAwesomeIcons.wallet, FontAwesomeIcons.wallet, '财务'),
-              _buildNavItem(3, FontAwesomeIcons.user, FontAwesomeIcons.user, '我的'),
+              _buildNavItem(0, AppIcons.home, AppIcons.home, '首页'),
+              _buildNavItem(1, AppIcons.plan, AppIcons.plan, '计划'),
+              _buildNavItem(2, FontAwesomeIcons.moneyBillWave, FontAwesomeIcons.moneyBillWave, '家庭财务'),
+              _buildNavItem(3, AppIcons.finance, AppIcons.finance, '财务'),
+              _buildNavItem(4, AppIcons.profile, AppIcons.profile, '我的'),
             ],
           ),
         ),

@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>每日计划 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .header-card {
+      background: linear-gradient(135deg, #4ade80, #22c55e);
+      padding: 20px;
+      color: white;
+    }
+    
+    .date-navigation {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px 0;
+      scrollbar-width: none;
+    }
+    
+    .date-navigation::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .date-item {
+      min-width: 45px;
+      height: 65px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 5px;
+    }
+    
+    .date-item.active {
+      background: white;
+      color: #22c55e;
+      box-shadow: 0 4px 6px rgba(34, 197, 94, 0.1);
+    }
+    
+    .date-day {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    
+    .date-weekday {
+      font-size: 0.75rem;
+      margin-top: 2px;
+      opacity: 0.9;
+    }
+    
+    .section-title {
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .plan-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 14px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    
+    .time-badge {
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    
+    .category-indicator {
+      width: 4px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      border-radius: 12px 0 0 12px;
+    }
+    
+    .category-work {
+      background-color: #60a5fa;
+    }
+    
+    .category-personal {
+      background-color: #f97316;
+    }
+    
+    .category-health {
+      background-color: #22c55e;
+    }
+    
+    .category-family {
+      background-color: #a855f7;
+    }
+    
+    .plan-title {
+      font-weight: 600;
+      color: #111827;
+      margin-right: 70px; /* Make space for the time badge */
+    }
+    
+    .plan-description {
+      font-size: 14px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+    
+    .plan-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #f3f4f6;
+    }
+    
+    .plan-complete {
+      display: flex;
+      align-items: center;
+      color: #6b7280;
+      font-size: 14px;
+    }
+    
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 2px solid #d1d5db;
+      margin-right: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+    }
+    
+    .checkbox.checked {
+      background-color: #22c55e;
+      border-color: #22c55e;
+    }
+    
+    .more-actions {
+      color: #9ca3af;
+      font-size: 18px;
+    }
+    
+    .special-projects-section {
+      margin-top: 20px;
+      background-color: #f3f4f6;
+      border-radius: 16px;
+      padding: 16px;
+    }
+    
+    .special-projects-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    
+    .special-projects-title {
+      font-weight: 600;
+      color: #4b5563;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .project-bubble {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      min-width: 100px;
+      width: 120px;
+      margin-right: 12px;
+    }
+    
+    .project-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      margin-bottom: 8px;
+    }
+    
+    .icon-home {
+      background: linear-gradient(135deg, #4f46e5, #818cf8);
+    }
+    
+    .project-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: #4b5563;
+      text-align: center;
+    }
+    
+    .project-progress {
+      font-size: 10px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+    
+    .add-plan-btn {
+      position: fixed;
+      right: 20px;
+      bottom: 100px;
+      width: 56px;
+      height: 56px;
+      border-radius: 28px;
+      background-color: #22c55e;
+      color: white;
+      box-shadow: 0 4px 6px rgba(34, 197, 94, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    
+    .add-plan-btn:active {
+      background-color: #16a34a;
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- 头部 -->
+      <div class="header-card">
+        <div class="flex justify-between items-center">
+          <h1 class="text-xl font-bold">每日计划</h1>
+          <a href="monthly_plan_calendar.html" class="text-white">
+            <i class="fas fa-calendar text-lg"></i>
+          </a>
+        </div>
+        
+        <!-- 日期选择 -->
+        <div class="date-navigation mt-4">
+          <div class="date-item">
+            <div class="date-day">31</div>
+            <div class="date-weekday">周一</div>
+          </div>
+          <div class="date-item">
+            <div class="date-day">1</div>
+            <div class="date-weekday">周二</div>
+          </div>
+          <div class="date-item active">
+            <div class="date-day">2</div>
+            <div class="date-weekday">今天</div>
+          </div>
+          <div class="date-item">
+            <div class="date-day">3</div>
+            <div class="date-weekday">周四</div>
+          </div>
+          <div class="date-item">
+            <div class="date-day">4</div>
+            <div class="date-weekday">周五</div>
+          </div>
+          <div class="date-item">
+            <div class="date-day">5</div>
+            <div class="date-weekday">周六</div>
+          </div>
+          <div class="date-item">
+            <div class="date-day">6</div>
+            <div class="date-weekday">周日</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4">
+        <!-- 专项计划部分 -->
+        <div class="special-projects-section">
+          <div class="special-projects-header">
+            <div class="special-projects-title">
+              <i class="fas fa-project-diagram text-indigo-600"></i>
+              <span>我的专项计划</span>
+            </div>
+            <a href="special_projects_list.html" class="text-indigo-600 text-sm">查看全部</a>
+          </div>
+          
+          <div class="overflow-x-auto flex pb-2" style="scrollbar-width: none;">
+            <a href="special_project_plan.html" class="project-bubble">
+              <div class="project-icon icon-home">
+                <i class="fas fa-home"></i>
+              </div>
+              <div class="project-name">房屋装修</div>
+              <div class="flex justify-between w-full px-1 mt-1">
+                <div class="text-xs text-indigo-600">¥150,000</div>
+                <div class="project-progress">35%</div>
+              </div>
+            </a>
+            
+            <a href="#" class="project-bubble">
+              <div class="project-icon" style="background: linear-gradient(135deg, #0ea5e9, #38bdf8);">
+                <i class="fas fa-plane"></i>
+              </div>
+              <div class="project-name">旅行计划</div>
+              <div class="flex justify-between w-full px-1 mt-1">
+                <div class="text-xs text-indigo-600">¥15,000</div>
+                <div class="project-progress">100%</div>
+              </div>
+            </a>
+            
+            <a href="#" class="project-bubble">
+              <div class="project-icon" style="background: linear-gradient(135deg, #10b981, #34d399);">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div class="project-name">资产配置</div>
+              <div class="flex justify-between w-full px-1 mt-1">
+                <div class="text-xs text-indigo-600">¥200,000</div>
+                <div class="project-progress">0%</div>
+              </div>
+            </a>
+            
+            <a href="create_special_project.html" class="project-bubble" style="min-width: 80px;">
+              <div class="project-icon" style="background: #e5e7eb; color: #9ca3af;">
+                <i class="fas fa-plus"></i>
+              </div>
+              <div class="project-name">添加专项</div>
+            </a>
+          </div>
+        </div>
+        
+        <!-- 今日计划 -->
+        <h2 class="section-title mt-6">
+          <span>今日待办</span>
+          <span class="text-sm font-normal text-gray-500">2025年4月2日</span>
+        </h2>
+        
+        <!-- 上午计划 -->
+        <h3 class="text-sm font-medium text-gray-500 mb-2">上午</h3>
+        
+        <div class="plan-card">
+          <div class="category-indicator category-health"></div>
+          <div class="time-badge">6:30 - 7:00</div>
+          <h4 class="plan-title">晨间慢跑</h4>
+          <p class="plan-description">沿着小区慢跑30分钟</p>
+          <div class="plan-actions">
+            <div class="plan-complete">
+              <div class="checkbox checked">
+                <i class="fas fa-check text-xs"></i>
+              </div>
+              <span>已完成</span>
+            </div>
+            <div class="more-actions">
+              <i class="fas fa-ellipsis-h"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="plan-card">
+          <div class="category-indicator category-work"></div>
+          <div class="time-badge">9:00 - 10:30</div>
+          <h4 class="plan-title">项目会议</h4>
+          <p class="plan-description">与团队讨论新功能的实施方案</p>
+          <div class="plan-actions">
+            <div class="plan-complete">
+              <div class="checkbox checked">
+                <i class="fas fa-check text-xs"></i>
+              </div>
+              <span>已完成</span>
+            </div>
+            <div class="more-actions">
+              <i class="fas fa-ellipsis-h"></i>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 下午计划 -->
+        <h3 class="text-sm font-medium text-gray-500 mb-2 mt-6">下午</h3>
+        
+        <div class="plan-card">
+          <div class="category-indicator category-personal"></div>
+          <div class="time-badge">12:30 - 13:30</div>
+          <h4 class="plan-title">健康午餐</h4>
+          <p class="plan-description">地中海风格沙拉，搭配全麦面包</p>
+          <div class="plan-actions">
+            <div class="plan-complete">
+              <div class="checkbox checked">
+                <i class="fas fa-check text-xs"></i>
+              </div>
+              <span>已完成</span>
+            </div>
+            <div class="more-actions">
+              <i class="fas fa-ellipsis-h"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="plan-card">
+          <div class="category-indicator category-work"></div>
+          <div class="time-badge">14:00 - 16:00</div>
+          <h4 class="plan-title">编写代码</h4>
+          <p class="plan-description">完成前端页面的开发任务</p>
+          <div class="plan-actions">
+            <div class="plan-complete">
+              <div class="checkbox checked">
+                <i class="fas fa-check text-xs"></i>
+              </div>
+              <span>已完成</span>
+            </div>
+            <div class="more-actions">
+              <i class="fas fa-ellipsis-h"></i>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 晚间计划 -->
+        <h3 class="text-sm font-medium text-gray-500 mb-2 mt-6">晚间</h3>
+        
+        <div class="plan-card">
+          <div class="category-indicator category-health"></div>
+          <div class="time-badge">18:00 - 18:45</div>
+          <h4 class="plan-title">力量训练</h4>
+          <p class="plan-description">健身房进行45分钟的力量训练</p>
+          <div class="plan-actions">
+            <div class="plan-complete">
+              <div class="checkbox">
+              </div>
+              <span>标记完成</span>
+            </div>
+            <div class="more-actions">
+              <i class="fas fa-ellipsis-h"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="plan-card">
+          <div class="category-indicator category-family"></div>
+          <div class="time-badge">20:00 - 21:00</div>
+          <h4 class="plan-title">家庭聚餐</h4>
+          <p class="plan-description">与家人共进晚餐，讨论周末出游计划</p>
+          <div class="plan-actions">
+            <div class="plan-complete">
+              <div class="checkbox">
+              </div>
+              <span>标记完成</span>
+            </div>
+            <div class="more-actions">
+              <i class="fas fa-ellipsis-h"></i>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 底部留白，保证浮动按钮不遮挡内容 -->
+        <div class="h-20"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 添加计划按钮 -->
+  <a href="add_edit_plan.html" class="add-plan-btn">
+    <i class="fas fa-plus"></i>
+  </a>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="daily_plan.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-tasks"></i></div>
+      <div>计划</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="profile.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+  
+  <script>
+    // 复选框点击交互
+    document.querySelectorAll('.checkbox').forEach(checkbox => {
+      checkbox.addEventListener('click', function() {
+        this.classList.toggle('checked');
+        if (this.classList.contains('checked')) {
+          this.innerHTML = '<i class="fas fa-check text-xs"></i>';
+          this.nextElementSibling.textContent = '已完成';
+        } else {
+          this.innerHTML = '';
+          this.nextElementSibling.textContent = '标记完成';
+        }
+      });
+    });
+    
+    // 日期选择交互
+    document.querySelectorAll('.date-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.date-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

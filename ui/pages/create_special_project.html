@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>创建专项计划 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .header-card {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      padding: 20px;
+      color: white;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #374151;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    
+    .form-control:focus {
+      border-color: #4f46e5;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+    
+    .phase-item {
+      background-color: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid #e5e7eb;
+      position: relative;
+    }
+    
+    .phase-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .phase-title {
+      font-weight: 500;
+      color: #111827;
+    }
+    
+    .phase-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .phase-action {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background-color: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+    }
+    
+    .phase-content {
+      padding: 10px 0;
+    }
+    
+    .plan-list {
+      margin-top: 10px;
+    }
+    
+    .plan-item {
+      padding: 12px;
+      border: 1px solid #f3f4f6;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background-color: #f9fafb;
+    }
+    
+    .plan-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .plan-name {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 500;
+      color: #374151;
+    }
+    
+    .plan-date {
+      font-size: 12px;
+      color: #6b7280;
+    }
+    
+    .plan-amount {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #4b5563;
+    }
+    
+    .plan-amount i {
+      color: #6b7280;
+    }
+    
+    .add-plan-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 0;
+      color: #4f46e5;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .btn-add-phase {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px dashed #d1d5db;
+      background-color: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #6b7280;
+      font-weight: 500;
+      margin-top: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .date-range {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .date-input {
+      flex: 1;
+    }
+    
+    .btn-primary {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-align: center;
+      background-color: #4f46e5;
+      color: white;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary:active {
+      background-color: #4338ca;
+    }
+    
+    .btn-secondary {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-align: center;
+      background-color: #f3f4f6;
+      color: #374151;
+      transition: all 0.2s;
+    }
+    
+    .btn-secondary:active {
+      background-color: #e5e7eb;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    
+    .drag-handle {
+      width: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      position: absolute;
+      left: 12px;
+      top: 16px;
+    }
+    
+    .drag-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: #d1d5db;
+    }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal {
+      width: 90%;
+      max-width: 350px;
+      background-color: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .modal-title {
+      font-weight: 600;
+      font-size: 18px;
+    }
+    
+    .modal-close {
+      font-size: 20px;
+      color: #9ca3af;
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    .btn-modal {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .btn-modal-cancel {
+      background-color: #f3f4f6;
+      color: #4b5563;
+    }
+    
+    .btn-modal-save {
+      background-color: #4f46e5;
+      color: white;
+    }
+    
+    /* 添加阶段名称输入框样式 */
+    .phase-name-input {
+      background: transparent;
+      border: none;
+      font-weight: 500;
+      color: #111827;
+      width: 100%;
+      padding: 0;
+    }
+    
+    .phase-name-input:focus {
+      outline: none;
+      border-bottom: 1px solid #4f46e5;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- 头部 -->
+      <div class="header-card">
+        <div class="flex justify-between items-center">
+          <a href="special_projects_list.html" class="text-white">
+            <i class="fas fa-arrow-left text-lg"></i>
+          </a>
+          <h1 class="text-xl font-bold">创建专项计划</h1>
+          <div class="w-6"></div> <!-- 占位元素，保持标题居中 -->
+        </div>
+      </div>
+
+      <!-- 表单内容 -->
+      <div class="p-4">
+        <!-- 计划名称 -->
+        <div class="form-group">
+          <label for="project-name" class="form-label">计划名称</label>
+          <input 
+            type="text" 
+            id="project-name" 
+            class="form-control" 
+            placeholder="例如：房屋装修计划"
+          >
+        </div>
+        
+        <!-- 计划周期 -->
+        <div class="form-group">
+          <label class="form-label">计划周期</label>
+          <div class="date-range">
+            <div class="date-input">
+              <input 
+                type="date" 
+                class="form-control" 
+                placeholder="开始日期"
+              >
+            </div>
+            <span class="self-center">至</span>
+            <div class="date-input">
+              <input 
+                type="date" 
+                class="form-control" 
+                placeholder="结束日期"
+              >
+            </div>
+          </div>
+        </div>
+        
+        <!-- 总预算设置 -->
+        <div class="form-group">
+          <label for="project-budget" class="form-label">总预算</label>
+          <input 
+            type="number" 
+            id="project-budget" 
+            class="form-control" 
+            placeholder="￥0.00"
+          >
+        </div>
+        
+        <!-- 计划描述 -->
+        <div class="form-group">
+          <label for="project-description" class="form-label">计划描述</label>
+          <textarea 
+            id="project-description" 
+            class="form-control" 
+            placeholder="描述您的专项计划..."
+            rows="3"
+          ></textarea>
+        </div>
+        
+        <!-- 阶段设置 -->
+        <div class="form-group">
+          <label class="form-label">阶段设置</label>
+          
+          <!-- 阶段1 -->
+          <div class="phase-item">
+            <div class="drag-handle">
+              <div class="drag-dot"></div>
+              <div class="drag-dot"></div>
+              <div class="drag-dot"></div>
+            </div>
+            <div class="pl-8">
+              <div class="phase-header">
+                <div class="phase-title">
+                  <input 
+                    type="text" 
+                    class="phase-name-input" 
+                    value="设计阶段" 
+                    placeholder="请输入阶段名称"
+                  >
+                </div>
+                <div class="phase-actions">
+                  <button class="phase-action delete-phase-btn">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="phase-content">
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  placeholder="阶段描述（可选）"
+                >
+                
+                <div class="plan-list">
+                  <!-- 计划项1 -->
+                  <div class="plan-item">
+                    <div class="plan-header">
+                      <div class="plan-name">确定装修风格与预算</div>
+                      <div class="plan-date">2025-04-01</div>
+                    </div>
+                    <div class="plan-amount">
+                      <i class="fas fa-money-bill-wave"></i>
+                      <span>￥500.00</span>
+                    </div>
+                  </div>
+                  
+                  <!-- 计划项2 -->
+                  <div class="plan-item">
+                    <div class="plan-header">
+                      <div class="plan-name">找设计师咨询</div>
+                      <div class="plan-date">2025-04-05</div>
+                    </div>
+                    <div class="plan-amount">
+                      <i class="fas fa-money-bill-wave"></i>
+                      <span>￥3,000.00</span>
+                    </div>
+                  </div>
+                  
+                  <button class="add-plan-btn" id="addPlanBtn1">
+                    <i class="fas fa-plus"></i> 添加计划
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 阶段2 -->
+          <div class="phase-item">
+            <div class="drag-handle">
+              <div class="drag-dot"></div>
+              <div class="drag-dot"></div>
+              <div class="drag-dot"></div>
+            </div>
+            <div class="pl-8">
+              <div class="phase-header">
+                <div class="phase-title">
+                  <input 
+                    type="text" 
+                    class="phase-name-input" 
+                    value="采购阶段" 
+                    placeholder="请输入阶段名称"
+                  >
+                </div>
+                <div class="phase-actions">
+                  <button class="phase-action delete-phase-btn">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="phase-content">
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  placeholder="阶段描述（可选）"
+                >
+                
+                <div class="plan-list">
+                  <!-- 计划项 -->
+                  <div class="plan-item">
+                    <div class="plan-header">
+                      <div class="plan-name">采购主材</div>
+                      <div class="plan-date">2025-04-20</div>
+                    </div>
+                    <div class="plan-amount">
+                      <i class="fas fa-money-bill-wave"></i>
+                      <span>￥50,000.00</span>
+                    </div>
+                  </div>
+                  
+                  <button class="add-plan-btn" id="addPlanBtn2">
+                    <i class="fas fa-plus"></i> 添加计划
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 添加阶段按钮 -->
+          <button class="btn-add-phase" id="addPhaseBtn">
+            <i class="fas fa-plus"></i> 添加阶段
+          </button>
+        </div>
+        
+        <!-- 提醒设置 -->
+        <div class="form-group">
+          <label class="form-label">计划提醒</label>
+          <select class="form-control">
+            <option value="none">不提醒</option>
+            <option value="1day" selected>计划前1天</option>
+            <option value="2day">计划前2天</option>
+            <option value="3day">计划前3天</option>
+            <option value="1week">计划前1周</option>
+          </select>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="btn-group">
+          <button class="btn-secondary">
+            取消
+          </button>
+          <button class="btn-primary">
+            创建计划
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 添加计划弹窗 -->
+  <div class="modal-overlay" id="addPlanModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">添加计划</div>
+        <div class="modal-close" id="closeModal">&times;</div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">计划名称</label>
+        <input type="text" class="form-control" placeholder="请输入计划名称">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">计划日期</label>
+        <input type="date" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">预计花费</label>
+        <input type="number" class="form-control" placeholder="￥0.00">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">计划描述</label>
+        <textarea class="form-control" rows="2" placeholder="可选"></textarea>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn-modal btn-modal-cancel" id="cancelAddPlan">取消</button>
+        <button class="btn-modal btn-modal-save" id="savePlan">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 类别选择交互
+    document.querySelectorAll('.category-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.category-item').forEach(i => {
+          i.classList.remove('active');
+        });
+        this.classList.add('active');
+      });
+    });
+    
+    // 取消按钮
+    document.querySelector('.btn-secondary').addEventListener('click', function() {
+      window.location.href = 'special_projects_list.html';
+    });
+    
+    // 创建计划按钮
+    document.querySelector('.btn-primary').addEventListener('click', function() {
+      // 这里可以添加表单验证逻辑
+      window.location.href = 'special_projects_list.html';
+    });
+    
+    // 添加计划弹窗
+    const addPlanModal = document.getElementById('addPlanModal');
+    const closeModal = document.getElementById('closeModal');
+    const cancelAddPlan = document.getElementById('cancelAddPlan');
+    const addPlanBtns = document.querySelectorAll('.add-plan-btn');
+    
+    addPlanBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        addPlanModal.style.display = 'flex';
+      });
+    });
+    
+    closeModal.addEventListener('click', function() {
+      addPlanModal.style.display = 'none';
+    });
+    
+    cancelAddPlan.addEventListener('click', function() {
+      addPlanModal.style.display = 'none';
+    });
+    
+    document.getElementById('savePlan').addEventListener('click', function() {
+      // 实际应用中这里应该保存计划数据
+      addPlanModal.style.display = 'none';
+      alert('计划已保存');
+    });
+    
+    // 添加阶段功能
+    document.getElementById('addPhaseBtn').addEventListener('click', function() {
+      // 创建新阶段元素
+      const phasesList = document.querySelector('.form-group:has(#addPhaseBtn)');
+      const newPhase = document.createElement('div');
+      newPhase.className = 'phase-item';
+      newPhase.innerHTML = `
+        <div class="drag-handle">
+          <div class="drag-dot"></div>
+          <div class="drag-dot"></div>
+          <div class="drag-dot"></div>
+        </div>
+        <div class="pl-8">
+          <div class="phase-header">
+            <div class="phase-title">
+              <input 
+                type="text" 
+                class="phase-name-input" 
+                value="新阶段" 
+                placeholder="请输入阶段名称"
+              >
+            </div>
+            <div class="phase-actions">
+              <button class="phase-action delete-phase-btn">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          <div class="phase-content">
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="阶段描述（可选）"
+            >
+            
+            <div class="plan-list">
+              <button class="add-plan-btn">
+                <i class="fas fa-plus"></i> 添加计划
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // 插入到添加阶段按钮前
+      phasesList.insertBefore(newPhase, document.getElementById('addPhaseBtn'));
+      
+      // 为新阶段的按钮添加事件监听
+      setupPhaseEventListeners(newPhase);
+    });
+    
+    // 删除阶段功能
+    function setupPhaseEventListeners(phaseElement) {
+      // 添加计划按钮点击事件
+      const addPlanBtn = phaseElement.querySelector('.add-plan-btn');
+      if (addPlanBtn) {
+        addPlanBtn.addEventListener('click', function() {
+          addPlanModal.style.display = 'flex';
+        });
+      }
+      
+      // 删除阶段按钮点击事件
+      const deletePhaseBtn = phaseElement.querySelector('.delete-phase-btn');
+      if (deletePhaseBtn) {
+        deletePhaseBtn.addEventListener('click', function() {
+          if (confirm('确定要删除这个阶段吗？')) {
+            phaseElement.remove();
+          }
+        });
+      }
+    }
+    
+    // 设置现有阶段的事件监听
+    document.querySelectorAll('.phase-item').forEach(function(phase) {
+      setupPhaseEventListeners(phase);
+    });
+  </script>
+</body>
+</html> 

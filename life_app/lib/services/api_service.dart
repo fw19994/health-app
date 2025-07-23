@@ -26,7 +26,7 @@ class ApiResponse<T> {
   });
 }
 
-class ApiService {
+class ApiService extends ChangeNotifier {
   final http.Client _client = http.Client();
   final DnsService _dnsService = DnsService();
   

@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>专项计划 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .header-card {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      padding: 20px;
+      color: white;
+    }
+    
+    .project-header {
+      padding: 16px 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      margin: -30px 16px 16px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .progress-container {
+      height: 10px;
+      background-color: #e5e7eb;
+      border-radius: 5px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #4f46e5, #818cf8);
+      border-radius: 5px;
+      transition: width 0.3s ease;
+    }
+    
+    .project-timeline {
+      position: relative;
+      padding-left: 30px;
+      margin: 20px 0;
+    }
+    
+    .timeline-line {
+      position: absolute;
+      left: 14px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: #e5e7eb;
+    }
+    
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .timeline-dot {
+      position: absolute;
+      left: -30px;
+      top: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: white;
+      border: 2px solid #4f46e5;
+      z-index: 1;
+    }
+    
+    .timeline-dot.completed {
+      background-color: #4f46e5;
+    }
+    
+    .timeline-dot.current {
+      background-color: #fff;
+      border: 3px solid #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    }
+    
+    .timeline-content {
+      background-color: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-right: 8px;
+    }
+    
+    .tag-design {
+      background-color: #e0f2fe;
+      color: #0369a1;
+    }
+    
+    .tag-purchase {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    
+    .tag-construction {
+      background-color: #f3e8ff;
+      color: #6b21a8;
+    }
+    
+    .tag-inspection {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+    
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    
+    .timeline-title {
+      font-weight: 600;
+      color: #111827;
+    }
+    
+    .timeline-date {
+      font-size: 12px;
+      color: #6b7280;
+    }
+    
+    .timeline-desc {
+      font-size: 14px;
+      color: #4b5563;
+      margin-top: 4px;
+    }
+    
+    .phase-heading {
+      padding: 8px 16px;
+      margin: 16px 0 12px;
+      font-weight: 600;
+      color: #4b5563;
+      border-left: 3px solid #4f46e5;
+      background-color: #f3f4f6;
+      border-radius: 0 4px 4px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .phase-heading-text {
+      font-weight: 600;
+    }
+    
+    .phase-edit-btn {
+      color: #6b7280;
+      font-size: 14px;
+      background: transparent;
+      border: none;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+    
+    .phase-edit-btn:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .add-task-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 12px auto;
+      padding: 10px 16px;
+      background-color: #f9fafb;
+      border: 1px dashed #d1d5db;
+      border-radius: 12px;
+      color: #6b7280;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    
+    .add-task-btn:active {
+      background-color: #f3f4f6;
+    }
+    
+    .add-task-btn i {
+      margin-right: 6px;
+    }
+    
+    .action-bar {
+      position: fixed;
+      bottom: 88px;
+      left: 16px;
+      right: 16px;
+      background-color: white;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+      display: flex;
+      gap: 10px;
+    }
+    
+    .btn-secondary {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      background-color: #f9fafb;
+      color: #4b5563;
+      font-weight: 500;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .btn-secondary:active {
+      background-color: #f3f4f6;
+    }
+    
+    .btn-primary {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      background-color: #4f46e5;
+      color: white;
+      font-weight: 500;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary:active {
+      background-color: #4338ca;
+    }
+    
+    .btn-action {
+      position: fixed;
+      right: 16px;
+      bottom: 100px;
+      width: 56px;
+      height: 56px;
+      border-radius: 28px;
+      background-color: #4f46e5;
+      color: white;
+      box-shadow: 0 4px 6px rgba(79, 70, 229, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    
+    .btn-action:active {
+      background-color: #4338ca;
+      transform: scale(0.95);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      display: none;
+    }
+    
+    .modal {
+      width: 90%;
+      max-width: 350px;
+      background-color: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .modal-title {
+      font-weight: 600;
+      font-size: 18px;
+    }
+    
+    .modal-close {
+      font-size: 20px;
+      color: #9ca3af;
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    .btn-modal {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .btn-modal-cancel {
+      background-color: #f3f4f6;
+      color: #4b5563;
+    }
+    
+    .btn-modal-save {
+      background-color: #4f46e5;
+      color: white;
+    }
+
+    /* 阶段编辑弹窗样式 */
+    .edit-phase-modal {
+      width: 90%;
+      max-width: 320px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- 头部 -->
+      <div class="header-card">
+        <div class="flex justify-between items-center mb-2">
+          <a href="index.html" class="text-white">
+            <i class="fas fa-arrow-left text-lg"></i>
+          </a>
+          <h1 class="text-xl font-bold">专项计划</h1>
+          <div class="w-6"></div>
+        </div>
+        <div class="flex justify-between items-center">
+          <div>
+            <span class="text-xs text-indigo-100">开始: 2025年4月1日</span>
+            <span class="mx-2 text-indigo-200">•</span>
+            <span class="text-xs text-indigo-100">预计完成: 2025年6月30日</span>
+          </div>
+          <button class="bg-white/20 text-white text-xs py-1 px-3 rounded-full">
+            进行中
+          </button>
+        </div>
+      </div>
+
+      <!-- 项目摘要 -->
+      <div class="project-header">
+        <h2 class="text-lg font-bold text-gray-800">房屋装修计划</h2>
+        <div class="flex items-center mt-1">
+          <span class="text-sm text-gray-500">总进度:</span>
+          <span class="ml-auto text-sm font-medium text-indigo-600">35%</span>
+        </div>
+        <div class="progress-container">
+          <div class="progress-bar" style="width: 35%;"></div>
+        </div>
+        <div class="flex justify-between items-center mt-3">
+          <div class="flex items-center">
+            <i class="fas fa-tasks text-gray-400 mr-2"></i>
+            <span class="text-sm text-gray-600">7/20 已完成</span>
+          </div>
+          <div class="flex items-center">
+            <i class="far fa-clock text-gray-400 mr-2"></i>
+            <span class="text-sm text-gray-600">还剩 80 天</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 阶段标题 -->
+      <div class="px-4">
+        <div class="phase-heading">
+          <span class="phase-heading-text">设计阶段</span>
+          <button class="phase-edit-btn">编辑</button>
+        </div>
+      </div>
+
+      <!-- 项目时间线 -->
+      <div class="px-4">
+        <div class="project-timeline">
+          <div class="timeline-line"></div>
+          
+          <!-- 时间线项目1 -->
+          <div class="timeline-item">
+            <div class="timeline-dot completed"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="tag tag-design">设计</span>
+                <span class="timeline-date">2025年4月1日</span>
+              </div>
+              <div class="timeline-title">确定装修风格与预算</div>
+              <p class="timeline-desc">初步确定现代简约风格，预算控制在15万内。</p>
+              <div class="flex justify-between items-center mt-3 text-sm">
+                <div class="text-indigo-600 font-medium">费用: ¥500.00</div>
+                <div class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">已完成</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 时间线项目2 -->
+          <div class="timeline-item">
+            <div class="timeline-dot completed"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="tag tag-design">设计</span>
+                <span class="timeline-date">2025年4月5日</span>
+              </div>
+              <div class="timeline-title">找设计师咨询</div>
+              <p class="timeline-desc">联系3家装修公司，对比方案与报价。</p>
+              <div class="flex justify-between items-center mt-3 text-sm">
+                <div class="text-indigo-600 font-medium">费用: ¥3,000.00</div>
+                <div class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">已完成</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 时间线项目3 -->
+          <div class="timeline-item">
+            <div class="timeline-dot completed"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="tag tag-design">设计</span>
+                <span class="timeline-date">2025年4月10日</span>
+              </div>
+              <div class="timeline-title">确定平面布局图</div>
+              <p class="timeline-desc">厨房改为开放式，客厅扩大3平米。</p>
+              <div class="flex justify-between items-center mt-3 text-sm">
+                <div class="text-indigo-600 font-medium">费用: ¥2,500.00</div>
+                <div class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">已完成</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 时间线项目4 - 当前 -->
+          <div class="timeline-item">
+            <div class="timeline-dot current"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="tag tag-design">设计</span>
+                <span class="timeline-date">2025年4月15日</span>
+              </div>
+              <div class="timeline-title">确定装修材料清单</div>
+              <p class="timeline-desc">地板选用强化木地板，墙面采用乳胶漆。</p>
+              <div class="flex justify-between items-center mt-3 text-sm">
+                <div class="text-indigo-600 font-medium">费用: ¥1,200.00</div>
+                <div class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">进行中</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 添加计划按钮 -->
+          <button class="add-task-btn w-full">
+            <i class="fas fa-plus"></i> 添加计划
+          </button>
+        </div>
+      </div>
+      
+      <!-- 阶段标题 -->
+      <div class="px-4">
+        <div class="phase-heading">
+          <span class="phase-heading-text">采购阶段</span>
+          <button class="phase-edit-btn">编辑</button>
+        </div>
+      </div>
+
+      <!-- 项目时间线 -->
+      <div class="px-4">
+        <div class="project-timeline">
+          <div class="timeline-line"></div>
+          
+          <!-- 时间线项目5 -->
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="tag tag-purchase">采购</span>
+                <span class="timeline-date">2025年4月20日</span>
+              </div>
+              <div class="timeline-title">采购主材</div>
+              <p class="timeline-desc">地板、瓷砖、卫浴设备、灯具等。</p>
+              <div class="flex justify-between items-center mt-3 text-sm">
+                <div class="text-indigo-600 font-medium">费用: ¥50,000.00</div>
+                <div class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">未开始</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 时间线项目6 -->
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="tag tag-purchase">采购</span>
+                <span class="timeline-date">2025年5月1日</span>
+              </div>
+              <div class="timeline-title">采购家电</div>
+              <p class="timeline-desc">冰箱、洗衣机、空调等大型家电。</p>
+              <div class="flex justify-between items-center mt-3 text-sm">
+                <div class="text-indigo-600 font-medium">费用: ¥30,000.00</div>
+                <div class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">未开始</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 添加计划按钮 -->
+          <button class="add-task-btn w-full">
+            <i class="fas fa-plus"></i> 添加采购阶段计划
+          </button>
+        </div>
+      </div>
+      
+      <!-- 阶段标题 -->
+      <div class="px-4">
+        <div class="phase-heading">
+          <span class="phase-heading-text">施工阶段</span>
+          <button class="phase-edit-btn">编辑</button>
+        </div>
+      </div>
+
+      <!-- 项目时间线 -->
+      <div class="px-4">
+        <div class="project-timeline">
+          <div class="timeline-line"></div>
+          
+          <!-- 时间线项目7 -->
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="tag tag-construction">施工</span>
+                <span class="timeline-date">2025年5月10日</span>
+              </div>
+              <div class="timeline-title">水电改造</div>
+              <p class="timeline-desc">所有房间的水电改造，包括隐蔽工程。</p>
+              <div class="flex justify-between items-center mt-3 text-sm">
+                <div class="text-indigo-600 font-medium">费用: ¥18,000.00</div>
+                <div class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">未开始</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 时间线项目8 -->
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="tag tag-construction">施工</span>
+                <span class="timeline-date">2025年5月20日</span>
+              </div>
+              <div class="timeline-title">泥瓦工程</div>
+              <p class="timeline-desc">铺设地砖、墙砖，卫生间防水处理。</p>
+            </div>
+          </div>
+          
+          <!-- 时间线项目9 -->
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="tag tag-construction">施工</span>
+                <span class="timeline-date">2025年5月30日</span>
+              </div>
+              <div class="timeline-title">木工工程</div>
+              <p class="timeline-desc">安装木门、橱柜、衣柜等。</p>
+            </div>
+          </div>
+          
+          <!-- 添加计划按钮 -->
+          <button class="add-task-btn w-full">
+            <i class="fas fa-plus"></i> 添加施工阶段计划
+          </button>
+        </div>
+      </div>
+      
+      <!-- 阶段标题 -->
+      <div class="px-4">
+        <div class="phase-heading">
+          <span class="phase-heading-text">验收阶段</span>
+          <button class="phase-edit-btn">编辑</button>
+        </div>
+      </div>
+
+      <!-- 项目时间线 -->
+      <div class="px-4 mb-24">
+        <div class="project-timeline">
+          <div class="timeline-line"></div>
+          
+          <!-- 时间线项目10 -->
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="tag tag-inspection">验收</span>
+                <span class="timeline-date">2025年6月20日</span>
+              </div>
+              <div class="timeline-title">完工验收</div>
+              <p class="timeline-desc">检查所有施工项目的完成情况。</p>
+              <div class="flex justify-between items-center mt-3 text-sm">
+                <div class="text-indigo-600 font-medium">费用: ¥1,000.00</div>
+                <div class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">未开始</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 时间线项目11 -->
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="tag tag-inspection">验收</span>
+                <span class="timeline-date">2025年6月25日</span>
+              </div>
+              <div class="timeline-title">家具进场</div>
+              <p class="timeline-desc">沙发、餐桌、床等大型家具的购买和安装。</p>
+              <div class="flex justify-between items-center mt-3 text-sm">
+                <div class="text-indigo-600 font-medium">费用: ¥45,000.00</div>
+                <div class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">未开始</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 时间线项目12 -->
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="tag tag-inspection">验收</span>
+                <span class="timeline-date">2025年6月30日</span>
+              </div>
+              <div class="timeline-title">入住准备</div>
+              <p class="timeline-desc">清洁、消毒、室内装饰等。</p>
+              <div class="flex justify-between items-center mt-3 text-sm">
+                <div class="text-indigo-600 font-medium">费用: ¥3,800.00</div>
+                <div class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">未开始</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 添加计划按钮 -->
+          <button class="add-task-btn w-full">
+            <i class="fas fa-plus"></i> 添加验收阶段计划
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 浮动操作按钮 -->
+  <button class="btn-action" id="openAddTaskModal">
+    <i class="fas fa-plus"></i>
+  </button>
+
+  <!-- 添加计划模态框 -->
+  <div class="modal-overlay" id="addTaskModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">添加计划</div>
+        <div class="modal-close" id="closeModal">&times;</div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">阶段</label>
+        <select class="form-control">
+          <option>设计阶段</option>
+          <option>采购阶段</option>
+          <option>施工阶段</option>
+          <option>验收阶段</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">计划名称</label>
+        <input type="text" class="form-control" placeholder="请输入计划名称">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">计划日期</label>
+        <input type="date" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">预计花费</label>
+        <input type="number" class="form-control" placeholder="￥0.00">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">计划描述</label>
+        <textarea class="form-control" rows="2" placeholder="可选"></textarea>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn-modal btn-modal-cancel" id="cancelAddPlan">取消</button>
+        <button class="btn-modal btn-modal-save" id="savePlan">保存</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 添加编辑阶段名称的模态框 -->
+  <div class="modal-overlay" id="editPhaseModal">
+    <div class="modal edit-phase-modal">
+      <div class="modal-header">
+        <div class="modal-title">编辑阶段</div>
+        <div class="modal-close" id="closeEditPhaseModal">&times;</div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">阶段名称</label>
+        <input type="text" id="phaseNameInput" class="form-control" placeholder="请输入阶段名称">
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn-modal btn-modal-cancel" id="cancelEditPhase">取消</button>
+        <button class="btn-modal btn-modal-save" id="savePhase">保存</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="index.html" class="tab-item">
+      <i class="tab-icon fas fa-home"></i>
+      <span>首页</span>
+    </a>
+    <a href="#" class="tab-item active">
+      <i class="tab-icon fas fa-tasks"></i>
+      <span>计划</span>
+    </a>
+    <a href="#" class="tab-item">
+      <i class="tab-icon fas fa-chart-pie"></i>
+      <span>财务</span>
+    </a>
+    <a href="#" class="tab-item">
+      <i class="tab-icon fas fa-user"></i>
+      <span>我的</span>
+    </a>
+  </div>
+
+  <script>
+    // 模态框交互
+    const openAddTaskModal = document.getElementById('openAddTaskModal');
+    const addTaskModal = document.getElementById('addTaskModal');
+    const closeModal = document.getElementById('closeModal');
+    const cancelAddPlan = document.getElementById('cancelAddPlan');
+    
+    openAddTaskModal.addEventListener('click', () => {
+      addTaskModal.style.display = 'flex';
+    });
+    
+    closeModal.addEventListener('click', () => {
+      addTaskModal.style.display = 'none';
+    });
+    
+    cancelAddPlan.addEventListener('click', () => {
+      addTaskModal.style.display = 'none';
+    });
+    
+    // 点击模态框外部关闭模态框
+    addTaskModal.addEventListener('click', (e) => {
+      if (e.target === addTaskModal) {
+        addTaskModal.style.display = 'none';
+      }
+    });
+    
+    // 保存计划按钮
+    document.getElementById('savePlan').addEventListener('click', function() {
+      // 实际应用中这里应该保存计划数据
+      addTaskModal.style.display = 'none';
+      alert('计划已保存');
+    });
+    
+    // 阶段内添加计划按钮
+    document.querySelectorAll('.add-task-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        addTaskModal.style.display = 'flex';
+        
+        // 根据点击的按钮设置相应的阶段
+        const phaseText = btn.textContent.trim().replace('添加', '').replace('计划', '').trim();
+        const selectElement = document.querySelector('.modal select');
+        
+        Array.from(selectElement.options).forEach((option, index) => {
+          if (option.textContent.includes(phaseText)) {
+            selectElement.selectedIndex = index;
+          }
+        });
+      });
+    });
+
+    // 阶段编辑功能
+    const editPhaseModal = document.getElementById('editPhaseModal');
+    const closeEditPhaseModal = document.getElementById('closeEditPhaseModal');
+    const cancelEditPhase = document.getElementById('cancelEditPhase');
+    const phaseNameInput = document.getElementById('phaseNameInput');
+    let currentEditingPhase = null;
+
+    // 为所有编辑按钮添加点击事件
+    document.querySelectorAll('.phase-edit-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        currentEditingPhase = this.closest('.phase-heading').querySelector('.phase-heading-text');
+        phaseNameInput.value = currentEditingPhase.textContent.trim();
+        editPhaseModal.style.display = 'flex';
+      });
+    });
+
+    // 关闭编辑模态框
+    closeEditPhaseModal.addEventListener('click', function() {
+      editPhaseModal.style.display = 'none';
+    });
+
+    cancelEditPhase.addEventListener('click', function() {
+      editPhaseModal.style.display = 'none';
+    });
+
+    // 点击模态框外部关闭
+    editPhaseModal.addEventListener('click', function(e) {
+      if (e.target === editPhaseModal) {
+        editPhaseModal.style.display = 'none';
+      }
+    });
+
+    // 保存阶段名称
+    document.getElementById('savePhase').addEventListener('click', function() {
+      if (currentEditingPhase && phaseNameInput.value.trim() !== '') {
+        currentEditingPhase.textContent = phaseNameInput.value.trim();
+        
+        // 同时更新添加计划按钮上的文本
+        const phaseSection = currentEditingPhase.closest('.px-4').nextElementSibling;
+        if (phaseSection) {
+          const addPlanBtn = phaseSection.querySelector('.add-task-btn');
+          if (addPlanBtn) {
+            addPlanBtn.innerHTML = `<i class="fas fa-plus"></i> 添加${phaseNameInput.value.trim()}计划`;
+          }
+        }
+        
+        // 同时更新下拉选择框中的选项
+        const selectElement = document.querySelector('.modal select');
+        const phaseIndex = Array.from(document.querySelectorAll('.phase-heading')).indexOf(
+          currentEditingPhase.closest('.phase-heading')
+        );
+        
+        if (phaseIndex !== -1 && phaseIndex < selectElement.options.length) {
+          selectElement.options[phaseIndex].textContent = phaseNameInput.value.trim();
+        }
+      }
+      
+      editPhaseModal.style.display = 'none';
+    });
+  </script>
+</body>
+</html> 

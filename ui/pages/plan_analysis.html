@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>计划分析 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .header-card {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      padding: 20px;
+      color: white;
+    }
+    
+    .section-card {
+      background-color: white;
+      border-radius: 16px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    
+    .section-header {
+      padding: 16px;
+      border-bottom: 1px solid #f3f4f6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #111827;
+    }
+    
+    .section-content {
+      padding: 16px;
+    }
+    
+    .ai-message {
+      background-color: #f0f9ff;
+      border-left: 4px solid #3b82f6;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+      color: #1e3a8a;
+    }
+    
+    .ai-suggestion {
+      background-color: #f0fdf4;
+      border-left: 4px solid #10b981;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+      color: #065f46;
+    }
+    
+    .ai-warning {
+      background-color: #fff7ed;
+      border-left: 4px solid #f97316;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+      color: #9a3412;
+    }
+    
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .stat-card {
+      background-color: #f9fafb;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .stat-label {
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+    
+    .progress-container {
+      margin-bottom: 16px;
+    }
+    
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      font-size: 0.85rem;
+    }
+    
+    .progress-category {
+      font-weight: 500;
+      color: #374151;
+    }
+    
+    .progress-value {
+      color: #6b7280;
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background-color: #f3f4f6;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+    
+    .progress-fill.work {
+      background-color: #3b82f6;
+    }
+    
+    .progress-fill.personal {
+      background-color: #f59e0b;
+    }
+    
+    .progress-fill.health {
+      background-color: #10b981;
+    }
+    
+    .progress-fill.family {
+      background-color: #8b5cf6;
+    }
+    
+    .trend-chart {
+      width: 100%;
+      height: 180px;
+      margin-bottom: 16px;
+    }
+    
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #4b5563;
+    }
+    
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    
+    .suggestion-card {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      background-color: #f9fafb;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .suggestion-icon {
+      width: 40px;
+      height: 40px;
+      background-color: #dbeafe;
+      color: #3b82f6;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .suggestion-content h4 {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #111827;
+    }
+    
+    .suggestion-content p {
+      font-size: 0.85rem;
+      color: #4b5563;
+    }
+    
+    .time-period-selector {
+      display: flex;
+      background-color: #f3f4f6;
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 16px;
+    }
+    
+    .time-period-item {
+      flex: 1;
+      text-align: center;
+      padding: 8px 0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    
+    .time-period-item.active {
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      font-weight: 500;
+    }
+    
+    .habit-card {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      background-color: #f9fafb;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .habit-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    
+    .habit-icon.good {
+      background-color: #d1fae5;
+      color: #059669;
+    }
+    
+    .habit-icon.bad {
+      background-color: #fee2e2;
+      color: #dc2626;
+    }
+    
+    .habit-content {
+      flex: 1;
+    }
+    
+    .habit-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+      color: #111827;
+    }
+    
+    .habit-desc {
+      font-size: 0.85rem;
+      color: #4b5563;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+    
+    .badge.good {
+      background-color: #d1fae5;
+      color: #059669;
+    }
+    
+    .badge.warning {
+      background-color: #fef3c7;
+      color: #d97706;
+    }
+    
+    .badge.bad {
+      background-color: #fee2e2;
+      color: #dc2626;
+    }
+    
+    .share-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background-color: #4f46e5;
+      color: white;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      margin-top: 16px;
+    }
+    
+    .share-button:active {
+      background-color: #4338ca;
+    }
+    
+    .calendar-heatmap {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+    
+    .heatmap-cell {
+      aspect-ratio: 1/1;
+      border-radius: 4px;
+    }
+    
+    .heatmap-cell.level-0 {
+      background-color: #f3f4f6;
+    }
+    
+    .heatmap-cell.level-1 {
+      background-color: #dbeafe;
+    }
+    
+    .heatmap-cell.level-2 {
+      background-color: #93c5fd;
+    }
+    
+    .heatmap-cell.level-3 {
+      background-color: #60a5fa;
+    }
+    
+    .heatmap-cell.level-4 {
+      background-color: #3b82f6;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- 头部 -->
+      <div class="header-card">
+        <div class="flex justify-between items-center mb-4">
+          <a href="daily_plan.html" class="text-white">
+            <i class="fas fa-arrow-left text-lg"></i>
+          </a>
+          <h1 class="text-xl font-bold">AI计划分析</h1>
+          <div class="w-6"></div> <!-- 占位元素，保持标题居中 -->
+        </div>
+        
+        <!-- 时间段选择器 -->
+        <div class="time-period-selector">
+          <div class="time-period-item">周</div>
+          <div class="time-period-item active">月</div>
+          <div class="time-period-item">季度</div>
+          <div class="time-period-item">年</div>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm opacity-80">分析周期</div>
+            <div class="text-lg font-bold">2025年4月</div>
+          </div>
+          <div class="flex gap-2">
+            <button class="w-8 h-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="w-8 h-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 主内容 -->
+      <div class="p-4">
+        <!-- AI总结卡片 -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              <i class="fas fa-robot text-indigo-500 mr-2"></i> AI总结
+            </div>
+            <div class="text-xs text-gray-500">更新于 2小时前</div>
+          </div>
+          <div class="section-content">
+            <div class="ai-message">
+              <p>李明，本月您完成了78%的计划，比上月提高了12%。您在健康类计划方面表现最佳，完成率达到92%。</p>
+            </div>
+            <div class="ai-suggestion">
+              <p>建议：工作类计划完成率较低(65%)，建议将复杂工作拆分为更小的任务，并在上午时段安排重要工作。</p>
+            </div>
+            <div class="ai-warning">
+              <p>注意：您有3个重复性计划连续3次未完成，可能需要调整计划难度或时间安排。</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 完成情况统计 -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              <i class="fas fa-chart-pie text-blue-500 mr-2"></i> 完成情况
+            </div>
+            <a href="#" class="text-indigo-600 text-sm">详情</a>
+          </div>
+          <div class="section-content">
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div class="stat-value text-blue-600">78%</div>
+                <div class="stat-label">总完成率</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value text-green-600">+12%</div>
+                <div class="stat-label">环比增长</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value text-gray-800">42</div>
+                <div class="stat-label">已完成计划</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value text-gray-800">12</div>
+                <div class="stat-label">未完成计划</div>
+              </div>
+            </div>
+            
+            <div class="progress-container">
+              <div class="progress-label">
+                <div class="progress-category">工作</div>
+                <div class="progress-value">65%</div>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill work" style="width: 65%"></div>
+              </div>
+            </div>
+            
+            <div class="progress-container">
+              <div class="progress-label">
+                <div class="progress-category">健康</div>
+                <div class="progress-value">92%</div>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill health" style="width: 92%"></div>
+              </div>
+            </div>
+            
+            <div class="progress-container">
+              <div class="progress-label">
+                <div class="progress-category">个人</div>
+                <div class="progress-value">75%</div>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill personal" style="width: 75%"></div>
+              </div>
+            </div>
+            
+            <div class="progress-container">
+              <div class="progress-label">
+                <div class="progress-category">家庭</div>
+                <div class="progress-value">80%</div>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill family" style="width: 80%"></div>
+              </div>
+            </div>
+            
+            <!-- 计划完成热力图 -->
+            <div class="mt-4 mb-2">
+              <div class="text-sm font-medium text-gray-700 mb-2">计划完成热力图</div>
+              <div class="calendar-heatmap">
+                <div class="heatmap-cell level-0"></div>
+                <div class="heatmap-cell level-1"></div>
+                <div class="heatmap-cell level-3"></div>
+                <div class="heatmap-cell level-2"></div>
+                <div class="heatmap-cell level-4"></div>
+                <div class="heatmap-cell level-2"></div>
+                <div class="heatmap-cell level-1"></div>
+                
+                <div class="heatmap-cell level-1"></div>
+                <div class="heatmap-cell level-2"></div>
+                <div class="heatmap-cell level-4"></div>
+                <div class="heatmap-cell level-3"></div>
+                <div class="heatmap-cell level-2"></div>
+                <div class="heatmap-cell level-1"></div>
+                <div class="heatmap-cell level-0"></div>
+                
+                <div class="heatmap-cell level-0"></div>
+                <div class="heatmap-cell level-1"></div>
+                <div class="heatmap-cell level-2"></div>
+                <div class="heatmap-cell level-4"></div>
+                <div class="heatmap-cell level-3"></div>
+                <div class="heatmap-cell level-2"></div>
+                <div class="heatmap-cell level-1"></div>
+                
+                <div class="heatmap-cell level-1"></div>
+                <div class="heatmap-cell level-3"></div>
+                <div class="heatmap-cell level-4"></div>
+                <div class="heatmap-cell level-2"></div>
+                <div class="heatmap-cell level-1"></div>
+                <div class="heatmap-cell level-0"></div>
+                <div class="heatmap-cell level-1"></div>
+              </div>
+              <div class="flex justify-between text-xs text-gray-500">
+                <div>较少</div>
+                <div class="flex gap-1">
+                  <div class="w-3 h-3 bg-gray-100 rounded"></div>
+                  <div class="w-3 h-3 bg-blue-200 rounded"></div>
+                  <div class="w-3 h-3 bg-blue-300 rounded"></div>
+                  <div class="w-3 h-3 bg-blue-400 rounded"></div>
+                  <div class="w-3 h-3 bg-blue-500 rounded"></div>
+                </div>
+                <div>较多</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 趋势分析 -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              <i class="fas fa-chart-line text-green-500 mr-2"></i> 趋势分析
+            </div>
+            <a href="#" class="text-indigo-600 text-sm">详情</a>
+          </div>
+          <div class="section-content">
+            <div class="trend-chart">
+              <img src="https://via.placeholder.com/350x180?text=计划完成率趋势图" alt="趋势图" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+            </div>
+            
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-color" style="background-color: #3b82f6;"></div>
+                <span>工作</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background-color: #10b981;"></div>
+                <span>健康</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background-color: #f59e0b;"></div>
+                <span>个人</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background-color: #8b5cf6;"></div>
+                <span>家庭</span>
+              </div>
+            </div>
+            
+            <div class="mt-4">
+              <div class="text-sm font-medium text-gray-700 mb-2">关键发现</div>
+              <ul class="text-sm text-gray-600 space-y-2 pl-5 list-disc">
+                <li>健康类计划完成率持续提高，近3周保持在90%以上</li>
+                <li>工作类计划在周一、周二完成率最高，周五最低</li>
+                <li>晚间8点后安排的计划完成率普遍较低</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <!-- AI改进建议 -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              <i class="fas fa-lightbulb text-amber-500 mr-2"></i> 改进建议
+            </div>
+          </div>
+          <div class="section-content">
+            <div class="suggestion-card">
+              <div class="suggestion-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="suggestion-content">
+                <h4>优化时间分配</h4>
+                <p>将重要工作计划安排在上午9:00-11:30，这个时段您的完成率最高(92%)</p>
+              </div>
+            </div>
+            
+            <div class="suggestion-card">
+              <div class="suggestion-icon">
+                <i class="fas fa-list-check"></i>
+              </div>
+              <div class="suggestion-content">
+                <h4>拆分复杂任务</h4>
+                <p>将"项目策划"等大型工作计划拆分为更小的任务，提高完成率</p>
+              </div>
+            </div>
+            
+            <div class="suggestion-card">
+              <div class="suggestion-icon">
+                <i class="fas fa-bell"></i>
+              </div>
+              <div class="suggestion-content">
+                <h4>调整提醒时间</h4>
+                <p>对于工作类计划，建议提前30分钟提醒，而非当前的15分钟</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 习惯分析 -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              <i class="fas fa-repeat text-purple-500 mr-2"></i> 习惯分析
+            </div>
+          </div>
+          <div class="section-content">
+            <div class="habit-card">
+              <div class="habit-icon good">
+                <i class="fas fa-dumbbell"></i>
+              </div>
+              <div class="habit-content">
+                <div class="flex justify-between">
+                  <div class="habit-title">每日健身</div>
+                  <div class="badge good">优秀</div>
+                </div>
+                <div class="habit-desc">连续完成21天，已形成稳定习惯</div>
+              </div>
+            </div>
+            
+            <div class="habit-card">
+              <div class="habit-icon good">
+                <div class="habit-icon good">
+                  <i class="fas fa-book"></i>
+                </div>
+              </div>
+              <div class="habit-content">
+                <div class="flex justify-between">
+                  <div class="habit-title">晨间阅读</div>
+                  <div class="badge good">良好</div>
+                </div>
+                <div class="habit-desc">完成率85%，建议保持</div>
+              </div>
+            </div>
+            
+            <div class="habit-card">
+              <div class="habit-icon bad">
+                <i class="fas fa-laptop-code"></i>
+              </div>
+              <div class="habit-content">
+                <div class="flex justify-between">
+                  <div class="habit-title">编程学习</div>
+                  <div class="badge warning">需改进</div>
+                </div>
+                <div class="habit-desc">完成率仅58%，建议调整时间或降低频率</div>
+              </div>
+            </div>
+            
+            <div class="habit-card">
+              <div class="habit-icon bad">
+                <i class="fas fa-bed"></i>
+              </div>
+              <div class="habit-content">
+                <div class="flex justify-between">
+                  <div class="habit-title">早睡早起</div>
+                  <div class="badge bad">不稳定</div>
+                </div>
+                <div class="habit-desc">完成率仅40%，建议重新设定更合理的目标</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 分享报告按钮 -->
+        <button class="share-button w-full">
+          <i class="fas fa-share-alt"></i>
+          <span>分享月度报告</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="home.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-home"></i></div>
+      <div>首页</div>
+    </a>
+    <a href="daily_plan.html" class="tab-item active">
+      <div class="tab-icon"><i class="fas fa-tasks"></i></div>
+      <div>计划</div>
+    </a>
+    <a href="finance_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-wallet"></i></div>
+      <div>财务</div>
+    </a>
+    <a href="health_dashboard.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+      <div>健康</div>
+    </a>
+    <a href="profile.html" class="tab-item">
+      <div class="tab-icon"><i class="fas fa-user"></i></div>
+      <div>我的</div>
+    </a>
+  </div>
+  
+  <script>
+    // 时间段选择器交互
+    document.querySelectorAll('.time-period-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.time-period-item').forEach(i => {
+          i.classList.remove('active');
+        });
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html> 

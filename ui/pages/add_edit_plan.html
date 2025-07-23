@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>添加计划 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .header-card {
+      background: linear-gradient(135deg, #10b981, #059669);
+      padding: 20px;
+      color: white;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #374151;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    
+    .form-control:focus {
+      border-color: #10b981;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    
+    .time-picker-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .time-picker {
+      flex: 1;
+    }
+    
+    .category-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .category-item {
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .category-item.active {
+      background-color: #10b981;
+      color: white;
+      border-color: #10b981;
+    }
+    
+    .category-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    .category-work .category-icon {
+      background-color: #dbeafe;
+      color: #2563eb;
+    }
+    
+    .category-personal .category-icon {
+      background-color: #fef3c7;
+      color: #d97706;
+    }
+    
+    .category-health .category-icon {
+      background-color: #d1fae5;
+      color: #059669;
+    }
+    
+    .category-family .category-icon {
+      background-color: #ede9fe;
+      color: #7c3aed;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #e5e7eb;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .toggle-slider {
+      background-color: #10b981;
+    }
+    
+    input:checked + .toggle-slider:before {
+      transform: translateX(22px);
+    }
+    
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .setting-row:last-child {
+      border-bottom: none;
+    }
+    
+    .setting-label {
+      font-weight: 500;
+      color: #374151;
+    }
+    
+    .setting-desc {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+    
+    .reminder-select {
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #374151;
+      background-color: white;
+    }
+    
+    .recurrence-select {
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #374151;
+      background-color: white;
+    }
+    
+    .btn-action {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background-color: #10b981;
+      color: white;
+    }
+    
+    .btn-primary:active {
+      background-color: #059669;
+    }
+    
+    .btn-secondary {
+      background-color: #f3f4f6;
+      color: #374151;
+    }
+    
+    .btn-secondary:active {
+      background-color: #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- 头部 -->
+      <div class="header-card">
+        <div class="flex justify-between items-center">
+          <a href="daily_plan.html" class="text-white">
+            <i class="fas fa-arrow-left text-lg"></i>
+          </a>
+          <h1 class="text-xl font-bold">添加计划</h1>
+          <div class="w-6"></div> <!-- 占位元素，保持标题居中 -->
+        </div>
+      </div>
+
+      <!-- 表单内容 -->
+      <div class="p-4">
+        <!-- 计划标题 -->
+        <div class="form-group">
+          <label for="plan-title" class="form-label">计划标题</label>
+          <input 
+            type="text" 
+            id="plan-title" 
+            class="form-control" 
+            placeholder="输入计划标题"
+          >
+        </div>
+        
+        <!-- 时间段选择 -->
+        <div class="form-group">
+          <label class="form-label">时间段</label>
+          <div class="time-picker-container">
+            <div class="time-picker">
+              <input 
+                type="time" 
+                id="start-time" 
+                class="form-control" 
+                value="09:00"
+              >
+            </div>
+            <span class="text-gray-400">至</span>
+            <div class="time-picker">
+              <input 
+                type="time" 
+                id="end-time" 
+                class="form-control" 
+                value="10:00"
+              >
+            </div>
+          </div>
+        </div>
+        
+        <!-- 日期选择 -->
+        <div class="form-group">
+          <label for="plan-date" class="form-label">日期</label>
+          <input 
+            type="date" 
+            id="plan-date" 
+            class="form-control" 
+            value="2025-04-02"
+          >
+        </div>
+        
+        <!-- 类别选择 -->
+        <div class="form-group">
+          <label class="form-label">类别</label>
+          <div class="category-selector">
+            <div class="category-item category-work active">
+              <div class="category-icon">
+                <i class="fas fa-briefcase text-xs"></i>
+              </div>
+              <span>工作</span>
+            </div>
+            <div class="category-item category-personal">
+              <div class="category-icon">
+                <i class="fas fa-user text-xs"></i>
+              </div>
+              <span>个人</span>
+            </div>
+            <div class="category-item category-health">
+              <div class="category-icon">
+                <i class="fas fa-heartbeat text-xs"></i>
+              </div>
+              <span>健康</span>
+            </div>
+            <div class="category-item category-family">
+              <div class="category-icon">
+                <i class="fas fa-home text-xs"></i>
+              </div>
+              <span>家庭</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 计划描述 -->
+        <div class="form-group">
+          <label for="plan-description" class="form-label">描述（可选）</label>
+          <textarea 
+            id="plan-description" 
+            class="form-control" 
+            placeholder="添加计划描述..."
+            rows="3"
+          ></textarea>
+        </div>
+        
+        <!-- 高级设置 -->
+        <div class="bg-white rounded-xl p-4 shadow-sm mb-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3">高级设置</h3>
+          
+          <!-- 提醒设置 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">提醒</div>
+              <div class="setting-desc">设置在计划开始前多久提醒</div>
+            </div>
+            <select class="reminder-select">
+              <option value="0">不提醒</option>
+              <option value="5">提前5分钟</option>
+              <option value="10">提前10分钟</option>
+              <option value="15" selected>提前15分钟</option>
+              <option value="30">提前30分钟</option>
+              <option value="60">提前1小时</option>
+            </select>
+          </div>
+          
+          <!-- 重复设置 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">重复</div>
+              <div class="setting-desc">设置计划重复周期</div>
+            </div>
+            <select class="recurrence-select">
+              <option value="once">一次性</option>
+              <option value="daily" selected>每天</option>
+              <option value="weekly">每周</option>
+              <option value="monthly">每月</option>
+              <option value="weekdays">工作日</option>
+              <option value="weekends">周末</option>
+            </select>
+          </div>
+          
+          <!-- 置顶设置 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">置顶计划</div>
+              <div class="setting-desc">将此计划显示在置顶区域</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <!-- 未完成提醒 -->
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">未完成提醒</div>
+              <div class="setting-desc">如果计划未完成，在指定时间提醒</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="flex flex-col gap-3 mb-6">
+          <button class="btn-action btn-primary">
+            保存计划
+          </button>
+          <button class="btn-action btn-secondary">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // 类别选择交互
+    document.querySelectorAll('.category-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+    
+    // 取消按钮
+    document.querySelector('.btn-secondary').addEventListener('click', function() {
+      window.location.href = 'daily_plan.html';
+    });
+  </script>
+</body>
+</html> 

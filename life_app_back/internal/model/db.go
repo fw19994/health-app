@@ -53,6 +53,9 @@ func InitDB(cfg config.DatabaseConfig) error {
 	// 自动迁移模型
 	if err := DB.AutoMigrate(
 		&Family{},
+		&Plan{},
+		&SpecialProject{},
+		&ProjectPhase{},
 	); err != nil {
 		return err
 	}

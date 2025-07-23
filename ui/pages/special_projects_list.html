@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>专项计划列表 - 品质生活</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .header-card {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      padding: 20px;
+      color: white;
+    }
+    
+    .search-bar {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      margin-top: 16px;
+    }
+    
+    .search-bar i {
+      color: rgba(255, 255, 255, 0.8);
+      margin-right: 10px;
+    }
+    
+    .search-bar input {
+      background: transparent;
+      border: none;
+      color: white;
+      width: 100%;
+    }
+    
+    .search-bar input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .search-bar input:focus {
+      outline: none;
+    }
+    
+    .category-chips {
+      display: flex;
+      gap: 10px;
+      margin: 16px 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 6px;
+    }
+    
+    .category-chips::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .category-chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    
+    .chip-all {
+      background-color: #4f46e5;
+      color: white;
+    }
+    
+    .chip-home {
+      background-color: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+    
+    .chip-travel {
+      background-color: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+    
+    .chip-education {
+      background-color: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+    
+    .chip-finance {
+      background-color: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+    
+    .project-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 16px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    
+    .project-card-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    
+    .project-title {
+      font-weight: 600;
+      color: #111827;
+      font-size: 18px;
+    }
+    
+    .project-status {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .status-active {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+    
+    .status-completed {
+      background-color: #e0f2fe;
+      color: #0369a1;
+    }
+    
+    .status-planned {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    
+    .project-date {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 12px;
+    }
+    
+    .progress-container {
+      height: 6px;
+      background-color: #f3f4f6;
+      border-radius: 3px;
+      margin: 12px 0;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    
+    .progress-bar-active {
+      background: linear-gradient(90deg, #4f46e5, #818cf8);
+    }
+    
+    .progress-bar-completed {
+      background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+    }
+    
+    .progress-bar-planned {
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+    
+    .project-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    
+    /* 移除类别徽章样式 */
+    
+    /* 移除不需要的类别徽章样式 */
+    
+    .btn-action {
+      position: fixed;
+      right: 16px;
+      bottom: 100px;
+      width: 56px;
+      height: 56px;
+      border-radius: 28px;
+      background-color: #4f46e5;
+      color: white;
+      box-shadow: 0 4px 6px rgba(79, 70, 229, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    
+    .btn-action:active {
+      background-color: #4338ca;
+      transform: scale(0.95);
+    }
+    
+    /* 模态框样式 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    
+    .modal {
+      width: 100%;
+      background-color: white;
+      border-radius: 20px 20px 0 0;
+      padding: 20px;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+      position: relative;
+      animation: slideUp 0.3s ease-out;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    
+    .modal-drag-handle {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding: 0 0 16px 0;
+    }
+    
+    .modal-drag-line {
+      width: 40px;
+      height: 4px;
+      background-color: #e5e7eb;
+      border-radius: 2px;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .modal-title {
+      font-weight: 600;
+      font-size: 18px;
+      color: #111827;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      color: #6b7280;
+      font-size: 18px;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    .modal-close:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .modal-body {
+      padding-bottom: 10px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #374151;
+      font-size: 15px;
+    }
+    
+    .form-icon {
+      margin-right: 8px;
+      color: #4f46e5;
+      font-size: 14px;
+      width: 16px;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font-size: 15px;
+      transition: all 0.2s;
+      background-color: #f9fafb;
+    }
+    
+    .form-control:focus {
+      border-color: #4f46e5;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      background-color: white;
+    }
+    
+    .date-range {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .date-input {
+      flex: 1;
+    }
+    
+    .date-separator {
+      color: #6b7280;
+      font-weight: 500;
+    }
+    
+    .budget-input {
+      position: relative;
+    }
+    
+    .currency-symbol {
+      position: absolute;
+      left: 16px;
+      top: 12px;
+      font-weight: 600;
+      color: #4b5563;
+      font-size: 15px;
+    }
+    
+    .budget-input .form-control {
+      padding-left: 30px;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    
+    .btn-secondary {
+      flex: 1;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-align: center;
+      background-color: #f3f4f6;
+      color: #374151;
+      border: none;
+      font-size: 15px;
+    }
+    
+    .btn-primary {
+      flex: 1;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-align: center;
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      font-size: 15px;
+    }
+    
+    .btn-primary:active, .btn-secondary:active {
+      transform: scale(0.98);
+    }
+    
+    .modal-open {
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-bar-left">
+      <span class="signal-icon">
+        <i class="fas fa-signal"></i>
+      </span>
+    </div>
+    <div class="status-bar-time">19:46</div>
+    <div class="status-bar-right">
+      <span class="wifi-icon">
+        <i class="fas fa-wifi"></i>
+      </span>
+      <span class="battery-icon">
+        <i class="fas fa-battery-three-quarters"></i> 85%
+      </span>
+    </div>
+  </div>
+
+  <!-- App Content -->
+  <div class="app-content">
+    <div class="scroll-container">
+      <!-- 头部 -->
+      <div class="header-card">
+        <div class="flex justify-between items-center">
+          <h1 class="text-xl font-bold">专项计划</h1>
+          <a href="#" class="text-white">
+            <i class="fas fa-ellipsis-h"></i>
+          </a>
+        </div>
+        
+        <!-- 搜索栏 -->
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="搜索专项计划">
+        </div>
+        
+        <!-- 分类标签 -->
+        <div class="category-chips">
+          <div class="category-chip chip-all">全部</div>
+          <div class="category-chip chip-home">进行中</div>
+          <div class="category-chip chip-travel">已完成</div>
+          <div class="category-chip chip-finance">未开始</div>
+        </div>
+      </div>
+
+      <!-- 项目卡片列表 -->
+      <div class="p-4">
+        <!-- 项目卡片1 -->
+                  <a href="special_project_plan.html" class="block">
+            <div class="project-card">
+              <div class="project-card-header">
+                <div class="project-title">房屋装修计划</div>
+                <div class="project-status status-active">进行中</div>
+              </div>
+              <div class="project-date">
+                2025-04-01 至 2025-06-30
+              </div>
+              <div class="flex justify-between mb-2">
+                <div class="text-sm text-gray-600">已完成: 7/20</div>
+                <div class="text-sm text-indigo-600 font-medium">总预算: ¥150,000</div>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar progress-bar-active" style="width: 35%;"></div>
+              </div>
+              <div class="project-stats">
+                <div>进度: 35%</div>
+                <div>还剩: 80天</div>
+              </div>
+            </div>
+          </a>
+        
+        <!-- 项目卡片2 -->
+                  <a href="#" class="block">
+            <div class="project-card">
+              <div class="project-card-header">
+                <div class="project-title">毕业旅行计划</div>
+                <div class="project-status status-completed">已完成</div>
+              </div>
+              <div class="project-date">
+                2024-07-01 至 2024-07-15
+              </div>
+              <div class="flex justify-between mb-2">
+                <div class="text-sm text-gray-600">已完成: 12/12</div>
+                <div class="text-sm text-indigo-600 font-medium">总预算: ¥15,000</div>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar progress-bar-completed" style="width: 100%;"></div>
+              </div>
+              <div class="project-stats">
+                <div>进度: 100%</div>
+                <div>已完成</div>
+              </div>
+            </div>
+          </a>
+        
+        <!-- 项目卡片3 -->
+                  <a href="#" class="block">
+            <div class="project-card">
+              <div class="project-card-header">
+                <div class="project-title">资产配置计划</div>
+                <div class="project-status status-planned">未开始</div>
+              </div>
+              <div class="project-date">
+                2025-01-01 至 2025-12-31
+              </div>
+              <div class="flex justify-between mb-2">
+                <div class="text-sm text-gray-600">已完成: 0/10</div>
+                <div class="text-sm text-indigo-600 font-medium">总预算: ¥200,000</div>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar progress-bar-planned" style="width: 0%;"></div>
+              </div>
+              <div class="project-stats">
+                <div>进度: 0%</div>
+                <div>未开始</div>
+              </div>
+            </div>
+          </a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 添加专项计划模态框 -->
+  <div id="addProjectModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-drag-handle">
+        <div class="modal-drag-line"></div>
+      </div>
+      
+      <div class="modal-header">
+        <h2 class="modal-title">添加专项计划</h2>
+        <button class="modal-close" onclick="closeModal('addProjectModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <form id="addProjectForm">
+          <!-- 专项名称 -->
+          <div class="form-group">
+            <label for="projectTitle" class="form-label">
+              <i class="fas fa-bookmark form-icon"></i>
+              专项名称
+            </label>
+            <input type="text" id="projectTitle" class="form-control" placeholder="请输入专项计划名称" required>
+          </div>
+          
+          <!-- 周期 -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-calendar-alt form-icon"></i>
+              项目周期
+            </label>
+            <div class="date-range">
+              <div class="date-input">
+                <input type="text" id="startDate" class="form-control" placeholder="开始日期" readonly>
+              </div>
+              <div class="date-separator">至</div>
+              <div class="date-input">
+                <input type="text" id="endDate" class="form-control" placeholder="结束日期" readonly>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 预算 -->
+          <div class="form-group">
+            <label for="projectBudget" class="form-label">
+              <i class="fas fa-yuan-sign form-icon"></i>
+              项目预算
+            </label>
+            <div class="budget-input">
+              <span class="currency-symbol">¥</span>
+              <input type="number" id="projectBudget" class="form-control" placeholder="请输入预算金额" min="0" step="0.01">
+            </div>
+          </div>
+          
+          <!-- 计划描述 -->
+          <div class="form-group">
+            <label for="projectDescription" class="form-label">
+              <i class="fas fa-align-left form-icon"></i>
+              计划描述
+            </label>
+            <textarea id="projectDescription" class="form-control" rows="3" placeholder="请输入计划描述"></textarea>
+          </div>
+          
+          <!-- 操作按钮 -->
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" onclick="closeModal('addProjectModal')">取消</button>
+            <button type="submit" class="btn-primary">创建计划</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 日期选择器容器 -->
+  <div id="startDatePickerContainer" style="display: none;"></div>
+  <div id="endDatePickerContainer" style="display: none;"></div>
+  
+  <!-- 浮动添加按钮 -->
+  <a href="#" class="btn-action" id="createProject">
+    <i class="fas fa-plus"></i>
+  </a>
+  
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <a href="index.html" class="tab-item">
+      <i class="tab-icon fas fa-home"></i>
+      <span>首页</span>
+    </a>
+    <a href="#" class="tab-item active">
+      <i class="tab-icon fas fa-tasks"></i>
+      <span>计划</span>
+    </a>
+    <a href="#" class="tab-item">
+      <i class="tab-icon fas fa-chart-pie"></i>
+      <span>财务</span>
+    </a>
+    <a href="#" class="tab-item">
+      <i class="tab-icon fas fa-user"></i>
+      <span>我的</span>
+    </a>
+  </div>
+
+  <!-- Navigation Bar -->
+  <div class="nav-bar">
+    <a href="home.html" class="nav-item">
+      <i class="fas fa-home"></i>
+      <span>首页</span>
+    </a>
+    <a href="monthly_plan_calendar.html" class="nav-item">
+      <i class="fas fa-calendar-alt"></i>
+      <span>日程</span>
+    </a>
+    <a href="#" class="nav-item active">
+      <i class="fas fa-chart-line"></i>
+      <span>计划</span>
+    </a>
+    <a href="assistant.html" class="nav-item">
+      <i class="fas fa-robot"></i>
+      <span>助手</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <i class="fas fa-user"></i>
+      <span>我的</span>
+    </a>
+  </div>
+  
+  <!-- Scripts -->
+  <script src="../js/components/datePicker.js"></script>
+  <script>
+    // 初始化日期选择器
+    let startDatePicker, endDatePicker;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      // 模拟数据 - 实际项目中应该从服务器获取
+      const projects = [
+        // ... existing code ...
+      ];
+      
+    // 分类标签切换
+    const categoryChips = document.querySelectorAll('.category-chip');
+    categoryChips.forEach(chip => {
+      chip.addEventListener('click', function() {
+        categoryChips.forEach(c => {
+          c.classList.remove('chip-all');
+          c.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+        });
+        
+        this.classList.add('chip-all');
+        this.style.backgroundColor = '#4f46e5';
+      });
+    });
+    
+      // 初始化日期选择器
+      startDatePicker = new DatePicker({
+        containerId: 'startDatePickerContainer',
+        onDateSelect: (date) => {
+          document.getElementById('startDate').value = formatDate(date);
+          startDatePicker.hide();
+          
+          // 如果开始日期晚于结束日期，更新结束日期
+          const endDateInput = document.getElementById('endDate');
+          if (endDateInput.value) {
+            const endDate = parseDate(endDateInput.value);
+            if (date > endDate) {
+              endDateInput.value = formatDate(date);
+            }
+          }
+        }
+      });
+      
+      endDatePicker = new DatePicker({
+        containerId: 'endDatePickerContainer',
+        onDateSelect: (date) => {
+          document.getElementById('endDate').value = formatDate(date);
+          endDatePicker.hide();
+          
+          // 如果结束日期早于开始日期，更新开始日期
+          const startDateInput = document.getElementById('startDate');
+          if (startDateInput.value) {
+            const startDate = parseDate(startDateInput.value);
+            if (date < startDate) {
+              startDateInput.value = formatDate(date);
+            }
+          }
+        }
+      });
+      
+      // 绑定日期输入框点击事件
+      document.getElementById('startDate').addEventListener('click', function() {
+        startDatePicker.show();
+      });
+      
+      document.getElementById('endDate').addEventListener('click', function() {
+        endDatePicker.show();
+      });
+      
+      // 表单提交处理
+      document.getElementById('addProjectForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // 获取表单数据
+        const formData = {
+          title: document.getElementById('projectTitle').value,
+          startDate: document.getElementById('startDate').value,
+          endDate: document.getElementById('endDate').value,
+          budget: document.getElementById('projectBudget').value,
+          description: document.getElementById('projectDescription').value
+        };
+        
+        // 验证表单
+        if (!formData.title) {
+          alert('请输入专项计划名称');
+          return;
+        }
+        
+        if (!formData.startDate || !formData.endDate) {
+          alert('请选择项目周期');
+          return;
+        }
+        
+        // 在实际应用中，这里应该发送数据到服务器
+        console.log('创建新专项计划:', formData);
+        
+        // 关闭模态框
+        closeModal('addProjectModal');
+        
+        // TODO: 添加新专项到列表
+        // 这里可以添加代码刷新专项列表或动态添加新专项卡片
+        alert('专项计划创建成功!');
+      });
+      
+      // 绑定浮动按钮事件
+      const addButton = document.getElementById('createProject');
+      if (addButton) {
+        addButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          openAddProjectModal();
+        });
+      }
+      
+      // 日期格式化函数
+      function formatDate(date) {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+      
+      // 解析日期字符串
+      function parseDate(dateStr) {
+        const [year, month, day] = dateStr.split('-').map(Number);
+        return new Date(year, month - 1, day);
+      }
+    });
+    
+    // 打开模态框
+    function openAddProjectModal() {
+      document.getElementById('addProjectModal').style.display = 'flex';
+      document.body.classList.add('modal-open');
+    }
+    
+    // 关闭模态框
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+      document.body.classList.remove('modal-open');
+    }
+  </script>
+</body>
+</html> 
