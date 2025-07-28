@@ -12,6 +12,7 @@ import '../../models/plan/special_project_model.dart';
 import '../../widgets/plan/add_special_project_modal.dart';
 import '../../widgets/plan/add_plan_modal.dart';
 import '../../widgets/plan/action_buttons.dart';
+import '../../widgets/plan/plan_monitor_status_badge.dart';
 import 'package:intl/intl.dart';
 
 class DailyPlanScreen extends StatefulWidget {
@@ -132,6 +133,11 @@ class _DailyPlanScreenState extends State<DailyPlanScreen> {
                 ),
                 Row(
                   children: [
+                    // 添加计划监控状态徽章
+                    const Padding(
+                      padding: EdgeInsets.only(right: 16.0),
+                      child: PlanMonitorStatusBadge(),
+                    ),
                     // 添加设置图标
                     GestureDetector(
                       onTap: () {
@@ -147,15 +153,15 @@ class _DailyPlanScreenState extends State<DailyPlanScreen> {
                       ),
                     ),
                     // 原有的日历图标
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, Routes.monthlyPlan);
-                      },
-                      child: const FaIcon(
-                        FontAwesomeIcons.calendar,
-                        color: Colors.white,
-                        size: 18,
-                      ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, Routes.monthlyPlan);
+                  },
+                  child: const FaIcon(
+                    FontAwesomeIcons.calendar,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                     ),
                   ],
                 ),

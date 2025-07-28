@@ -86,6 +86,29 @@ class PlanService extends ChangeNotifier {
     }).toList();
   }
   
+  // 从API获取今天的计划
+  Future<List<Plan>> fetchTodayPlans() async {
+    try {
+      // 确保已有计划数据
+      if (_plans.isEmpty) {
+        await loadPlans();
+      } else {
+        // 如果距离上次加载已超过12小时，则重新加载
+        final now = DateTime.now();
+        if (_lastLoadedDate == null || 
+            now.difference(_lastLoadedDate!).inHours > 12) {
+          await loadPlans();
+        }
+      }
+      
+      // 获取今天的计划
+      return getTodayPlans();
+    } catch (e) {
+      debugPrint('获取今日计划失败: $e');
+      return _plans.isEmpty ? [] : getTodayPlans();
+    }
+  }
+  
   // 获取指定日期的计划
   List<Plan> getPlansForDate(DateTime date) {
     final targetDate = DateTime(date.year, date.month, date.day);
@@ -1123,14 +1146,14 @@ final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.da
       // 检查是否可以设置提醒
       if (!plan.canReceiveReminder) {
         debugPrint('该计划不需要设置提醒: ${plan.id}');
-        return;
-      }
-      
+      return;
+    }
+    
       // 初始化提醒服务
       final reminderService = ReminderService();
       await reminderService.initialize();
-      
-      // 设置提醒
+    
+    // 设置提醒
       final success = await reminderService.scheduleReminder(plan);
       
       if (success) {

@@ -37,6 +37,7 @@ import 'screens/finance/family_finance/family_finance_router.dart';
 import 'utils/app_icons.dart';
 import 'services/reminder_service.dart';
 import 'services/api_service.dart';
+import 'services/plan_monitor_service.dart';
 
 // 全局导航键
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -124,6 +125,10 @@ class MyApp extends StatelessWidget {
           create: (context) => ReminderService(),
           lazy: false, // 确保立即创建
         ),
+        ChangeNotifierProvider<PlanMonitorService>(
+          create: (context) => PlanMonitorService(),
+          lazy: false, // 确保立即创建
+        ),
       ],
       child: ScaffoldMessenger(
         key: _scaffoldMessengerKey,
@@ -197,6 +202,18 @@ class MyApp extends StatelessWidget {
               // 设置ProjectPhaseService的context
               final projectPhaseService = Provider.of<ProjectPhaseService>(context, listen: false);
               projectPhaseService.setContext(context);
+              
+              // 初始化ReminderService
+              final reminderService = Provider.of<ReminderService>(context, listen: false);
+              reminderService.initialize();
+              
+              // 在用户已登录的情况下，启动计划监控服务
+              if (authService.isLoggedIn) {
+                // 启动计划监控服务
+                final planMonitorService = Provider.of<PlanMonitorService>(context, listen: false);
+                planMonitorService.startMonitoring();
+                debugPrint('计划监控服务已在应用启动时启动');
+              }
             });
             return MediaQuery(
               // 防止文字缩放影响布局

@@ -147,19 +147,19 @@ class ProjectPhasesList extends StatelessWidget {
         // 构建所有阶段
         ...phases.map((phase) {
           return SpecialProjectPhase(
-            id: phase.id,
-            title: phase.name,
-            onEdit: () => onEditPhase(phase.id),
-            onAddPhaseBefore: () => onAddPhase(phase.id),
-            onDeletePhase: () => onDeletePhase(phase.id),
-            children: [
-              SpecialProjectTimeline(
-                phaseId: phase.id,
-                tasks: phase.tasks,
-                onAddTask: () => onAddTask(phase.id),
-                onAddTaskBefore: (taskId) => onAddTaskBefore(phase.id, taskId),
-                onEditTask: (task) => onEditTask(phase.id, task),
-                onDeleteTask: (taskId) => onDeleteTask(taskId),
+                id: phase.id,
+                title: phase.name,
+                onEdit: () => onEditPhase(phase.id),
+                onAddPhaseBefore: () => onAddPhase(phase.id),
+                onDeletePhase: () => onDeletePhase(phase.id),
+                children: [
+                  SpecialProjectTimeline(
+                    phaseId: phase.id,
+                    tasks: phase.tasks,
+                    onAddTask: () => onAddTask(phase.id),
+                    onAddTaskBefore: (taskId) => onAddTaskBefore(phase.id, taskId),
+                    onEditTask: (task) => onEditTask(phase.id, task),
+                    onDeleteTask: (taskId) => onDeleteTask(taskId),
                 onCompleteTask: (task) => onCompleteTask(task),
                 phaseColors: _getPhaseColors(phase.id),
               ),

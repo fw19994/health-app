@@ -5,20 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2e1b89c6-fa57-4e16-9de3-db71ea4265ae" name="更改" comment="init">
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/constants/api_constants.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/constants/api_constants.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/constants/routes.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/constants/routes.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/android/app/src/main/AndroidManifest.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/api_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/utils/app_icons.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/utils/app_icons.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/plan/daily_plan_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/plan/daily_plan_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/plan/plan_settings_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/plan/plan_settings_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/plan/widgets/project_phases_list.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/plan/widgets/project_phases_list.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/plan/widgets/special_project_timeline.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/plan/widgets/special_project_timeline.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/plan_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/plan_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/reminder_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/reminder_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/widgets/plan/add_plan_modal.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/widgets/plan/add_plan_modal.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/widgets/plan/add_special_project_modal.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/widgets/plan/add_special_project_modal.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/pubspec.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/1b8c4b9c-51ba-40be-892a-7abd3198744c.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/1b8c4b9c-51ba-40be-892a-7abd3198744c.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/model/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/model/db.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/router/setupRouter.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/router/setupRouter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ui/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../ui/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ui/pages/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/../ui/pages/home.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -52,7 +52,7 @@ dependencies:
   url_launcher: ^6.2.1
   flutter_local_notifications: ^16.2.0
   timezone: ^0.9.2
-  flutter_native_timezone: ^2.0.0 # 获取设备当前时区
+  # flutter_native_timezone: ^1.1.0 # 获取设备当前时区 - 由于构建问题暂时移除
   # 暂时移除这些依赖以解决构建问题
   # speech_to_text: ^6.5.1
   # flutter_tts: ^3.8.5

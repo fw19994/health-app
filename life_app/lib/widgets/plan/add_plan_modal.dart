@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../models/plan/plan_model.dart';
 import '../../services/plan_service.dart';
 import '../../widgets/common/date_picker_modal.dart';
+import '../../widgets/common/app_alert_dialog.dart';
 import 'custom_time_picker.dart';
 import '../../widgets/common/category_selector.dart';
 import 'package:uuid/uuid.dart';
@@ -550,8 +551,11 @@ class _AddPlanModalContentState extends State<_AddPlanModalContent> {
   
   void _submitForm() async {
     if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入计划标题')),
+      // 使用AppAlertDialog替换原有的AlertDialog
+      AppAlertDialog.show(
+        context: context,
+        message: '请输入计划标题',
+        accentColor: _selectedColor,
       );
       return;
     }
@@ -608,26 +612,22 @@ class _AddPlanModalContentState extends State<_AddPlanModalContent> {
         // 操作成功，关闭弹窗并返回true
         Navigator.pop(context, true);
       } else {
-        // 显示错误信息
+        // 使用AppAlertDialog.showError替换SnackBar
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(result['message'] ?? '操作失败'),
-              backgroundColor: Colors.red,
-            ),
+          AppAlertDialog.showError(
+            context: context,
+            message: result['message'] ?? '操作失败',
           );
         }
         // 操作失败，返回false
         Navigator.pop(context, false);
       }
     } catch (e) {
-      // 捕获其他可能的异常
+      // 使用AppAlertDialog.showError替换SnackBar
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('发生错误: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
+        AppAlertDialog.showError(
+          context: context,
+          message: '发生错误: ${e.toString()}',
         );
       }
       // 操作失败，返回false

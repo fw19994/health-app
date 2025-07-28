@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../models/plan/special_project_model.dart';
 import '../../services/special_project_service.dart';
-import '../../themes/app_theme.dart';
 import '../../widgets/common/date_picker_modal.dart';
-import 'package:provider/provider.dart';
+import '../../widgets/common/app_alert_dialog.dart';
 
 /// 添加专项计划弹窗
 /// 可在多个页面复用的添加专项计划弹窗组件
@@ -82,8 +83,9 @@ class _AddSpecialProjectModalState extends State<AddSpecialProjectModal> {
     }
 
     if (_startDate == null || _endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请选择项目周期')),
+      AppAlertDialog.show(
+        context: context,
+        message: '请选择项目周期',
       );
       return;
     }
@@ -119,14 +121,16 @@ class _AddSpecialProjectModalState extends State<AddSpecialProjectModal> {
       // 关闭弹窗
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('专项计划创建成功')),
+        AppAlertDialog.showSuccess(
+          context: context,
+          message: '专项计划创建成功',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('创建失败: ${e.toString()}')),
+        AppAlertDialog.showError(
+          context: context,
+          message: '创建失败: ${e.toString()}',
         );
       }
     } finally {

@@ -51,42 +51,42 @@ class _SpecialProjectTimelineState extends State<SpecialProjectTimeline> {
         children: [
           // 时间线
           Stack(
-            children: [
+              children: [
               // 时间线竖线 - 放在最左侧
-              Positioned(
+                Positioned(
                 left: leftPosition + dotHalfSize - 1, // 圆点中心位置减去线宽的一半(1px)
-                top: 0,
-                bottom: 0,
-                width: 2,
-                child: Container(
-                  color: const Color(0xFFE5E7EB),
+                  top: 0,
+                  bottom: 0,
+                  width: 2,
+                  child: Container(
+                    color: const Color(0xFFE5E7EB),
+                  ),
                 ),
-              ),
-              
-              // 时间线项目
-              Column(
-                children: [
-                  ...widget.tasks.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final task = entry.value;
-                    final bool showAddButton = addButtonController.activeTaskId == task.id;
+                
+                // 时间线项目
+                Column(
+                  children: [
+                    ...widget.tasks.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final task = entry.value;
+                      final bool showAddButton = addButtonController.activeTaskId == task.id;
+                      
+                      return Column(
+                        children: [
+                          // 任务项
+                          _buildTimelineItem(task, dotSize, addButtonController),
+                        ],
+                      );
+                    }).toList(),
                     
-                    return Column(
-                      children: [
-                        // 任务项
-                        _buildTimelineItem(task, dotSize, addButtonController),
-                      ],
-                    );
-                  }).toList(),
-                  
                   // 添加任务按钮 - 适配新的风格
                   if (widget.tasks.isEmpty)
                     _buildEmptyStateWithAddButton(dotSize)
                   else
                     _buildAddTaskButton(dotSize),
-                ],
-              ),
-            ],
+                      ],
+                    ),
+                  ],
           ),
         ],
       ),
@@ -174,12 +174,12 @@ class _SpecialProjectTimelineState extends State<SpecialProjectTimeline> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             // 日期
-                            Text(
-                              _formatDate(task.date),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF6B7280),
-                              ),
+                        Text(
+                          _formatDate(task.date),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF6B7280),
+                          ),
                             ),
                             // 时间段
                             if (task.startTime != null)
@@ -260,12 +260,12 @@ class _SpecialProjectTimelineState extends State<SpecialProjectTimeline> {
                                   : null,
                               ),
                               const SizedBox(width: 8),
-                              Text(
+                        Text(
                                 isCompleted(task) ? '已完成' : '标记完成',
                                 style: TextStyle(
-                                  fontSize: 14,
+                            fontSize: 14,
                                   color: isCompleted(task) ? colors['primary'] : const Color(0xFF6B7280),
-                                  fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
@@ -282,11 +282,11 @@ class _SpecialProjectTimelineState extends State<SpecialProjectTimeline> {
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                                 color: colors['primary']!,
-                              ),
-                            ),
+                          ),
+                        ),
                             const SizedBox(width: 12),
-                            
-                            // 状态标签 - 右下角
+                        
+                        // 状态标签 - 右下角
                             _buildStatusBadge(task, colors),
                           ],
                         ),
@@ -407,7 +407,7 @@ class _SpecialProjectTimelineState extends State<SpecialProjectTimeline> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         // 取消按钮
-                        TextButton(
+          TextButton(
                           onPressed: () => Navigator.of(dialogContext).pop(),
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -428,17 +428,17 @@ class _SpecialProjectTimelineState extends State<SpecialProjectTimeline> {
                         
                         // 删除按钮
                         ElevatedButton(
-                          onPressed: () {
+            onPressed: () {
                             // 先关闭对话框
                             Navigator.of(dialogContext).pop();
                             
                             // 使用Future.microtask确保在对话框完全关闭后再调用删除功能
                             Future.microtask(() {
-                              if (widget.onDeleteTask != null) {
-                                widget.onDeleteTask!(task.id);
-                              }
+              if (widget.onDeleteTask != null) {
+                widget.onDeleteTask!(task.id);
+              }
                             });
-                          },
+            },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
@@ -446,7 +446,7 @@ class _SpecialProjectTimelineState extends State<SpecialProjectTimeline> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6),
                             ),
-                          ),
+            ),
                           child: const Text(
                             '删除',
                             style: TextStyle(
@@ -460,8 +460,8 @@ class _SpecialProjectTimelineState extends State<SpecialProjectTimeline> {
                     ),
                   ],
                 ),
-              ),
-            ],
+          ),
+        ],
           ),
         ),
       ),
@@ -556,7 +556,7 @@ class _SpecialProjectTimelineState extends State<SpecialProjectTimeline> {
         return category;
     }
   }
-
+  
   // 构建状态标签
   Widget _buildStatusBadge(ProjectTask task, Map<String, Color> colors) {
     // 获取当前时间
@@ -574,7 +574,7 @@ class _SpecialProjectTimelineState extends State<SpecialProjectTimeline> {
     // 判断任务状态
     if (isCompleted) {
       // 已完成状态
-      text = '已完成';
+        text = '已完成';
       backgroundColor = colors['lighter']!;
       textColor = colors['primary']!;
     } else {
@@ -689,7 +689,7 @@ class _SpecialProjectTimelineState extends State<SpecialProjectTimeline> {
     } else {
       return NumberFormat('0.00').format(cost);
     }
-  }
+    }
   
   // 为空阶段构建带有添加按钮的空状态
   Widget _buildEmptyStateWithAddButton(double dotSize) {
@@ -796,4 +796,4 @@ class _SpecialProjectTimelineState extends State<SpecialProjectTimeline> {
   bool isCompleted(ProjectTask task) {
     return task.isCompletedToday || task.status == TaskStatus.completed;
   }
-}
+  }

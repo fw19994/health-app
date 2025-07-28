@@ -965,18 +965,32 @@ class _FamilyManagementScreenState extends State<FamilyManagementScreen> {
   
   // 家庭卡片
   Widget _buildFamilyCard(Family family) {
-    // 生成随机颜色作为家庭卡片的渐变背景色
-    final List<List<Color>> gradients = [
-      [const Color(0xFF3B82F6), const Color(0xFF1D4ED8)], // 蓝色渐变
-      [const Color(0xFF10B981), const Color(0xFF047857)], // 绿色渐变
-      [const Color(0xFFF59E0B), const Color(0xFFB45309)], // 橙色渐变
-      [const Color(0xFF6366F1), const Color(0xFF4338CA)], // 靛蓝渐变
-      [const Color(0xFFEC4899), const Color(0xFFBE185D)], // 粉色渐变
-    ];
+    // 使用应用定义的颜色，而非自定义明亮颜色
+    // 从项目主题中获取颜色
+    final int familyColorIndex = family.id % 4;
+    List<Color> cardGradient;
     
-    // 根据家庭ID选择渐变色，确保同一个家庭总是显示相同的渐变色
-    final gradientIndex = family.id % gradients.length;
-    final gradient = gradients[gradientIndex];
+    // 根据家庭ID选择不同的颜色组合，但都来自主题
+    switch(familyColorIndex) {
+      case 0:
+        // 主色调渐变 - 橙色系
+        cardGradient = [AppTheme.primaryColor, AppTheme.secondaryColor];
+        break;
+      case 1:
+        // 首页样式 - 蓝紫色系
+        cardGradient = [AppTheme.homeHeaderDark, AppTheme.homeHeaderLight];
+        break;
+      case 2:
+        // 智能助手背景色 + 紫色
+        cardGradient = [AppTheme.assistantBackground, const Color(0xFF7C3AED)];
+        break;
+      case 3:
+        // 家庭按钮颜色 - 绿色系
+        cardGradient = [AppTheme.familyButtonIcon, const Color(0xFF059669)];
+        break;
+      default:
+        cardGradient = [AppTheme.primaryColor, AppTheme.secondaryColor];
+    }
     
     return GestureDetector(
       onTap: () {
@@ -987,15 +1001,15 @@ class _FamilyManagementScreenState extends State<FamilyManagementScreen> {
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -1003,90 +1017,122 @@ class _FamilyManagementScreenState extends State<FamilyManagementScreen> {
           children: [
             // 家庭卡片头部 - 渐变色背景
             Container(
-              height: 100,
+              height: 80,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: gradient,
+                  colors: cardGradient,
                 ),
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    // 家庭图标
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
+              child: Stack(
+                children: [
+                  // 背景图案装饰
+                  Positioned(
+                    right: -20,
+                    top: -20,
+                    child: Opacity(
+                      opacity: 0.1,
+                      child: Icon(
                         FontAwesomeIcons.house,
-                        size: 24,
+                        size: 80,
                         color: Colors.white,
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    // 家庭名称和创建日期
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            family.name,
-                            style: const TextStyle(
+                  ),
+                  // 内容
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: Row(
+                      children: [
+                        // 家庭图标
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            FontAwesomeIcons.house,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // 家庭名称和创建日期
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                family.name,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '创建于 ${family.formattedCreatedDate}',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // 家庭状态标签
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: family.isActive
+                                ? Colors.white.withOpacity(0.2)
+                                : Colors.black.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: family.isActive 
+                                  ? Colors.white.withOpacity(0.4)
+                                  : Colors.white.withOpacity(0.2),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Text(
+                            family.isActive ? '活跃' : '已停用',
+                            style: TextStyle(
                               color: Colors.white,
-                              fontSize: 20,
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '创建于 ${family.formattedCreatedDate}',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.8),
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // 家庭状态标签
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: family.isActive
-                            ? Colors.green.withOpacity(0.2)
-                            : Colors.red.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        family.isActive ? '活跃' : '已停用',
-                        style: TextStyle(
-                          color: family.isActive ? Colors.white : Colors.white.withOpacity(0.8),
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             // 家庭卡片底部 - 信息部分
             Column(
               children: [
+                // 信息区域
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -1095,104 +1141,138 @@ class _FamilyManagementScreenState extends State<FamilyManagementScreen> {
                         icon: FontAwesomeIcons.userGroup,
                         label: '成员数量',
                         value: '${family.memberCount}人',
+                        color: cardGradient[0],
+                      ),
+                      // 垂直分隔线
+                      Container(
+                        height: 30,
+                        width: 1,
+                        color: Colors.grey.withOpacity(0.2),
                       ),
                       // 家庭管理员
                       _buildInfoItem(
                         icon: FontAwesomeIcons.userShield,
                         label: '管理员',
                         value: family.ownerName,
+                        color: cardGradient[0],
                       ),
                     ],
                   ),
                 ),
+                
+                // 分隔线
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Colors.grey.withOpacity(0.1),
+                ),
+                
                 // 操作按钮区域
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.grey[50],
                     borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(16),
-                      bottomRight: Radius.circular(16),
+                      bottomLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
                     ),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // 切换状态按钮
-                      IconButton(
-                        onPressed: () => _toggleFamilyStatus(family),
-                        icon: Icon(
-                          family.isActive 
-                            ? Icons.toggle_on_outlined 
-                            : Icons.toggle_off_outlined,
-                          size: 24,
-                          color: family.isActive 
-                            ? Colors.green 
-                            : Colors.grey,
-                        ),
-                        tooltip: family.isActive ? '停用家庭' : '激活家庭',
+                      // 左侧管理操作
+                      Row(
+                        children: [
+                          // 切换状态按钮
+                          _buildIconButton(
+                            icon: family.isActive 
+                              ? Icons.toggle_on_outlined 
+                              : Icons.toggle_off_outlined,
+                            color: cardGradient[0],
+                            tooltip: family.isActive ? '停用家庭' : '激活家庭',
+                            onPressed: () => _toggleFamilyStatus(family),
+                          ),
+                          // 编辑家庭按钮
+                          _buildIconButton(
+                            icon: Icons.edit_outlined,
+                            color: cardGradient[0],
+                            tooltip: '编辑家庭',
+                            onPressed: () => _editFamily(family),
+                          ),
+                          // 删除家庭按钮
+                          _buildIconButton(
+                            icon: Icons.delete_outline,
+                            color: AppTheme.error.withOpacity(0.7),
+                            tooltip: '删除家庭',
+                            onPressed: () => _deleteFamily(family),
+                          ),
+                        ],
                       ),
-                      // 编辑家庭按钮
-                      IconButton(
-                        onPressed: () => _editFamily(family),
-                        icon: const Icon(
-                          Icons.edit,
-                          size: 20,
-                          color: Colors.blue,
-                        ),
-                        tooltip: '编辑家庭',
-                      ),
-                      // 删除家庭按钮
-                      IconButton(
-                        onPressed: () => _deleteFamily(family),
-                        icon: const Icon(
-                          Icons.delete,
-                          size: 20,
-                          color: Colors.red,
-                        ),
-                        tooltip: '删除家庭',
-                      ),
-                      // 记一笔按钮
-                      ElevatedButton.icon(
-                        onPressed: family.isActive ? () {
-                          // 导航到记账页面
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ExpenseTrackingScreen(
-                                familyId: family.id,
-                                isFamilyExpense: true,
+                      
+                      // 右侧主要操作
+                      Row(
+                        children: [
+                          // 记一笔按钮
+                          SizedBox(
+                            height: 30,
+                            child: ElevatedButton.icon(
+                              onPressed: family.isActive ? () {
+                                // 导航到记账页面
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ExpenseTrackingScreen(
+                                      familyId: family.id,
+                                      isFamilyExpense: true,
+                                    ),
+                                  ),
+                                );
+                              } : null,
+                              icon: const Icon(FontAwesomeIcons.moneyBillWave, size: 12),
+                              label: const Text('记一笔'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.success,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                                textStyle: const TextStyle(fontSize: 12),
+                                disabledBackgroundColor: Colors.grey.shade300,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
                             ),
-                          );
-                        } : null, // 如果家庭未激活，则禁用按钮
-                        icon: const Icon(FontAwesomeIcons.moneyBillWave, size: 14),
-                        label: const Text('记一笔'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                          textStyle: const TextStyle(fontSize: 12),
-                          disabledBackgroundColor: Colors.grey.shade300,
-                        ),
-                      ),
-                      // 进入家庭按钮
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          // 导航到家庭财务页面
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => FamilyFinanceScreen(familyId: family.id)),
-                          );
-                        },
-                        icon: const Icon(Icons.visibility, size: 16),
-                        label: const Text('进入家庭'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          textStyle: const TextStyle(fontSize: 12),
-                        ),
+                          ),
+                          const SizedBox(width: 8),
+                          // 进入家庭按钮
+                          SizedBox(
+                            height: 30,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                // 导航到家庭财务页面
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => FamilyFinanceScreen(familyId: family.id)),
+                                );
+                              },
+                              icon: const Icon(Icons.visibility_outlined, size: 14),
+                              label: const Text('进入家庭'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: cardGradient[0],
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                                textStyle: const TextStyle(fontSize: 12),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -1205,37 +1285,77 @@ class _FamilyManagementScreenState extends State<FamilyManagementScreen> {
     );
   }
   
+  // 定制图标按钮
+  Widget _buildIconButton({
+    required IconData icon,
+    required Color color,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(right: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: color.withOpacity(0.15),
+          width: 1,
+        ),
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(
+          icon,
+          size: 18,
+          color: color,
+        ),
+        tooltip: tooltip,
+        padding: const EdgeInsets.all(6),
+        constraints: const BoxConstraints(),
+        splashRadius: 20,
+      ),
+    );
+  }
+  
   // 家庭信息项
   Widget _buildInfoItem({
     required IconData icon,
     required String label,
     required String value,
+    required Color color,
   }) {
-    return Column(
-      children: [
-        Icon(
-          icon,
-          size: 18,
-          color: Colors.grey[600],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
+    return Expanded(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 14,
+            color: color.withOpacity(0.7),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
+          const SizedBox(width: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey[600],
+                ),
+              ),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: color.withOpacity(0.9),
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 } 
