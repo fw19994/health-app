@@ -7,14 +7,9 @@
     <list default="true" id="2e1b89c6-fa57-4e16-9de3-db71ea4265ae" name="更改" comment="init">
       <change beforePath="$PROJECT_DIR$/../life_app/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/android/app/src/main/AndroidManifest.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/plan/daily_plan_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/plan/daily_plan_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/plan/plan_settings_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/plan/plan_settings_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/plan/widgets/project_phases_list.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/plan/widgets/project_phases_list.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/screens/plan/widgets/special_project_timeline.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/screens/plan/widgets/special_project_timeline.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/plan_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/plan_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../life_app/lib/services/plan_monitor_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/plan_monitor_service.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/lib/services/reminder_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/services/reminder_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/widgets/plan/add_plan_modal.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/widgets/plan/add_plan_modal.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../life_app/lib/widgets/plan/add_special_project_modal.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/lib/widgets/plan/add_special_project_modal.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/pubspec.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../life_app/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../life_app/pubspec.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />

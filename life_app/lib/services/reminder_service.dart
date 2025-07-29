@@ -245,17 +245,22 @@ class ReminderService extends ChangeNotifier {
     }
     
     try {
+      // 获取用户通知偏好设置
+      final prefs = await SharedPreferences.getInstance();
+      final bool playSound = prefs.getBool('notification_sound_enabled') ?? true;
+      final bool enableVibration = prefs.getBool('notification_vibration_enabled') ?? true;
+      
       // 创建特殊闹钟通知渠道
       final AndroidNotificationChannel alarmChannel = AndroidNotificationChannel(
         'alarm_channel',
         '闹钟提醒',
         description: '像闹钟一样的计划提醒',
         importance: Importance.high, // 高优先级
-        enableVibration: true,
+        enableVibration: enableVibration,
         enableLights: true,
         ledColor: Colors.red,
-        playSound: true,
-        sound: const RawResourceAndroidNotificationSound('alarm_sound'),
+        playSound: playSound,
+        sound: playSound ? const RawResourceAndroidNotificationSound('alarm_sound') : null,
       );
       
       // 注册通知渠道
@@ -271,11 +276,11 @@ class ReminderService extends ChangeNotifier {
         importance: Importance.high,
         priority: Priority.high,
         fullScreenIntent: true, // 尝试全屏显示通知
-        playSound: true,
-        sound: const RawResourceAndroidNotificationSound('alarm_sound'),
+        playSound: playSound,
+        sound: playSound ? const RawResourceAndroidNotificationSound('alarm_sound') : null,
         audioAttributesUsage: AudioAttributesUsage.alarm, // 使用闹钟音频属性
-        enableVibration: true,
-        vibrationPattern: Int64List.fromList([0, 500, 500, 500, 500, 500, 500, 500]), // 更强的震动模式
+        enableVibration: enableVibration,
+        vibrationPattern: enableVibration ? Int64List.fromList([0, 500, 500, 500, 500, 500, 500, 500]) : null, // 更强的震动模式
         ticker: '计划提醒',
         visibility: NotificationVisibility.public,
         ongoing: true, // 持久通知，用户必须手动取消
@@ -285,8 +290,8 @@ class ReminderService extends ChangeNotifier {
       final DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
-        presentSound: true,
-        sound: 'alarm_sound.mp3',
+        presentSound: playSound,
+        sound: playSound ? 'alarm_sound.mp3' : null,
         interruptionLevel: InterruptionLevel.timeSensitive, // 时间敏感的打断级别
       );
       

@@ -1,9 +1,17 @@
 import 'dart:async';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:workmanager/workmanager.dart';
 import '../models/plan/plan_model.dart';
+import '../main.dart'; // 导入navigatorKey
+import 'foreground_service.dart'; // 导入前台服务管理器
 import 'plan_service.dart';
 import 'reminder_service.dart';
+
+// 定义后台任务名称
+const String checkPlansTask = "com.lifeapp.checkPlansTask";
 
 /// 计划监控服务
 /// 
@@ -28,6 +36,12 @@ class PlanMonitorService extends ChangeNotifier {
   // 已提醒的计划ID集合，避免重复提醒
   final Set<String> _alreadyNotifiedPlans = {};
   
+  // 初始化WorkManager
+  Future<void> _initWorkManager() async {
+    // WorkManager的初始化和回调已经在main.dart中实现
+    debugPrint('WorkManager配置已更新');
+  }
+  
   // 开始监控服务
   Future<void> startMonitoring() async {
     if (_isRunning) {
@@ -37,6 +51,46 @@ class PlanMonitorService extends ChangeNotifier {
     
     debugPrint('启动计划监控服务');
     await _reminderService.initialize();
+    
+    // 初始化WorkManager配置
+    await _initWorkManager();
+    
+    try {
+      // 注册周期性后台任务，仅在移动端平台执行
+      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+        debugPrint('在移动端注册后台任务');
+        await Workmanager().registerPeriodicTask(
+          "plan-monitor-task",
+          checkPlansTask,
+          frequency: const Duration(minutes: 15), // 每15分钟检查一次
+          constraints: Constraints(
+            networkType: NetworkType.connected, // 需要网络连接
+            requiresBatteryNotLow: false, // 低电量也能运行
+            requiresCharging: false, // 不需要充电
+            requiresDeviceIdle: false, // 不需要设备空闲
+            requiresStorageNotLow: false, // 存储空间低也能运行
+          ),
+          existingWorkPolicy: ExistingWorkPolicy.replace, // 如果任务已存在则替换
+          backoffPolicy: BackoffPolicy.linear, // 任务失败后线性延迟重试
+          backoffPolicyDelay: const Duration(minutes: 5), // 重试延迟时间
+        );
+        debugPrint('后台任务注册成功');
+        
+        // 在Android平台默认启动前台服务
+        if (Platform.isAndroid) {
+          await ForegroundServiceManager.startService(
+            title: '悦管家计划监控中',
+            content: '应用正在后台运行，以便及时提醒您的计划',
+          );
+          debugPrint('前台服务已启动');
+        }
+      } else {
+        debugPrint('当前平台不支持后台任务，仅使用前台定时器');
+      }
+    } catch (e) {
+      debugPrint('注册后台任务失败: $e');
+      debugPrint('将仅使用前台定时器进行监控');
+    }
     
     // 清空已提醒计划记录
     _alreadyNotifiedPlans.clear();
@@ -55,7 +109,7 @@ class PlanMonitorService extends ChangeNotifier {
   }
   
   // 停止监控服务
-  void stopMonitoring() {
+  Future<void> stopMonitoring() async {
     if (!_isRunning) {
       debugPrint('计划监控服务未在运行');
       return;
@@ -63,6 +117,22 @@ class PlanMonitorService extends ChangeNotifier {
     
     _timer?.cancel();
     _timer = null;
+    
+    try {
+      // 取消后台任务，仅在移动端平台执行
+      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+        await Workmanager().cancelAll();
+        debugPrint('已取消所有后台任务');
+        
+        // 在Android平台停止前台服务
+        if (Platform.isAndroid) {
+          await ForegroundServiceManager.stopService();
+        }
+      }
+    } catch (e) {
+      debugPrint('取消后台任务失败: $e');
+    }
+    
     _isRunning = false;
     notifyListeners();
     debugPrint('计划监控服务已停止');
@@ -108,7 +178,20 @@ class PlanMonitorService extends ChangeNotifier {
         _sendReminder(plan);
         // 记录已提醒，避免重复提醒
         _alreadyNotifiedPlans.add(plan.id);
+        
+        // 同时更新SharedPreferences中的记录，供后台任务使用
+        _updateNotifiedPlansInPrefs();
       }
+    }
+  }
+  
+  // 更新已通知计划到SharedPreferences
+  Future<void> _updateNotifiedPlansInPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('already_notified_plans', _alreadyNotifiedPlans.toList());
+    } catch (e) {
+      debugPrint('更新已通知计划到SharedPreferences失败: $e');
     }
   }
   
@@ -118,12 +201,13 @@ class PlanMonitorService extends ChangeNotifier {
     
     // 获取提醒方式设置
     final prefs = await SharedPreferences.getInstance();
-    final useAlarm = prefs.getBool('use_alarm_for_plan_start') ?? false;
     final playSound = prefs.getBool('notification_sound_enabled') ?? true;
     final enableVibration = prefs.getBool('notification_vibration_enabled') ?? true;
     
-    if (useAlarm) {
-      // 使用闹钟式提醒
+    // 根据通知声音设置决定是否使用闹钟提醒
+    // 如果声音开启，则使用闹钟提醒；否则使用普通通知
+    if (playSound) {
+      // 有声音则使用闹钟式提醒
       await _reminderService.showAlarmNotification(
         title: '计划开始提醒',
         body: '计划"${plan.title}"已经开始，请及时处理。\n${plan.description}\n${plan.timeRangeString}',
@@ -131,7 +215,7 @@ class PlanMonitorService extends ChangeNotifier {
       );
       debugPrint('已发送闹钟式提醒');
     } else {
-      // 使用普通通知
+      // 无声音则使用普通通知
       await _reminderService.showNormalNotification(
         title: '计划开始提醒',
         body: '计划"${plan.title}"已经开始，请及时处理。\n${plan.description}\n${plan.timeRangeString}',
@@ -141,23 +225,41 @@ class PlanMonitorService extends ChangeNotifier {
     }
   }
   
+  // 加载监控服务状态
+  Future<void> loadMonitoringState() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    // 检查通知功能是否启用
+    final bool notificationsEnabled = prefs.getBool('notification_enabled') ?? true;
+    
+    // 如果通知功能启用且监控服务未运行，则启动服务
+    if (notificationsEnabled && !_isRunning) {
+      await startMonitoring();
+    }
+    // 如果通知功能被禁用但监控服务正在运行，则停止服务
+    else if (!notificationsEnabled && _isRunning) {
+      await stopMonitoring();
+    }
+  }
+  
   // 清除特定计划的提醒记录，允许再次提醒
   void clearNotificationRecord(String planId) {
     _alreadyNotifiedPlans.remove(planId);
+    _updateNotifiedPlansInPrefs();
   }
   
   // 清除所有提醒记录
   void clearAllNotificationRecords() {
     _alreadyNotifiedPlans.clear();
+    _updateNotifiedPlansInPrefs();
   }
   
   // 测试发送提醒（供设置页面使用）
   Future<void> sendReminder({
     bool playSound = true, 
-    bool enableVibration = true, 
-    bool useAlarm = false
+    bool enableVibration = true
   }) async {
-    debugPrint('测试发送计划提醒: useAlarm=$useAlarm, playSound=$playSound, enableVibration=$enableVibration');
+    debugPrint('测试发送计划提醒: playSound=$playSound, enableVibration=$enableVibration');
     
     // 创建一个测试计划
     final now = DateTime.now();
@@ -179,8 +281,9 @@ class PlanMonitorService extends ChangeNotifier {
     // 初始化提醒服务
     await _reminderService.initialize();
     
-    if (useAlarm) {
-      // 使用闹钟式提醒
+    // 根据声音设置决定使用哪种提醒类型
+    if (playSound) {
+      // 有声音则使用闹钟式提醒
       await _reminderService.showAlarmNotification(
         title: '测试计划开始提醒(闹钟式)',
         body: '计划"${testPlan.title}"已经开始，请及时处理。\n${testPlan.description}\n${testPlan.timeRangeString}',
@@ -188,7 +291,7 @@ class PlanMonitorService extends ChangeNotifier {
       );
       debugPrint('已发送闹钟式提醒');
     } else {
-      // 使用普通通知
+      // 无声音则使用普通通知
       await _reminderService.showNormalNotification(
         title: '测试计划开始提醒(普通)',
         body: '计划"${testPlan.title}"已经开始，请及时处理。\n${testPlan.description}\n${testPlan.timeRangeString}',

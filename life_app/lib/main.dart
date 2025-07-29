@@ -8,6 +8,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:workmanager/workmanager.dart';
 import 'utils/stagewise_integration.dart';
 import 'screens/home_screen.dart';
 import 'screens/finance_screen.dart';
@@ -29,6 +30,7 @@ import 'services/auth_service.dart';
 import 'services/plan_service.dart';
 import 'services/special_project_service.dart';
 import 'services/project_phase_service.dart';
+import 'services/plan_monitor_service.dart';
 import 'constants/api_constants.dart';
 import 'constants/routes.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -37,10 +39,101 @@ import 'screens/finance/family_finance/family_finance_router.dart';
 import 'utils/app_icons.dart';
 import 'services/reminder_service.dart';
 import 'services/api_service.dart';
-import 'services/plan_monitor_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// 全局导航键
+// 全局NavigatorKey，用于在服务中获取BuildContext
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+// 后台任务回调入口点
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((taskName, inputData) async {
+    debugPrint('执行后台任务: $taskName');
+    
+    // 调用PlanMonitorService中定义的回调逻辑而不是自身
+    if (taskName == 'com.lifeapp.checkPlansTask') {
+      try {
+        // 初始化必要服务
+        final reminderService = ReminderService();
+        await reminderService.initialize();
+        
+        // 检查今天的计划
+        final planService = PlanService();
+        final plans = await planService.fetchTodayPlans();
+        
+        final now = DateTime.now();
+        
+        // 从SharedPreferences获取已通知的计划ID
+        final prefs = await SharedPreferences.getInstance();
+        final Set<String> notifiedPlanIds = 
+            prefs.getStringList('already_notified_plans')?.toSet() ?? <String>{};
+        
+        // 检查需要提醒的计划
+        for (final plan in plans) {
+          // 如果计划已经提醒过或已完成，跳过
+          if (notifiedPlanIds.contains(plan.id) || plan.isCompleted) {
+            continue;
+          }
+          
+          // 获取计划时间
+          final planDateTime = plan.toDateTime();
+          if (planDateTime == null) {
+            continue;
+          }
+          
+          // 计算时间差（单位：分钟）
+          final differenceInMinutes = planDateTime.difference(now).inMinutes;
+          
+          // 如果计划即将开始或已开始不超过5分钟（后台任务间隔较大，放宽条件），发送提醒
+          if (differenceInMinutes <= 0 && differenceInMinutes >= -5) {
+            // 获取提醒方式设置
+            final playSound = prefs.getBool('notification_sound_enabled') ?? true;
+            final enableVibration = prefs.getBool('notification_vibration_enabled') ?? true;
+            
+            // 根据声音设置决定是否使用闹钟提醒
+            if (playSound) {
+              // 有声音则使用闹钟式提醒
+              await reminderService.showAlarmNotification(
+                title: '计划开始提醒',
+                body: '计划"${plan.title}"已经开始，请及时处理。\n${plan.description}\n${plan.timeRangeString}',
+                payload: plan.id,
+              );
+            } else {
+              // 无声音则使用普通通知
+              await reminderService.showNormalNotification(
+                title: '计划开始提醒',
+                body: '计划"${plan.title}"已经开始，请及时处理。\n${plan.description}\n${plan.timeRangeString}',
+                payload: plan.id,
+              );
+            }
+            
+            // 记录已提醒的计划ID
+            notifiedPlanIds.add(plan.id);
+            await prefs.setStringList('already_notified_plans', notifiedPlanIds.toList());
+          }
+        }
+        
+        // 清理超过24小时的通知记录
+        final lastCleanupTime = prefs.getInt('last_cleanup_time') ?? 0;
+        final currentTime = DateTime.now().millisecondsSinceEpoch;
+        
+        if (currentTime - lastCleanupTime > 24 * 60 * 60 * 1000) {
+          // 如果上次清理时间超过24小时，则清理通知记录
+          await prefs.setStringList('already_notified_plans', []);
+          await prefs.setInt('last_cleanup_time', currentTime);
+        }
+        
+        debugPrint('后台任务执行成功');
+        return true;
+      } catch (e) {
+        debugPrint('后台任务执行失败: $e');
+        return false;
+      }
+    }
+    
+    return true;
+  });
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,6 +156,7 @@ void main() async {
   if (!kIsWeb) {
     Map<Permission, PermissionStatus> statuses = await [
       Permission.storage,
+      Permission.notification, // 添加通知权限
     ].request();
     
     statuses.forEach((permission, status) {
@@ -85,6 +179,15 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+  }
+  
+  // 初始化WorkManager (用于后台任务)
+  if (!kIsWeb) {
+    await Workmanager().initialize(
+      callbackDispatcher,
+      isInDebugMode: false, // 生产环境设置为false
+    );
+    debugPrint('WorkManager初始化成功');
   }
   
   // 创建认证服务实例
@@ -192,7 +295,7 @@ class MyApp extends StatelessWidget {
             // 在应用启动后设置PlanService的context
             final planService = Provider.of<PlanService>(context, listen: false);
             // 使用microtask确保在build完成后设置context
-            Future.microtask(() {
+            Future.microtask(() async {
               planService.setContext(context);
               
               // 设置SpecialProjectService的context
@@ -205,14 +308,18 @@ class MyApp extends StatelessWidget {
               
               // 初始化ReminderService
               final reminderService = Provider.of<ReminderService>(context, listen: false);
-              reminderService.initialize();
+              await reminderService.initialize();
               
-              // 在用户已登录的情况下，启动计划监控服务
+              // 启动计划监控服务（不需要检查是否开启）
+              final planMonitorService = Provider.of<PlanMonitorService>(context, listen: false);
               if (authService.isLoggedIn) {
-                // 启动计划监控服务
-                final planMonitorService = Provider.of<PlanMonitorService>(context, listen: false);
-                planMonitorService.startMonitoring();
-                debugPrint('计划监控服务已在应用启动时启动');
+                // 默认自动启动计划监控服务
+                if (!planMonitorService.isRunning) {
+                  await planMonitorService.startMonitoring();
+                  debugPrint('计划监控服务已在应用启动时启动');
+                } else {
+                  debugPrint('计划监控服务已经在运行中');
+                }
               }
             });
             return MediaQuery(
