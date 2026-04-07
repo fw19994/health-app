@@ -2,6 +2,16 @@
 
 面向家庭场景的 **健康管理 + 记账与预算 + 日程计划** 应用。本仓库包含 **Flutter 跨端客户端**、**Go 语言后端 API**，以及一套 **Web 静态原型页面**（HTML/CSS/JS），便于对照功能与迭代设计。
 
+## 应用展示
+
+以下为客户端实际运行效果截图（图片文件位于仓库根目录：`image.png`、`image copy.png`）。
+
+<p align="center">
+  <img src="image.png" alt="悦管家 App 界面展示" width="360" />
+  &nbsp;&nbsp;
+  <img src="image%20copy.png" alt="悦管家 App 界面展示" width="360" />
+</p>
+
 ---
 
 ## 功能概览
