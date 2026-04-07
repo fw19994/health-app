@@ -1,0 +1,72 @@
+# 生产环境配置示例
+# 使用方式：复制为 config.prod.yaml，敏感项务必用环境变量注入，勿提交真实文件
+#   cp config/config.prod.yaml.example config/config.prod.yaml
+
+app:
+  name: "悦管家"
+  debug: false
+  env: "production"
+  logLevel: "info"
+  showStacktrace: false
+
+server:
+  port: "8082"
+  timeout: 30s
+  maxBodySize: "10M"
+  useHTTPS: true
+
+database:
+  driver: "mysql"
+  host: "${DB_HOST:-127.0.0.1}"
+  port: "3306"
+  username: "${DB_USER:-app}"
+  password: "${DB_PASSWORD:-}"
+  database: "${DB_NAME:-health}"
+  options: "charset=utf8mb4&parseTime=True&loc=Local&timeout=10s&readTimeout=30s&writeTimeout=30s"
+  maxOpenConns: 200
+  maxIdleConns: 20
+  connMaxLifetime: 5m
+  logQueries: false
+  enableSlaveRead: false
+
+redis:
+  host: "${REDIS_HOST:-127.0.0.1}"
+  port: "${REDIS_PORT:-6379}"
+  password: "${REDIS_PASSWORD}"
+  db: 0
+  enableLogging: false
+  poolSize: 100
+  minIdleConns: 10
+
+jwt:
+  secret: "${JWT_SECRET}"
+  accessExpiry: 2h
+  refreshExpiry: 168h
+  issuer: "lifeapp-api"
+  audience: "app.example.com"
+  jwtBlacklist: true
+  jwtRotation: true
+
+sms:
+  provider: "${SMS_PROVIDER:-mock}"
+  accessKey: "${SMS_ACCESS_KEY}"
+  secretKey: "${SMS_SECRET_KEY}"
+  signName: "悦管家"
+  templateID: "${SMS_TEMPLATE_ID:-SMS_123456789}"
+  expireTime: 300
+  codeLength: 6
+  mockInDev: false
+  dailyLimit: 20
+  ipRateLimit: true
+
+monitoring:
+  enablePrometheus: true
+  enableHealthCheck: true
+  enableProfiling: false
+
+oss:
+  endpoint: "${OSS_ENDPOINT:-oss-cn-hangzhou.aliyuncs.com}"
+  accessKeyId: "${OSS_ACCESS_KEY_ID}"
+  accessKeySecret: "${OSS_ACCESS_KEY_SECRET}"
+  bucketName: "${OSS_BUCKET:-your-bucket}"
+  urlPrefix: "${OSS_URL_PREFIX:-https://your-bucket.oss-cn-hangzhou.aliyuncs.com}"

@@ -1,0 +1,59 @@
+# 开发环境配置示例
+# 使用方式：复制为 config.dev.yaml 后按需修改，切勿将含真实密钥的 config.*.yaml 提交到 Git
+#   cp config/config.dev.yaml.example config/config.dev.yaml
+
+app:
+  name: "悦管家-开发版"
+  debug: true
+  env: "dev"
+  logLevel: "debug"
+  showStacktrace: true
+
+server:
+  port: "8082"
+  timeout: 30s
+
+database:
+  driver: "mysql"
+  host: "127.0.0.1"
+  port: "3306"
+  username: "root"
+  password: "your_mysql_password"
+  database: "your_database_name"
+  options: "charset=utf8mb4&parseTime=True&loc=Local"
+  maxOpenConns: 150
+  maxIdleConns: 15
+  connMaxLifetime: 5m
+  logQueries: true
+  slowQueryTime: 500
+
+redis:
+  host: "127.0.0.1"
+  port: "6379"
+  password: ""
+  db: 1
+  enableLogging: true
+
+jwt:
+  secret: "${JWT_SECRET_DEV:-change-me-dev-jwt-secret-min-32-chars}"
+  accessExpiry: 12h
+  refreshExpiry: 168h
+  issuer: "lifeapp-api"
+
+sms:
+  provider: "mock"
+  accessKey: "${SMS_ACCESS_KEY:-}"
+  secretKey: "${SMS_SECRET_KEY:-}"
+  signName: "悦管家-测试"
+  templateID: "SMS_123456789"
+  expireTime: 300
+  codeLength: 6
+  mockInDev: true
+
+# 阿里云 OSS（可选；不需要上传功能可填占位符并在代码侧关闭相关路由）
+oss:
+  endpoint: "oss-cn-hangzhou.aliyuncs.com"
+  accessKeyId: "${OSS_ACCESS_KEY_ID:-your-access-key-id}"
+  accessKeySecret: "${OSS_ACCESS_KEY_SECRET:-your-access-key-secret}"
+  bucketName: "your-bucket"
+  urlPrefix: "https://your-bucket.oss-cn-hangzhou.aliyuncs.com"

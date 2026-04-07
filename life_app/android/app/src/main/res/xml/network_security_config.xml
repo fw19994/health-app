@@ -7,6 +7,6 @@
         </trust-anchors>
     </base-config>
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">api.shoppingfw.cn</domain>
+        <domain includeSubdomains="true">api.example.com</domain>
     </domain-config>
 </network-security-config> 

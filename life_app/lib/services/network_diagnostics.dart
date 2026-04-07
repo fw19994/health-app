@@ -19,7 +19,7 @@ class NetworkDiagnostics {
     {'name': '阿里巴巴', 'url': 'https://www.aliyun.com'},
     {'name': '网易', 'url': 'https://www.163.com'},
     {'name': '新浪', 'url': 'https://www.sina.com.cn'},
-    {'name': 'API站点', 'url': 'https://api.shoppingfw.cn'},
+    {'name': 'API站点', 'url': 'https://api.example.com'},
   ];
   
   // 测试所有站点

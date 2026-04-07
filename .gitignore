@@ -1,0 +1,14 @@
+# 后端：真实配置文件（从 *.example 复制生成，见 life_app_back/README.md）
+life_app_back/config/config.dev.yaml
+life_app_back/config/config.prod.yaml
+life_app_back/config/config.local.yaml
+
+# IDE（含本地数据源等，勿提交）
+.idea/
+**/.idea/
+
+# 后端运行时上传目录
+life_app_back/static/uploads/
+
+# 系统文件
+.DS_Store

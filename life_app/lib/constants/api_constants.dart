@@ -17,9 +17,10 @@ class ApiConstants {
   static String get baseUrl {
     switch (_environment) {
       case Environment.local:
-        return 'http://127.0.0.1:8082';//https://api.shoppingfw.cn
+        return 'http://127.0.0.1:8082';
       case Environment.production:
-        return 'https://api.shoppingfw.cn';
+        // 部署到线上后改为你的 API 根地址，勿将内网或他人域名提交到公开仓库
+        return 'https://api.example.com';
     }
   }
   
