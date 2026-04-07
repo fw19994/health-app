@@ -7,9 +7,9 @@
 以下为客户端实际运行效果截图（图片文件位于仓库根目录：`image.png`、`image copy.png`）。
 
 <p align="center">
-  <img src="image.png" alt="悦管家 App 界面展示" width="360" />
+  <img src="https://github.com/fw19994/health-app/blob/main/image%20copy.png" alt="悦管家 App 界面展示" width="360" />
   &nbsp;&nbsp;
-  <img src="image%20copy.png" alt="悦管家 App 界面展示" width="360" />
+  <img src="https://github.com/fw19994/health-app/blob/main/image.png" alt="悦管家 App 界面展示" width="360" />
 </p>
 
 ---
